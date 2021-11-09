@@ -4,6 +4,7 @@ import com.maru.inunavi.repository.lectureRepository;
 import lombok.*;
 
 import javax.persistence.*;
+import java.util.List;
 import java.util.StringTokenizer;
 
 @Builder
@@ -11,80 +12,66 @@ import java.util.StringTokenizer;
 @AllArgsConstructor
 @Getter
 public class lecture {
+
+    // A_ 순번
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    // 학년
+
+    // C_학과(부)
     @Column(length = 45, nullable = false)
-    private String age;
-    // 이수구분
+    private String department;
+
+    // D_학년
+    @Column(length = 45, nullable = false)
+    private String grade;
+
+    // E_이수구분
     @Column(length = 45, nullable = false)
     private String category;
-    // 학수번호
-    @Column(length = 45, nullable = false)
+
+    // F_학수번호
+    @Column(length = 45, nullable = true)
     private String number;
-    // 교과목명
+
+    // G_교과목명
     @Column(length = 45, nullable = true)
-    private String lectureName;
-    // 학점
-    @Column(length = 45, nullable = true)
-    private String point;
-    // 교수명
+    private String lecturename;
+
+    // H_담당교수
     @Column(length = 45, nullable = true)
     private String professor;
-    // 요일 및 시간1
-    @Column(length = 45, nullable = true)
-    private String daytime1;
-    // 요일 및 시간2
-    @Column(length = 45, nullable = true)
-    private String daytime2;
-    // 요일 및 시간3
-    @Column(length = 45, nullable = true)
-    private String daytime3;
-    // 강의실1
-    @Column(length = 45, nullable = true)
-    private String position1;
-    // 강의실2
-    @Column(length = 45, nullable = true)
-    private String position2;
-    // 강의실3
-    @Column(length = 45, nullable = true)
-    private String position3;
 
-    // 수강대상
+    // I_강의실
     @Column(length = 45, nullable = true)
-    private String who;
+    private String classroom;
 
-    // 수업방법
+    // J_시간표
+    @Column(length = 45, nullable = true)
+    private String classtime;
+
+    // K_수업방법
     @Column(length = 45, nullable = true)
     private String how;
 
-    // 비고
+    // L_학점
     @Column(length = 45, nullable = true)
-    private String etc;
+    private String point;
 
-    // 생성자
-    public lecture(String age, String category, String number, String lectureName, String point,
-                   String professor, String daytime1, String daytime2, String daytime3, String position1, String position2, String position3, String who, String how, String etc) {
-        this.age = age;
-        this.category = category;
-        this.number = number;
-        this.lectureName = lectureName;
-        this.point = point;
-        this.professor = professor;
-        this.daytime1 = Daytime2Int(daytime1);
-        this.daytime2 = Daytime2Int(daytime2);
-        this.daytime3 = Daytime2Int(daytime3);
-        this.position1 = position1;
-        this.position2 = position2;
-        this.position3 = position3;
-        this.who = who;
-        this.how = how;
-        this.etc = etc;
-    }
 
-    public lecture() {
+    public lecture() {}
 
+    public lecture(List<String> csv) {
+        this.department = csv.get(0);
+        this.grade = csv.get(1);
+        this.category = csv.get(2);
+        this.number = csv.get(3);
+        this.lecturename = csv.get(4);
+        this.professor = csv.get(5);
+        this.classroom = csv.get(6);
+        this.classtime = csv.get(7);
+        this.how = csv.get(8);
+        this.point = csv.get(9);
     }
 
     // 요일 및 시간 정수화
