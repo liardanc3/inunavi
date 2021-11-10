@@ -10,7 +10,7 @@ import java.util.List;
 
 @RestController
 public class lectureController{
-
+    //sex
     private final lectureService _lectureService;
 
     public lectureController(lectureService _lectureService){
