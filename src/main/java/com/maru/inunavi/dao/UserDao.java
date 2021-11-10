@@ -2,6 +2,7 @@ package com.maru.inunavi.dao;
 
 import com.maru.inunavi.entity.User;
 import com.maru.inunavi.entity.Constant;
+import org.apache.catalina.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -18,7 +19,6 @@ public class UserDao {
     }
 
     public ArrayList<User> selectAll(){
-        //System.out.println("sex");
         String sql = "select * from user_table";
         return (ArrayList<User>) this.template.query(sql, BeanPropertyRowMapper.newInstance(User.class));
     }

@@ -43,11 +43,11 @@ public class lecture {
     private String professor;
 
     // I_강의실(raw)
-    @Column(length = 80, nullable = true)
+    @Column(length = 200, nullable = true)
     private String classroom_raw;
 
     // J_시간표(raw)
-    @Column(length = 80, nullable = true)
+    @Column(length = 200, nullable = true)
     private String classtime_raw;
 
     // J_시간표
@@ -66,19 +66,19 @@ public class lecture {
 
     // 생성자
     public lecture() {}
-    public lecture(List<String> csv, String classroom_raw, String classtime_raw) {
+    public lecture(List<String> csv, String classroom, String classtime) {
         this.department = csv.get(0);
         this.grade = csv.get(1);
         this.category = csv.get(2);
         this.number = csv.get(3);
         this.lecturename = csv.get(4);
         this.professor = csv.get(5);
-        this.classroom = csv.get(6);
-        this.classtime = csv.get(7);
+        this.classroom_raw = csv.get(6);
+        this.classtime_raw = csv.get(7);
         this.how = csv.get(8);
         this.point = csv.get(9);
 
-        this.classroom_raw = classroom_raw;
-        this.classtime_raw = classtime_raw;
+        this.classroom_raw = classroom;
+        this.classtime_raw = classtime;
     }
 }
