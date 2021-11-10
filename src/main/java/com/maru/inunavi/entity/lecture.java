@@ -42,17 +42,11 @@ public class lecture {
     @Column(length = 45, nullable = true)
     private String professor;
 
-    // I_강의실(raw)
-    @Column(length = 80, nullable = true)
-    private String classroom_raw;
-
-    // J_시간표(raw)
-    @Column(length = 80, nullable = true)
-    private String classtime_raw;
-
-    // J_시간표
+    // I_강의실
     @Column(length = 45, nullable = true)
     private String classroom;
+
+    // J_시간표
     @Column(length = 45, nullable = true)
     private String classtime;
 
@@ -64,9 +58,10 @@ public class lecture {
     @Column(length = 45, nullable = true)
     private String point;
 
-    // 생성자
+
     public lecture() {}
-    public lecture(List<String> csv, String classroom_raw, String classtime_raw) {
+
+    public lecture(List<String> csv) {
         this.department = csv.get(0);
         this.grade = csv.get(1);
         this.category = csv.get(2);
@@ -77,8 +72,60 @@ public class lecture {
         this.classtime = csv.get(7);
         this.how = csv.get(8);
         this.point = csv.get(9);
+    }
 
-        this.classroom_raw = classroom_raw;
-        this.classtime_raw = classtime_raw;
+    // 요일 및 시간 정수화
+    public String Daytime2Int(String daytime) {
+
+        // 요일 시간 없을 때
+        if(daytime.equals("-")){
+            return daytime;
+        }
+
+        // 시간 초기값 설정(30분 분할, 월요일 오전 9시 기준 0, 화요일 오전 9시 = 48)
+        final char [] dayARR = {'월','화','수','목','금','토'};
+        int t = 0; int start=99999; int end=0;
+        for(int i=0; i<7; i++){
+            if(dayARR[i]==daytime.charAt(0)){
+                t = i*47+18;
+                break;
+            }
+        }
+        // 야간여부 확인
+        boolean flag = false;
+        for(int i=0; i<daytime.length(); i++){
+            if(daytime.charAt(i)=='야'){
+                flag=true;
+                break;
+            }
+        }
+        if(flag) t+=18;
+
+        // 정수화
+        String _daytime = daytime.substring(1,daytime.length()-1);
+        StringTokenizer s = new StringTokenizer(_daytime);
+        while(s.hasMoreTokens()){
+            String ss = s.nextToken(" -야");
+            System.out.println(ss);
+
+            // 숫자만 입력된 경우 (7 8 9 등)
+            if(ss.length()==1){
+                int now = Integer.parseInt(ss);
+                start = Math.min(start,t+(now-1)*2);
+                end = Math.max(end,t+(now-1)*2+1);
+            }
+
+            // 섞인 경우 (8A 8B 등)
+            else{
+                int now = Integer.parseInt(ss.substring(0,1));
+                start = Math.min(start,t+(now-1)*2+1);
+                end = Math.max(end,t+(now-1)*2);
+            }
+        }
+
+        // ex "0,5" -> (월 1 2 3)
+        String _start = Integer.toString(start);
+        String _end = Integer.toString(end);
+        return _start + "," + _end;
     }
 }

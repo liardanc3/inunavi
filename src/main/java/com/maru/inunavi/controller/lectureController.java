@@ -20,6 +20,7 @@ public class lectureController{
     @GetMapping("allLecture")
     @ResponseBody
     public List<lecture> allLecture(){
+        System.out.println("sex");
         return _lectureService.allLecture();
     }
 
