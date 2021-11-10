@@ -45,7 +45,7 @@ public class lectureService {
 
                 // 학과(부),학년,이수구분,학수번호,교과목명,담당교수,강의실,시간표,수업방법관리,학점
                 for(int i=1; i<=12 && s.hasMoreTokens(); i++){
-                    tmp = "";
+                    tmp = "";;;
                     tmp += s.nextToken(",");
                     System.out.println(tmp);
 
