@@ -11,7 +11,7 @@ import java.util.Map;
 public class NaviServiceImpl implements Service{
     public Object execute(HttpServletRequest request){
         Graph graph = new Graph();
-        // 밑의 부분 대신 xml에서 객체참조받아야함
+        /* 밑의 부분 대신 xml에서 객체참조받아야함
         Node node = new Node(0, "정보대");
         node.addEdge(1, 2);
         node.addEdge(2, 3);
@@ -28,6 +28,23 @@ public class NaviServiceImpl implements Service{
         graph.addNode(node3);
         graph.addNode(node4);
         graph.addNode(node5);
+        */
+        // 밑의 부분 대신 xml에서 객체참조받아야함
+        graph.addNode("정보대");
+        graph.addEdge(0, 1, 3);
+        graph.addEdge(0, 2, 7);
+
+        graph.addNode("유아교육과");
+        graph.addEdge(1, 2, 3);
+        graph.addEdge(1, 3, 5);
+
+        graph.addNode("컨벤션센터");
+        graph.addEdge(2, 3, 6);
+
+        graph.addNode("영어영문학과");
+
+        graph.addNode("여자휴게소");
+        graph.addEdge(4, 0, 1);
         // ~
         int start = Integer.parseInt(request.getParameter("start"));
         int end = Integer.parseInt(request.getParameter("end"));
