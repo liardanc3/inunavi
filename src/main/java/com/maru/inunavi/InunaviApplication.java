@@ -5,7 +5,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
 public class InunaviApplication {
-
+	// 오후 5:54
 	public static void main(String[] args) {
 		SpringApplication.run(InunaviApplication.class, args);
 	}
