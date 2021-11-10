@@ -34,7 +34,7 @@ public class lectureService {
             FileReader fileReader = new FileReader(file);
             BufferedReader bufReader = new BufferedReader(fileReader);
 
-            String line = null, tmp= null;
+            String line = "", tmp= "";
             line = bufReader.readLine();
             while((line = bufReader.readLine()) != null){
 
@@ -43,23 +43,27 @@ public class lectureService {
 
                 StringTokenizer s = new StringTokenizer(line);
 
-                // A,B열 스킵
-                tmp = s.nextToken(",");
-                tmp = s.nextToken(",");
-
                 // 학과(부),학년,이수구분,학수번호,교과목명,담당교수,강의실,시간표,수업방법관리,학점
-                for(int i=3; i<=12 && s.hasMoreTokens(); i++){
-                    tmp = s.nextToken(",");
+                for(int i=1; i<=12 && s.hasMoreTokens(); i++){
+                    tmp = "";
+                    tmp += s.nextToken(",");
                     System.out.println(tmp);
+
+                    // A,B열 스킵
+                    if(i<=2) continue;
+
+                    // I열 스킵
+                    if(i==9){
+                        // 다중 강의실
+                        if(tmp.charAt(0)=='"'){
+                            s.nextToken(",");
+                        }
+                        continue;
+                    }
 
                     // 수업시간
                     if(i==10){
-                        String time_tmp = tmp;
-                        if(tmp.charAt(tmp.length()-1)!=']'){
-                            tmp = s.nextToken(",");
-                            time_tmp+=tmp;
-                            tmp = time_tmp;
-                        }
+
                     }
 
                     csv.add(tmp);
