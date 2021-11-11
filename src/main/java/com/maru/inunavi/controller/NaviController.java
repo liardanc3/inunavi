@@ -1,6 +1,9 @@
 package com.maru.inunavi.controller;
 
+import com.maru.inunavi.entity.Constant;
+import com.maru.inunavi.entity.navi.Graph;
 import com.maru.inunavi.service.*;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -13,6 +16,11 @@ import java.util.Map;
 public class NaviController {
 
     private Service service;
+
+    @Autowired
+    public void setGraph(Graph graph){
+        Constant.graph = graph;
+    }
 
     @RequestMapping("/")
     public String home() {

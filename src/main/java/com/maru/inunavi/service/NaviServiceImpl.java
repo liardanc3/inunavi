@@ -1,5 +1,6 @@
 package com.maru.inunavi.service;
 
+import com.maru.inunavi.entity.Constant;
 import com.maru.inunavi.entity.navi.Graph;
 import com.maru.inunavi.entity.navi.Node;
 
@@ -9,27 +10,17 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class NaviServiceImpl implements Service{
+
+    private Graph graph;
+
+    public NaviServiceImpl(){
+        this.graph = Constant.graph;
+    }
+
     public Object execute(HttpServletRequest request){
-        Graph graph = new Graph();
-        /* 밑의 부분 대신 xml에서 객체참조받아야함
-        Node node = new Node(0, "정보대");
-        node.addEdge(1, 2);
-        node.addEdge(2, 3);
-        Node node2 = new Node(1, "유아교육과");
-        node2.addEdge(2, 3);
-        node2.addEdge(3, 5);
-        Node node3 = new Node(2, "컨벤션센터");
-        node3.addEdge(3, 6);
-        Node node4 = new Node(3, "영어영문학과");
-        Node node5 = new Node(4, "여자휴게소");
-        node5.addEdge(0, 1);
-        graph.addNode(node);
-        graph.addNode(node2);
-        graph.addNode(node3);
-        graph.addNode(node4);
-        graph.addNode(node5);
-        */
-        // 밑의 부분 대신 xml에서 객체참조받아야함
+
+
+        /*
         graph.addNode("정보대");
         graph.addEdge(0, 1, 3);
         graph.addEdge(0, 2, 7);
@@ -46,9 +37,10 @@ public class NaviServiceImpl implements Service{
         graph.addNode("여자휴게소");
         graph.addEdge(4, 0, 1);
         // ~
+        */
         int start = Integer.parseInt(request.getParameter("start"));
         int end = Integer.parseInt(request.getParameter("end"));
-        ArrayList<Object> res = graph.dijkstra(start, end);
+        ArrayList<Object> res = this.graph.dijkstra(start, end);
         int dist = (int) res.get(res.size()-1);
         res.remove(res.size()-1);
         Map<String, Object> json = new HashMap<>();
