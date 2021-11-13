@@ -1,17 +1,14 @@
 package com.maru.inunavi.entity;
 
-import com.maru.inunavi.repository.lectureRepository;
 import lombok.*;
-
 import javax.persistence.*;
 import java.util.List;
-import java.util.StringTokenizer;
 
 @Builder
-@Entity(name="lectureTable")
+@Entity(name="AllLecture")
 @AllArgsConstructor
 @Getter
-public class lecture {
+public class Lecture {
 
     // A_ 순번
     @Id
@@ -65,8 +62,8 @@ public class lecture {
     private String point;
 
     // 생성자
-    public lecture() {}
-    public lecture(List<String> csv, String classroom, String classtime) {
+    public Lecture() {}
+    public Lecture(List<String> csv, String classroom, String classtime) {
         this.department = csv.get(0);
         this.grade = csv.get(1);
         this.category = csv.get(2);

@@ -16,13 +16,12 @@ public class NaviController {
 
     @RequestMapping("/")
     public String home() {
-        //System.out.println("sex");
         return "index";
     }
 
     @RequestMapping("/load")
     public @ResponseBody Map<String, Object> load(HttpServletRequest request) {
-        System.out.println("sex");
+
         service = new NaviServiceImpl();
         Map<String, Object> json = (Map<String, Object>) service.execute(request);
         //Map<String, ArrayList<Map<String, Integer>>> json = new HashMap<String, ArrayList<Map<String, Integer>>>();
