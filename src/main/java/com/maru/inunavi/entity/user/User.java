@@ -1,11 +1,10 @@
-package com.maru.inunavi.entity;
+package com.maru.inunavi.entity.user;
 
 public class User {
     private String id;
     private String password;
     private String name;
     private String email;
-    private String class_list;
 
     public User() {}
 
@@ -41,11 +40,4 @@ public class User {
         this.email = email;
     }
 
-    public String getClass_list() {
-        return class_list;
-    }
-
-    public void setClass_list(String class_list) {
-        this.class_list = class_list;
-    }
 }

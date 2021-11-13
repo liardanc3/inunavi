@@ -1,8 +1,8 @@
 package com.maru.inunavi.dao;
 
-import com.maru.inunavi.entity.User;
+import com.maru.inunavi.entity.user.ClassList;
+import com.maru.inunavi.entity.user.User;
 import com.maru.inunavi.entity.Constant;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 
@@ -28,10 +28,24 @@ public class UserDao {
         return true;
     }
 
-    public boolean updateClassList(String id, String classList){
+    public ArrayList<ClassList> selectClass(String id){
+        String sql = "select * from class_list where id=?";
+        return (ArrayList<ClassList>) this.template.query(sql, BeanPropertyRowMapper.newInstance(ClassList.class), id);
+    }
+
+    public boolean insertClass(String id, int class_id){
         if(idCheck(id)) return false;
-        String sql = "update user_table set class_list = ? where id = ?";
-        this.template.update(sql, classList, id);
+        String sql = "select count(*) from class_list where id=? and class_id=?";
+        if(this.template.queryForObject(sql, int.class, id, class_id) > 0) return false;
+        sql = "insert into class_list (id, class_id) values (?, ?)";
+        this.template.update(sql, id, class_id);
+        return true;
+    }
+
+    public boolean deleteClass(String id, int class_id){
+        if(idCheck(id)) return false;
+        String sql = "delete from class_list where id=? and class_id=?";
+        this.template.update(sql, id, class_id);
         return true;
     }
 
