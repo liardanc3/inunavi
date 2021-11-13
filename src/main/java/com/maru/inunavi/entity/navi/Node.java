@@ -6,27 +6,27 @@ public class Node {
 
     private int num;
     private String name;
-    private ArrayList<ArrayList<Integer>> edge;
+    private ArrayList<ArrayList<Integer>> edges;
 
     public Node(int num, String name){
         this.num = num;
         this.name = name;
-        this.edge = new ArrayList<ArrayList<Integer>>();
+        this.edges = new ArrayList<ArrayList<Integer>>();
     }
 
     public void addEdge(int v, int d){
         ArrayList<Integer> edge = new ArrayList<Integer>();
         edge.add(v);
         edge.add(d);
-        this.edge.add(edge);
+        this.edges.add(edge);
     }
 
-    public ArrayList<ArrayList<Integer>> getEdge() {
-        return edge;
+    public ArrayList<ArrayList<Integer>> getEdges() {
+        return edges;
     }
 
-    public void setEdge(ArrayList<ArrayList<Integer>> edge) {
-        this.edge = edge;
+    public void setEdges(ArrayList<ArrayList<Integer>> edges) {
+        this.edges = edges;
     }
 
     public int getNum() {

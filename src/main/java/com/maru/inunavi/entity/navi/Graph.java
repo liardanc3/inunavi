@@ -16,7 +16,8 @@ public class Graph {
         this.nodes.add(v);
     }
 
-    public void addNode(int num, String name){
+    public void addNode(String name){
+        int num = nodes.size();
         Node v = new Node(num, name);
         this.nodes.add(v);
     }
@@ -37,7 +38,7 @@ public class Graph {
             int now = e.getNow();
             int dist = e.getDist();
             if (distance[now] < dist) continue;
-            for(ArrayList<Integer> edge:this.nodes.get(now).getEdge()){
+            for(ArrayList<Integer> edge:this.nodes.get(now).getEdges()){
                 int cost = dist + edge.get(1);
                 if (cost < distance[edge.get(0)]) {
                     distance[edge.get(0)] = cost;

@@ -1,7 +1,8 @@
 package com.maru.inunavi.controller;
 
 import com.maru.inunavi.entity.Constant;
-import com.maru.inunavi.entity.User;
+import com.maru.inunavi.entity.user.ClassList;
+import com.maru.inunavi.entity.user.User;
 import com.maru.inunavi.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -51,11 +52,25 @@ public class UserController {
         return (Map<String, String>) service.execute(request);
     }
 
-    @RequestMapping("/update/class")
+    @RequestMapping("/insert/class")
     @ResponseBody
-    public Map<String, String> updateClassList(HttpServletRequest request) {
-        service = new UserUpdateClassListServiceImpl();
+    public Map<String, String> insertClass(HttpServletRequest request) {
+        service = new UserInsertClassServiceImpl();
         return (Map<String, String>) service.execute(request);
+    }
+
+    @RequestMapping("/delete/class")
+    @ResponseBody
+    public Map<String, String> deleteClass(HttpServletRequest request) {
+        service = new UserDeleteClassServiceImpl();
+        return (Map<String, String>) service.execute(request);
+    }
+
+    @RequestMapping("/select/class")
+    @ResponseBody
+    public ArrayList<ClassList> selectClass(HttpServletRequest request) {
+        service = new UserSelectClassServiceImpl();
+        return (ArrayList<ClassList>) service.execute(request);
     }
 
     @RequestMapping(value = "/check/id", method = RequestMethod.GET)
