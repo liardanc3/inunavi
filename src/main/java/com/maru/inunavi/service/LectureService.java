@@ -41,7 +41,7 @@ public class LectureService {
             line = bufReader.readLine();
             while ((line = bufReader.readLine()) != null) {
 
-                // csv로 읽은 행 데이터 List에 넣어서 통채로 생성자로
+                // tsv로 읽은 행 데이터 List에 넣어서 통채로 생성자로
                 List<String> csv = new ArrayList<>();
                 StringTokenizer s = new StringTokenizer(line);
 
@@ -76,8 +76,83 @@ public class LectureService {
                 // classtime 정제
                 if(classtime_raw.charAt(0) != '-'){
                     StringTokenizer time = new StringTokenizer(classtime_raw);
+                    int init_start=0, init_end=0;
                     while(time.hasMoreTokens()){
-                        String tmp = time.nextToken(":");
+                        time.nextToken(":");
+                        String tmp = time.nextToken("]");
+                        if(tmp.charAt(0)==':')
+                            tmp = tmp.substring(1,tmp.length());
+                        int start=0, end=0;
+
+                        // time_sep = 화(8B-9);
+                        StringTokenizer time_sep = new StringTokenizer(tmp);
+                        while(time_sep.hasMoreTokens()){
+                            String ttmp = time_sep.nextToken(",");
+
+                            System.out.println(ttmp);
+                            int idx=0;
+                            if(ttmp.charAt(idx)=='('){
+                                start=init_start;
+                                end=init_end;
+                            }
+                            else{
+                                switch (ttmp.charAt(0)){
+                                    case '월': start+=16; end+=16; break;
+                                    case '화': start+=63; end+=63; break;
+                                    case '수': start+=110; end+=110; break;
+                                    case '목': start+=157; end+=157; break;
+                                    case '금': start+=204; end+=204; break;
+                                    case '토': start+=251; end+=251; break;
+                                }
+                                init_start=start; init_end=end;
+                                idx++;
+                            }
+
+                            // 야간
+                            if(ttmp.charAt(idx+1)=='야'){
+                                start+=18;
+                                init_start = start;
+                                int int2Str = ttmp.charAt(idx+2) - '0';
+                                start += 2*int2Str;
+                                if(ttmp.charAt(idx+3) != '-')
+                                    start += 1;
+
+                                end+=18;
+                                init_end = end;
+                                if(ttmp.charAt(ttmp.length()-2) == 'A'){
+                                    int2Str = ttmp.charAt(ttmp.length()-3) - '0';
+                                    end += 2*int2Str;
+                                }
+                                else {
+                                    int2Str = ttmp.charAt(ttmp.length() - 2) - '0';
+                                    end += 2 * int2Str - 1;
+                                }
+                                _classtime += Integer.toString(start) + '-' + Integer.toString(end) + ',';
+                                time_cnt++;
+                            }
+
+                            // 주간
+                            else{
+                                init_start = start;
+                                init_end = end;
+
+                                int int2Str = ttmp.charAt(idx+2) - '0';
+                                start += (2*int2Str);
+                                if(ttmp.charAt(idx+3) != '-')
+                                    start += 1;
+
+                                if(ttmp.charAt(ttmp.length()-2) == 'A'){
+                                    int2Str = ttmp.charAt(ttmp.length()-3) - '0';
+                                    end += 2*int2Str;
+                                }
+                                else {
+                                    int2Str = ttmp.charAt(ttmp.length()-2) - '0';
+                                    end += 2 * int2Str - 1;
+                                }
+                                _classtime += Integer.toString(start) + '-' + Integer.toString(end) + ',';
+                                time_cnt++;
+                            }
+                        }
                     }
                 } else _classtime = classtime_raw;
 
@@ -89,7 +164,6 @@ public class LectureService {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
         return _AllLectureRepository.findAll();
     }
 
