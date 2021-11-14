@@ -8,10 +8,7 @@ import org.springframework.stereotype.Service;
 
 import javax.swing.text.html.Option;
 import java.io.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.StringTokenizer;
+import java.util.*;
 
 @Service
 public class LectureService {
@@ -23,7 +20,6 @@ public class LectureService {
         this._AllLectureRepository = _AllLectureRepository;
         this._UserLectureRepository = _UserLectureRepository;
     }
-
 
     public List<Lecture> allLecture(){
         return _AllLectureRepository.findAll();
@@ -37,11 +33,11 @@ public class LectureService {
         // csv파일 읽어서 DB에 수업정보 업데이트
         try {
             File file;
-            file = new File("src/main/resources/ALLLECTURE.csv");
+            file = new File("src/main/resources/ALLLECTURE2.txt");
             FileReader fileReader = new FileReader(file);
             BufferedReader bufReader = new BufferedReader(fileReader);
 
-            String line = "", tmp = "";
+            String line = "";
             line = bufReader.readLine();
             while ((line = bufReader.readLine()) != null) {
 
@@ -51,26 +47,40 @@ public class LectureService {
 
                 // 학과(부),학년,이수구분,학수번호,교과목명,담당교수,강의실,시간표,수업방법관리,학점
                 for (int i = 1; i <= 12 && s.hasMoreTokens(); i++) {
-                    tmp = "";
-                    tmp += s.nextToken(",");
-                    System.out.println(tmp);
+                    String tmp = s.nextToken("\t");
+                    if(i<=2) continue;
 
-                    // A,B열 스킵
-                    if (i <= 2) continue;
-                    if(tmp.charAt(0) == '"'){
-                        while (tmp.charAt(tmp.length() - 1) != '"') {
-                            tmp += ",";
-                            tmp += s.nextToken(",");
-                        }
-                    }
                     csv.add(tmp);
                 }
-                String _classroom = "", _classtime="";
-                String room = csv.get(6), time=csv.get(7);
-
 
 
                 System.out.println(csv);
+
+                String _classroom = "", _classtime="";
+                String classroom_raw = csv.get(6), classtime_raw=csv.get(7);
+                int room_cnt=0, time_cnt=0;
+
+                // classroom 정제
+                if(classroom_raw.charAt(0) != '-'){
+                    StringTokenizer room = new StringTokenizer(classroom_raw);
+                    while(room.hasMoreTokens()){
+                        String tmp = room.nextToken("[");
+                        if(!room.hasMoreTokens()) break;
+                        tmp = room.nextToken("]");
+                        _classroom += tmp.substring(1,tmp.length());
+                        _classroom += ",";
+                        room_cnt++;
+                    }
+                } else _classroom = classroom_raw;
+
+                // classtime 정제
+                if(classtime_raw.charAt(0) != '-'){
+                    StringTokenizer time = new StringTokenizer(classtime_raw);
+                    while(time.hasMoreTokens()){
+                        String tmp = time.nextToken(":");
+                    }
+                } else _classtime = classtime_raw;
+
                 Lecture _lecture = new Lecture(csv, _classroom, _classtime);
                 _AllLectureRepository.save(_lecture);
             }
@@ -82,6 +92,7 @@ public class LectureService {
 
         return _AllLectureRepository.findAll();
     }
+
 
     public boolean addLecture(String userID, String lectureID) {
         UserLecture _UserLecture = new UserLecture(userID,lectureID);

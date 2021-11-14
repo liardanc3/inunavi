@@ -13,9 +13,7 @@ public interface AllLectureRepository extends JpaRepository<Lecture,Long> {
 
     @Transactional
     @Modifying
-    @Query(value = "alter TABLE lecture_Table AUTO_INCREMENT = 1",nativeQuery = true)
+    @Query(value = "alter TABLE all_lecture AUTO_INCREMENT = 1",nativeQuery = true)
     void deleteINCREMENT();
-
-
 
 }

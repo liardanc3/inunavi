@@ -15,7 +15,6 @@ import java.util.List;
 @Repository
 public interface UserLectureRepository extends JpaRepository<UserLecture,Long> {
 
-
     @Query("SELECT m FROM UserLecture AS m WHERE m.UserID= :_UserID AND m.LectureID= :_LectureID")
     UserLecture findByUserIDAndLectureID(
             @Param("_UserID") String userID,
