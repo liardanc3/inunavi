@@ -30,6 +30,8 @@ public class LectureService {
         _AllLectureRepository.deleteAll();
         _AllLectureRepository.deleteINCREMENT();
 
+        List<Lecture> LL = new ArrayList<Lecture>();
+
         // csv파일 읽어서 DB에 수업정보 업데이트
         try {
             File file;
@@ -155,13 +157,15 @@ public class LectureService {
                 } else _classtime = classtime_raw;
 
                 Lecture _lecture = new Lecture(csv, _classroom, _classtime);
-                _AllLectureRepository.save(_lecture);
+                LL.add(_lecture);
+
             }
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         }
+        _AllLectureRepository.saveAll(LL);
         return _AllLectureRepository.findAll();
     }
 
