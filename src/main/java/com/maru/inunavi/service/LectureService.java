@@ -97,11 +97,11 @@ public class LectureService {
                             else{
                                 switch (ttmp.charAt(0)){
                                     case '월': start+=16; end+=16; break;
-                                    case '화': start+=63; end+=63; break;
-                                    case '수': start+=110; end+=110; break;
-                                    case '목': start+=157; end+=157; break;
-                                    case '금': start+=204; end+=204; break;
-                                    case '토': start+=251; end+=251; break;
+                                    case '화': start+=64; end+=64; break;
+                                    case '수': start+=112; end+=112; break;
+                                    case '목': start+=160; end+=160; break;
+                                    case '금': start+=208; end+=208; break;
+                                    case '토': start+=256; end+=256; break;
                                 }
                                 init_start=start; init_end=end;
                                 idx++;
