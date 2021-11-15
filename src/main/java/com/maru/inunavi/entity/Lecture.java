@@ -48,9 +48,9 @@ public class Lecture {
     private String classtime_raw;
 
     // J_시간표
-    @Column(length = 45, nullable = true)
+    @Column(length = 200, nullable = true)
     private String classroom;
-    @Column(length = 45, nullable = true)
+    @Column(length = 200, nullable = true)
     private String classtime;
 
     // K_수업방법

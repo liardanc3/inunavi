@@ -49,19 +49,14 @@ public class LectureService {
                 for (int i = 1; i <= 12 && s.hasMoreTokens(); i++) {
                     String tmp = s.nextToken("\t");
                     if(i<=2) continue;
-
                     csv.add(tmp);
                 }
 
-
-                System.out.println(csv);
-
                 String _classroom = "", _classtime="";
                 String classroom_raw = csv.get(6), classtime_raw=csv.get(7);
-                int room_cnt=0, time_cnt=0;
 
-                // classroom 정제
-                if(classroom_raw.charAt(0) != '-'){
+                // classroom 정제(폐기)
+                /*if(classroom_raw.charAt(0) != '-'){
                     StringTokenizer room = new StringTokenizer(classroom_raw);
                     while(room.hasMoreTokens()){
                         String tmp = room.nextToken("[");
@@ -71,25 +66,27 @@ public class LectureService {
                         _classroom += ",";
                         room_cnt++;
                     }
-                } else _classroom = classroom_raw;
-
+                } else _classroom = classroom_raw;*/
                 // classtime 정제
                 if(classtime_raw.charAt(0) != '-'){
                     StringTokenizer time = new StringTokenizer(classtime_raw);
                     int init_start=0, init_end=0;
                     while(time.hasMoreTokens()){
-                        time.nextToken(":");
+                        time.nextToken("[");
+                        if(!time.hasMoreTokens()) break;
+                        String _room = time.nextToken(":");
+                        if(_room.length()<3) break;
+                        _room = _room.substring(1,_room.length()) + ",";
+                        if(!time.hasMoreTokens()) break;
                         String tmp = time.nextToken("]");
                         if(tmp.charAt(0)==':')
                             tmp = tmp.substring(1,tmp.length());
-                        int start=0, end=0;
+                        int start=0, end=0, time_cnt=0;
 
                         // time_sep = 화(8B-9);
                         StringTokenizer time_sep = new StringTokenizer(tmp);
                         while(time_sep.hasMoreTokens()){
                             String ttmp = time_sep.nextToken(",");
-
-                            System.out.println(ttmp);
                             int idx=0;
                             if(ttmp.charAt(idx)=='('){
                                 start=init_start;
@@ -114,8 +111,6 @@ public class LectureService {
                                 init_start = start;
                                 int int2Str = ttmp.charAt(idx+2) - '0';
                                 start += 2*int2Str;
-                                if(ttmp.charAt(idx+3) != '-')
-                                    start += 1;
 
                                 end+=18;
                                 init_end = end;
@@ -125,7 +120,7 @@ public class LectureService {
                                 }
                                 else {
                                     int2Str = ttmp.charAt(ttmp.length() - 2) - '0';
-                                    end += 2 * int2Str - 1;
+                                    end += 2 * int2Str + 1;
                                 }
                                 _classtime += Integer.toString(start) + '-' + Integer.toString(end) + ',';
                                 time_cnt++;
@@ -138,7 +133,7 @@ public class LectureService {
 
                                 int int2Str = ttmp.charAt(idx+2) - '0';
                                 start += (2*int2Str);
-                                if(ttmp.charAt(idx+3) != '-')
+                                if(ttmp.length() > idx+3 && ttmp.charAt(idx+3) != '-')
                                     start += 1;
 
                                 if(ttmp.charAt(ttmp.length()-2) == 'A'){
@@ -152,6 +147,9 @@ public class LectureService {
                                 _classtime += Integer.toString(start) + '-' + Integer.toString(end) + ',';
                                 time_cnt++;
                             }
+                        }
+                        for(int i=0; i<time_cnt; i++){
+                            _classroom+=_room;
                         }
                     }
                 } else _classtime = classtime_raw;
