@@ -4,6 +4,9 @@ import com.maru.inunavi.entity.Lecture;
 import com.maru.inunavi.entity.UserLecture;
 import com.maru.inunavi.repository.AllLectureRepository;
 import com.maru.inunavi.repository.UserLectureRepository;
+import org.apache.tomcat.util.http.fileupload.FileUtils;
+import org.apache.tomcat.util.http.fileupload.IOUtils;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 
 import javax.swing.text.html.Option;
@@ -34,8 +37,9 @@ public class LectureService {
 
         // csv파일 읽어서 DB에 수업정보 업데이트
         try {
-            File file;
-            file = new File("src/main/resources/ALLLECTURE2.txt");
+            ClassPathResource classPathResource = new ClassPathResource("src/main/resources/ALLLECTURE2.txt");
+            InputStream is = new BufferedInputStream(classPathResource.getInputStream());
+            File file = new File(is.toString());
             FileReader fileReader = new FileReader(file);
             BufferedReader bufReader = new BufferedReader(fileReader);
 
@@ -133,18 +137,18 @@ public class LectureService {
                                 init_start = start;
                                 init_end = end;
 
-                                int int2Str = ttmp.charAt(idx+2) - '0';
+                                int int2Str = ttmp.charAt(idx+1) - '0';
                                 start += (2*int2Str);
-                                if(ttmp.length() > idx+3 && ttmp.charAt(idx+3) != '-')
+                                if(ttmp.charAt(idx+2) == 'B')
                                     start += 1;
 
                                 if(ttmp.charAt(ttmp.length()-2) == 'A'){
                                     int2Str = ttmp.charAt(ttmp.length()-3) - '0';
-                                    end += 2*int2Str;
+                                    end += 2 * int2Str;
                                 }
                                 else {
                                     int2Str = ttmp.charAt(ttmp.length()-2) - '0';
-                                    end += 2 * int2Str - 1;
+                                    end += 2 * int2Str + 1;
                                 }
                                 _classtime += Integer.toString(start) + '-' + Integer.toString(end) + ',';
                                 time_cnt++;
