@@ -4,14 +4,15 @@ import com.maru.inunavi.entity.Lecture;
 import com.maru.inunavi.entity.UserLecture;
 import com.maru.inunavi.repository.AllLectureRepository;
 import com.maru.inunavi.repository.UserLectureRepository;
-import org.apache.tomcat.util.http.fileupload.FileUtils;
+import org.apache.commons.io.FileUtils;
 import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 
-import javax.swing.text.html.Option;
 import java.io.*;
 import java.util.*;
+
+import static org.apache.commons.io.FileUtils.copyInputStreamToFile;
 
 @Service
 public class LectureService {
@@ -37,9 +38,15 @@ public class LectureService {
 
         // csv파일 읽어서 DB에 수업정보 업데이트
         try {
-            ClassPathResource classPathResource = new ClassPathResource("src/main/resources/ALLLECTURE2.txt");
-            InputStream is = new BufferedInputStream(classPathResource.getInputStream());
-            File file = new File(is.toString());
+            // 배포용 경로
+            InputStream inputStream = new ClassPathResource("ALLLECTURE2.txt").getInputStream();
+            File file =File.createTempFile("ALLLECTURE2",".txt");
+            try {
+                FileUtils.copyInputStreamToFile(inputStream, file);
+            } finally {
+                IOUtils.closeQuietly(inputStream);
+            }
+
             FileReader fileReader = new FileReader(file);
             BufferedReader bufReader = new BufferedReader(fileReader);
 
