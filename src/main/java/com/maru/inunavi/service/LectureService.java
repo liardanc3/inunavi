@@ -46,7 +46,6 @@ public class LectureService {
             } finally {
                 IOUtils.closeQuietly(inputStream);
             }
-
             FileReader fileReader = new FileReader(file);
             BufferedReader bufReader = new BufferedReader(fileReader);
 
