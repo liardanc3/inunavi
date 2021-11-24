@@ -19,6 +19,7 @@ public class LectureController {
         this._LectureService=_LectureService;
     }
 
+    //Æó±â
     @GetMapping("allLecture")
     @ResponseBody
     public List<Lecture> allLecture(){
@@ -38,4 +39,16 @@ public class LectureController {
         return _LectureService.addLecture(userID,lectureID);
     }
 
+    @GetMapping("selectLecture")
+    @ResponseBody
+    public List<Lecture> selectLecture(@RequestParam(value = "main_keyword") String main_keyword,
+                                       @RequestParam(value = "keyword_option") String keyword_option,
+                                       @RequestParam(value = "major_option") String major_option,
+                                       @RequestParam(value = "cse_option") String cse_option,
+                                       @RequestParam(value = "sort_option") String sort_option,
+                                       @RequestParam(value = "grade_option") String grade_option,
+                                       @RequestParam(value = "category_option") String category_option,
+                                       @RequestParam(value = "score_option") String score_option){
+        return _LectureService.selectLecture(main_keyword,keyword_option,major_option,cse_option,sort_option,grade_option,category_option,score_option);
+    }
 }

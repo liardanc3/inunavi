@@ -16,18 +16,19 @@ import static org.apache.commons.io.FileUtils.copyInputStreamToFile;
 
 @Service
 public class LectureService {
-
     private final AllLectureRepository _AllLectureRepository;
     private final UserLectureRepository _UserLectureRepository;
-
     public LectureService(AllLectureRepository _AllLectureRepository, UserLectureRepository _UserLectureRepository) {
         this._AllLectureRepository = _AllLectureRepository;
         this._UserLectureRepository = _UserLectureRepository;
     }
 
+    //-------------------------------------------//
+
     public List<Lecture> allLecture(){
         return _AllLectureRepository.findAll();
     }
+
     public List<Lecture> updateLecture() {
 
         // 기존 테이블 삭제 후 순번 초기화
@@ -180,7 +181,6 @@ public class LectureService {
         return _AllLectureRepository.findAll();
     }
 
-
     public boolean addLecture(String userID, String lectureID) {
         UserLecture _UserLecture = new UserLecture(userID,lectureID);
         // 중복체크
@@ -193,5 +193,87 @@ public class LectureService {
             _UserLectureRepository.save(_UserLecture);
             return true;
         }
+    }
+
+    public List<Lecture> selectLecture(String main_keyword, String keyword_option, String major_option, String cse_option, String sort_option, String grade_option, String category_option, String score_option) {
+        List<Lecture> tmp = allLecture();
+        List<Lecture> result = new ArrayList<Lecture>();
+
+        for(int i=0; i<tmp.size(); i++){
+            Lecture now = tmp.get(i);
+
+            // main_keyword, keyword_option
+            if(main_keyword!=""){
+                if(keyword_option=="과목명" && main_keyword != now.getLecturename())
+                    continue;
+                if(keyword_option=="교수명" && main_keyword != now.getProfessor())
+                    continue;
+                if(keyword_option=="과목코드" && main_keyword != now.getNumber())
+                    continue;
+            }
+
+            // major_option
+            if(major_option!="전체" && major_option != now.getDepartment())
+                continue;
+
+            // cse_option
+            if(cse_option!="전체" && cse_option != now.getCategory())
+                continue;
+
+            // grade_option
+            StringTokenizer gst = new StringTokenizer(grade_option);
+            int grade_check[] = new int[]{1,0,0,0,0};
+            while(gst.hasMoreTokens()){
+                String tok = gst.nextToken(", ");
+                if(tok.charAt(0)=='1') grade_check[1]++;
+                else if(tok.charAt(0)=='2') grade_check[2]++;
+                else if(tok.charAt(0)=='3') grade_check[3]++;
+                else if(tok.charAt(0)=='4') grade_check[4]++;
+            }
+            if(grade_check[now.getGrade().charAt(0)-'0'] != 1)
+                continue;
+
+            // category_option
+            StringTokenizer cst = new StringTokenizer(category_option);
+            // 교선, 교필, 교직, 군사, 기초과학, 일선, 전기, 전선, 전필
+            HashMap<String, Boolean> category_check = new HashMap<String, Boolean>();
+            while(cst.hasMoreTokens()){
+                String tok = cst.nextToken(", ");
+                if(tok == "교양선택") category_check.put("교양선택",true);
+                else if(tok == "교양필수") category_check.put("교양필수",true);
+                else if(tok == "교직") category_check.put("교직",true);
+                else if(tok == "군사학") category_check.put("군사학",true);
+                else if(tok == "기초과학") category_check.put("기초과학",true);
+                else if(tok == "일반선택") category_check.put("일반선택",true);
+                else if(tok == "전공기초") category_check.put("전공기초",true);
+                else if(tok == "전공선택") category_check.put("전공선택",true);
+                else if(tok == "전공필수") category_check.put("전공필수",true);
+            }
+            if(category_option != "전체" && !category_check.containsKey(now.getCategory()))
+                continue;
+
+            // score_option
+            StringTokenizer sst = new StringTokenizer(score_option);
+            int score_check[] = new int[]{0,0,0,0,0,0,0};
+            while(sst.hasMoreTokens()){
+                String tok = sst.nextToken(", ");
+                if(tok.charAt(0)=='1') score_check[1]++;
+                else if(tok.charAt(0)=='2') score_check[2]++;
+                else if(tok.charAt(0)=='3') score_check[3]++;
+                else if(tok.charAt(0)=='5') score_check[5]++;
+                else if(tok.charAt(0)=='6') score_check[6]++;
+            }
+            if(score_option != "전체" && score_check[Integer.parseInt(now.getPoint())] == 0)
+                continue;
+
+            result.add(now);
+        }
+
+       /*// sort_option
+        if(sort_option=="과목코드")
+            Arrays.sort(result,cmpNumber);
+        if(sort_option=="과목명")
+            Arrays.sort(result,cmpLectureName);*/
+        return result;
     }
 }

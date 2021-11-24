@@ -2,6 +2,7 @@ package com.maru.inunavi.entity;
 
 import lombok.*;
 import javax.persistence.*;
+import java.util.Comparator;
 import java.util.List;
 
 @Builder
@@ -79,3 +80,4 @@ public class Lecture {
         this.classtime = classtime;
     }
 }
+
