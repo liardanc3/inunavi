@@ -45,7 +45,7 @@ public class UserController {
         return (String)request.getSession().getAttribute("id");
     }
 
-    @RequestMapping(value = "/insert", method = RequestMethod.POST)
+    @RequestMapping(value = "/insert", method = RequestMethod.POST) // ?id=&name=&password=&email=
     @ResponseBody
     public Map<String, String> insert(HttpServletRequest request) {
         service = new UserInsertServiceImpl();
@@ -54,14 +54,14 @@ public class UserController {
 
     @RequestMapping("/insert/class")
     @ResponseBody
-    public Map<String, String> insertClass(HttpServletRequest request) {
+    public Map<String, String> insertClass(HttpServletRequest request) { // ?id=&class_id=
         service = new UserInsertClassServiceImpl();
         return (Map<String, String>) service.execute(request);
     }
 
     @RequestMapping("/delete/class")
     @ResponseBody
-    public Map<String, String> deleteClass(HttpServletRequest request) {
+    public Map<String, String> deleteClass(HttpServletRequest request) { // ?id=&class_id=
         service = new UserDeleteClassServiceImpl();
         return (Map<String, String>) service.execute(request);
     }
@@ -73,7 +73,7 @@ public class UserController {
         return (ArrayList<ClassList>) service.execute(request);
     }
 
-    @RequestMapping(value = "/check/id", method = RequestMethod.GET)
+    @RequestMapping(value = "/check/id", method = RequestMethod.GET) // ?id=
     @ResponseBody
     public Map<String, String> idCheck(HttpServletRequest request) {
         service = new UserIdCheckServiceImpl();
@@ -87,7 +87,7 @@ public class UserController {
         return (ArrayList<User>) service.execute(request);
     }
 
-    @RequestMapping(value = "/login", method = RequestMethod.POST)
+    @RequestMapping(value = "/login", method = RequestMethod.POST) // ?id=&password=
     @ResponseBody
     public Map<String, String> login(HttpServletRequest request) {
         service = new UserLoginServiceImpl();

@@ -28,7 +28,7 @@ public class NaviController {
     }
 
     @RequestMapping("/load")
-    public @ResponseBody Map<String, Object> load(HttpServletRequest request) {
+    public @ResponseBody Map<String, Object> load(HttpServletRequest request) { // ?start=&end=
 
         service = new NaviServiceImpl();
         Map<String, Object> json = (Map<String, Object>) service.execute(request);

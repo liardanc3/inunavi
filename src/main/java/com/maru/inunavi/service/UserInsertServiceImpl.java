@@ -15,6 +15,7 @@ public class UserInsertServiceImpl implements Service{
         json.put("id", id);
         if(uDao.insert(id, request.getParameter("password"), request.getParameter("name"), request.getParameter("email")))
             json.put("success", "true");
+        else json.put("success", "false");
         return json;
     }
 
