@@ -7,7 +7,10 @@ import com.maru.inunavi.repository.UserLectureRepository;
 import org.apache.commons.io.FileUtils;
 import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Service;
+import org.springframework.util.AutoPopulatingList;
 
 import java.io.*;
 import java.util.*;
@@ -27,6 +30,7 @@ public class LectureService {
 
     public List<Lecture> allLecture(){
         return _AllLectureRepository.findAll();
+
     }
 
     public List<Lecture> updateLecture() {
@@ -196,41 +200,69 @@ public class LectureService {
     }
 
     public List<Lecture> selectLecture(String main_keyword, String keyword_option, String major_option, String cse_option, String sort_option, String grade_option, String category_option, String score_option) {
-        List<Lecture> tmp = allLecture();
+        main_keyword = main_keyword.substring(1,main_keyword.length()-1);
+        keyword_option = keyword_option.substring(1,keyword_option.length()-1);
+        major_option = major_option.substring(1,major_option.length()-1);
+        cse_option = cse_option.substring(1,cse_option.length()-1);
+        sort_option = sort_option.substring(1,sort_option.length()-1);
+        grade_option = grade_option.substring(1,grade_option.length()-1);
+        category_option = category_option.substring(1,category_option.length()-1);
+        score_option = score_option.substring(1,score_option.length()-1);
+
+        // sort_option
+
+        List<Lecture> tmp = new ArrayList<Lecture>();
         List<Lecture> result = new ArrayList<Lecture>();
+
+        if(sort_option.equals("과목코드"))
+            tmp = _AllLectureRepository.findAllByOrderByNumberAsc();
+        else if(sort_option.equals("과목명"))
+            tmp = _AllLectureRepository.findAllByOrderByLecturenameAsc();
+        else tmp = _AllLectureRepository.findAll();
 
         for(int i=0; i<tmp.size(); i++){
             Lecture now = tmp.get(i);
 
             // main_keyword, keyword_option
             if(main_keyword!=""){
-                if(keyword_option=="과목명" && main_keyword != now.getLecturename())
+                if(keyword_option.equals("전체")){
+                    if(!now.getLecturename().contains(main_keyword) && !now.getProfessor().contains(main_keyword) &&
+                            !now.getNumber().contains(main_keyword)) continue;
+                }
+                if(keyword_option.equals("과목명") && !now.getLecturename().contains(main_keyword))
                     continue;
-                if(keyword_option=="교수명" && main_keyword != now.getProfessor())
+                else if(keyword_option.equals("교수명") && !now.getProfessor().contains(main_keyword))
                     continue;
-                if(keyword_option=="과목코드" && main_keyword != now.getNumber())
+                else if(keyword_option.equals("과목코드") && !now.getNumber().contains(main_keyword))
                     continue;
             }
 
+            if(now.getLecturename().contains("그래픽스"))
+                System.out.println("point1");
+
             // major_option
-            if(major_option!="전체" && major_option != now.getDepartment())
+            if(!major_option.equals("전체") && !now.getDepartment().equals(major_option))
                 continue;
-
+            if(now.getLecturename().contains("그래픽스"))
+                System.out.println("point2");
             // cse_option
-            if(cse_option!="전체" && cse_option != now.getCategory())
+            if(!cse_option.equals("전체") && !cse_option.equals(now.getCategory()))
                 continue;
-
+            if(now.getLecturename().contains("그래픽스"))
+                System.out.println("point3");
             // grade_option
             StringTokenizer gst = new StringTokenizer(grade_option);
             int grade_check[] = new int[]{1,0,0,0,0};
-            while(gst.hasMoreTokens()){
+            if(now.getLecturename().contains("그래픽스"))
+                System.out.println(grade_option);
+            while(!grade_option.equals("전체") && gst.hasMoreTokens()){
                 String tok = gst.nextToken(", ");
                 if(tok.charAt(0)=='1') grade_check[1]++;
                 else if(tok.charAt(0)=='2') grade_check[2]++;
                 else if(tok.charAt(0)=='3') grade_check[3]++;
                 else if(tok.charAt(0)=='4') grade_check[4]++;
             }
-            if(grade_check[now.getGrade().charAt(0)-'0'] != 1)
+            if(!grade_option.equals("전체") && grade_check[now.getGrade().charAt(0)-'0'] != 1)
                 continue;
 
             // category_option
@@ -239,17 +271,17 @@ public class LectureService {
             HashMap<String, Boolean> category_check = new HashMap<String, Boolean>();
             while(cst.hasMoreTokens()){
                 String tok = cst.nextToken(", ");
-                if(tok == "교양선택") category_check.put("교양선택",true);
-                else if(tok == "교양필수") category_check.put("교양필수",true);
-                else if(tok == "교직") category_check.put("교직",true);
-                else if(tok == "군사학") category_check.put("군사학",true);
-                else if(tok == "기초과학") category_check.put("기초과학",true);
-                else if(tok == "일반선택") category_check.put("일반선택",true);
-                else if(tok == "전공기초") category_check.put("전공기초",true);
-                else if(tok == "전공선택") category_check.put("전공선택",true);
-                else if(tok == "전공필수") category_check.put("전공필수",true);
+                if(tok.equals("교양선택")) category_check.put("교양선택",true);
+                else if(tok.equals("교양필수")) category_check.put("교양필수",true);
+                else if(tok.equals("교직")) category_check.put("교직",true);
+                else if(tok.equals("군사학")) category_check.put("군사학",true);
+                else if(tok.equals("기초과학")) category_check.put("기초과학",true);
+                else if(tok.equals("일반선택")) category_check.put("일반선택",true);
+                else if(tok.equals("전공기초")) category_check.put("전공기초",true);
+                else if(tok.equals("전공선택")) category_check.put("전공선택",true);
+                else if(tok.equals("전공필수")) category_check.put("전공필수",true);
             }
-            if(category_option != "전체" && !category_check.containsKey(now.getCategory()))
+            if(!category_option.equals("전체") && !category_check.containsKey(now.getCategory()))
                 continue;
 
             // score_option
@@ -263,10 +295,12 @@ public class LectureService {
                 else if(tok.charAt(0)=='5') score_check[5]++;
                 else if(tok.charAt(0)=='6') score_check[6]++;
             }
-            if(score_option != "전체" && score_check[Integer.parseInt(now.getPoint())] == 0)
+            if(!score_option.equals("전체") && score_check[Integer.parseInt(now.getPoint())] == 0)
                 continue;
-
+            if(now.getLecturename().contains("그래픽스"))
+                System.out.println("point6");
             result.add(now);
+
         }
 
        /*// sort_option

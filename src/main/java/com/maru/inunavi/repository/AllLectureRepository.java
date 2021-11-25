@@ -9,6 +9,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.transaction.Transactional;
+import java.util.List;
 
 @Repository
 public interface AllLectureRepository extends JpaRepository<Lecture,Long> {
@@ -17,5 +18,11 @@ public interface AllLectureRepository extends JpaRepository<Lecture,Long> {
     @Modifying
     @Query(value = "alter TABLE all_lecture AUTO_INCREMENT = 1",nativeQuery = true)
     void deleteINCREMENT();
+
+    @Query(value = "select t from AllLecture t order by t.number ASC")
+    List<Lecture> findAllByOrderByNumberAsc();
+
+    @Query(value = "select t from AllLecture t order by t.lecturename ASC")
+    List<Lecture> findAllByOrderByLecturenameAsc();
 
 }
