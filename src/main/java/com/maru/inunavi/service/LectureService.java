@@ -210,15 +210,14 @@ public class LectureService {
         score_option = score_option.substring(1,score_option.length()-1);
 
         // sort_option
-
         List<Lecture> tmp = new ArrayList<Lecture>();
         List<Lecture> result = new ArrayList<Lecture>();
-
         if(sort_option.equals("과목코드"))
             tmp = _AllLectureRepository.findAllByOrderByNumberAsc();
         else if(sort_option.equals("과목명"))
             tmp = _AllLectureRepository.findAllByOrderByLecturenameAsc();
         else tmp = _AllLectureRepository.findAll();
+
 
         for(int i=0; i<tmp.size(); i++){
             Lecture now = tmp.get(i);
@@ -237,19 +236,14 @@ public class LectureService {
                     continue;
             }
 
-            if(now.getLecturename().contains("그래픽스"))
-                System.out.println("point1");
-
             // major_option
             if(!major_option.equals("전체") && !now.getDepartment().equals(major_option))
                 continue;
-            if(now.getLecturename().contains("그래픽스"))
-                System.out.println("point2");
+
             // cse_option
             if(!cse_option.equals("전체") && !cse_option.equals(now.getCategory()))
                 continue;
-            if(now.getLecturename().contains("그래픽스"))
-                System.out.println("point3");
+
             // grade_option
             StringTokenizer gst = new StringTokenizer(grade_option);
             int grade_check[] = new int[]{1,0,0,0,0};
@@ -297,17 +291,9 @@ public class LectureService {
             }
             if(!score_option.equals("전체") && score_check[Integer.parseInt(now.getPoint())] == 0)
                 continue;
-            if(now.getLecturename().contains("그래픽스"))
-                System.out.println("point6");
+
             result.add(now);
-
         }
-
-       /*// sort_option
-        if(sort_option=="과목코드")
-            Arrays.sort(result,cmpNumber);
-        if(sort_option=="과목명")
-            Arrays.sort(result,cmpLectureName);*/
         return result;
     }
 }

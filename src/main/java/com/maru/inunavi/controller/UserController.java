@@ -35,7 +35,7 @@ public class UserController {
 
     @RequestMapping("/loginform")
     public String loginForm() {
-        //System.out.println("sex");
+
         return "loginForm";
     }
 

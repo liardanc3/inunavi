@@ -5,6 +5,7 @@ import com.maru.inunavi.entity.UserLecture;
 import com.maru.inunavi.service.LectureService;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
 
 @RestController
@@ -38,14 +39,17 @@ public class LectureController {
 
     @GetMapping("selectLecture")
     @ResponseBody
-    public List<Lecture> selectLecture(@RequestParam(value = "main_keyword") String main_keyword,
-                                       @RequestParam(value = "keyword_option") String keyword_option,
-                                       @RequestParam(value = "major_option") String major_option,
-                                       @RequestParam(value = "cse_option") String cse_option,
-                                       @RequestParam(value = "sort_option") String sort_option,
-                                       @RequestParam(value = "grade_option") String grade_option,
-                                       @RequestParam(value = "category_option") String category_option,
-                                       @RequestParam(value = "score_option") String score_option){
-        return _LectureService.selectLecture(main_keyword,keyword_option,major_option,cse_option,sort_option,grade_option,category_option,score_option);
+    public HashMap<String,List<Lecture>> selectLecture(@RequestParam(value = "main_keyword") String main_keyword,
+                                                       @RequestParam(value = "keyword_option") String keyword_option,
+                                                       @RequestParam(value = "major_option") String major_option,
+                                                       @RequestParam(value = "cse_option") String cse_option,
+                                                       @RequestParam(value = "sort_option") String sort_option,
+                                                       @RequestParam(value = "grade_option") String grade_option,
+                                                       @RequestParam(value = "category_option") String category_option,
+                                                       @RequestParam(value = "score_option") String score_option){
+        List<Lecture> LL = _LectureService.selectLecture(main_keyword,keyword_option,major_option,cse_option,sort_option,grade_option,category_option,score_option);
+        HashMap<String,List<Lecture>> result = new HashMap<>();
+        result.put("response",LL);
+        return result;
     }
 }
