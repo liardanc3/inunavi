@@ -23,6 +23,9 @@ public class UserDao {
     }
 
     public boolean insert(String id, String password, String name, String email){
+        if(!idCheck(id)){
+            return false;
+        }
         String sql = "insert into user_table (id, password, name, email) values (?, ?, ?, ?)";
         this.template.update(sql, id, password, name, email);
         return true;
