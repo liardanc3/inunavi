@@ -33,8 +33,7 @@ public class UserDao {
     }
 
     public ArrayList<Lecture> selectClass(String id){
-        String sql = "select a.* from all_lecture as a join class_list as c on c.id = ? and c.class_id = a.id order by a.id";
-        System.out.println("sex");
+        String sql = "select a.* from all_lecture as a join class_list as c on c.id = ? and c.class_id = a.number";
         return (ArrayList<Lecture>) this.template.query(sql, BeanPropertyRowMapper.newInstance(Lecture.class), id);
     }
 
