@@ -85,6 +85,7 @@ public class LectureService {
                     }
                 } else _classroom = classroom_raw;*/
                 // classtime 정제
+                String classname = csv.get(4);
                 if(classtime_raw.charAt(0) != '-'){
                     StringTokenizer time = new StringTokenizer(classtime_raw);
                     int init_start=0, init_end=0;
@@ -111,12 +112,12 @@ public class LectureService {
                             }
                             else{
                                 switch (ttmp.charAt(0)){
-                                    case '월': start+=16; end+=16; break;
-                                    case '화': start+=64; end+=64; break;
-                                    case '수': start+=112; end+=112; break;
-                                    case '목': start+=160; end+=160; break;
-                                    case '금': start+=208; end+=208; break;
-                                    case '토': start+=256; end+=256; break;
+                                    case '월': start=16; end=16; break;
+                                    case '화': start=64; end=64; break;
+                                    case '수': start=112; end=112; break;
+                                    case '목': start=160; end=160; break;
+                                    case '금': start=208; end=208; break;
+                                    case '토': start=256; end=256; break;
                                 }
                                 init_start=start; init_end=end;
                                 idx++;
@@ -150,11 +151,12 @@ public class LectureService {
 
                                 int int2Str = ttmp.charAt(idx+1) - '0';
                                 start += (2*int2Str);
+
                                 if(ttmp.charAt(idx+2) == 'B')
                                     start += 1;
 
-                                if(ttmp.charAt(ttmp.length()-2) == 'A'){
-                                    int2Str = ttmp.charAt(ttmp.length()-3) - '0';
+                                if(ttmp.charAt(ttmp.length()-2) == 'A') {
+                                    int2Str = ttmp.charAt(ttmp.length() - 3) - '0';
                                     end += 2 * int2Str;
                                 }
                                 else {
@@ -185,6 +187,7 @@ public class LectureService {
         return _AllLectureRepository.findAll();
     }
 
+    // 폐기
     public boolean addLecture(String userID, String lectureID) {
         UserLecture _UserLecture = new UserLecture(userID,lectureID);
         // 중복체크
