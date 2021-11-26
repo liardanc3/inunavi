@@ -1,5 +1,6 @@
 package com.maru.inunavi.dao;
 
+import com.maru.inunavi.entity.Lecture;
 import com.maru.inunavi.entity.user.ClassList;
 import com.maru.inunavi.entity.user.User;
 import com.maru.inunavi.entity.Constant;
@@ -31,9 +32,10 @@ public class UserDao {
         return true;
     }
 
-    public ArrayList<ClassList> selectClass(String id){
-        String sql = "select * from class_list where id=?";
-        return (ArrayList<ClassList>) this.template.query(sql, BeanPropertyRowMapper.newInstance(ClassList.class), id);
+    public ArrayList<Lecture> selectClass(String id){
+        String sql = "select a.* from all_lecture as a join class_list as c on c.id = ? and c.class_id = a.id order by a.id";
+        System.out.println("sex");
+        return (ArrayList<Lecture>) this.template.query(sql, BeanPropertyRowMapper.newInstance(Lecture.class), id);
     }
 
     public boolean insertClass(String id, int class_id){
