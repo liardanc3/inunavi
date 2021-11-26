@@ -1,6 +1,7 @@
 package com.maru.inunavi.controller;
 
 import com.maru.inunavi.entity.Constant;
+import com.maru.inunavi.entity.Lecture;
 import com.maru.inunavi.entity.user.ClassList;
 import com.maru.inunavi.entity.user.User;
 import com.maru.inunavi.service.*;
@@ -68,10 +69,9 @@ public class UserController {
 
     @RequestMapping("/select/class")
     @ResponseBody
-    public ArrayList<ClassList> selectClass(HttpServletRequest request) {
+    public Map<String, ArrayList<Lecture>> selectClass(HttpServletRequest request) {
         service = new UserSelectClassServiceImpl();
-        System.out.println("sex");
-        return (ArrayList<ClassList>) service.execute(request);
+        return (Map<String, ArrayList<Lecture>>) service.execute(request);
     }
 
     @RequestMapping(value = "/check/id", method = RequestMethod.GET) // ?id=
