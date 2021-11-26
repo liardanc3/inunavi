@@ -52,14 +52,14 @@ public class UserController {
         return (Map<String, String>) service.execute(request);
     }
 
-    @RequestMapping("/insert/class")
+    @RequestMapping(value = "/insert/class", method = RequestMethod.POST)
     @ResponseBody
     public Map<String, String> insertClass(HttpServletRequest request) { // ?id=&class_id=
         service = new UserInsertClassServiceImpl();
         return (Map<String, String>) service.execute(request);
     }
 
-    @RequestMapping("/delete/class")
+    @RequestMapping(value = "/delete/class", method = RequestMethod.POST)
     @ResponseBody
     public Map<String, String> deleteClass(HttpServletRequest request) { // ?id=&class_id=
         service = new UserDeleteClassServiceImpl();
@@ -70,6 +70,7 @@ public class UserController {
     @ResponseBody
     public ArrayList<ClassList> selectClass(HttpServletRequest request) {
         service = new UserSelectClassServiceImpl();
+        System.out.println("sex");
         return (ArrayList<ClassList>) service.execute(request);
     }
 
