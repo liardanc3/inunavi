@@ -13,9 +13,8 @@ public class UserDeleteClassServiceImpl implements Service{
         Map<String, String> json = new HashMap<>();
         String id = request.getParameter("id");
         json.put("id", id);
-        if(uDao.deleteClass(id, Integer.parseInt(request.getParameter("class_id"))))
-            json.put("success", "true");
-        else json.put("success", "false");
+        uDao.deleteClass(id, request.getParameter("class_id"));
+        json.put("success", "true");
         return json;
     }
 }

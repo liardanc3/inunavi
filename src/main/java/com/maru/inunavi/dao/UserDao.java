@@ -37,7 +37,7 @@ public class UserDao {
         return (ArrayList<Lecture>) this.template.query(sql, BeanPropertyRowMapper.newInstance(Lecture.class), id);
     }
 
-    public boolean insertClass(String id, int class_id){
+    public boolean insertClass(String id, String class_id){
         if(idCheck(id)) return false;
         String sql = "select count(*) from class_list where id=? and class_id=?";
         if(this.template.queryForObject(sql, int.class, id, class_id) > 0) return false;
@@ -46,7 +46,7 @@ public class UserDao {
         return true;
     }
 
-    public boolean deleteClass(String id, int class_id){
+    public boolean deleteClass(String id, String class_id){
         if(idCheck(id)) return false;
         String sql = "delete from class_list where id=? and class_id=?";
         this.template.update(sql, id, class_id);
