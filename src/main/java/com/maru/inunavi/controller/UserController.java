@@ -21,12 +21,8 @@ import java.util.Map;
 @RequestMapping("/user")
 public class UserController {
 
-    private Service service;
-
     @Autowired
-    public void setTemplate(DataSource dataSource){
-        Constant.template = new JdbcTemplate(dataSource);
-    }
+    private UserService userService;
 
     @RequestMapping("/form")
     public String home() {
@@ -48,50 +44,57 @@ public class UserController {
 
     @RequestMapping(value = "/insert", method = RequestMethod.POST) // ?id=&name=&password=&email=
     @ResponseBody
-    public Map<String, String> insert(HttpServletRequest request) {
-        service = new UserInsertServiceImpl();
-        return (Map<String, String>) service.execute(request);
+    public Map<String, String> Resister(HttpServletRequest request) {
+        String id = request.getParameter("id");
+        String password = request.getParameter("password");
+        String name = request.getParameter("name");
+        String email = request.getParameter("email");
+        return userService.resister(id, password, name, email);
     }
 
     @RequestMapping(value = "/insert/class", method = RequestMethod.POST)
     @ResponseBody
     public Map<String, String> insertClass(HttpServletRequest request) { // ?id=&class_id=
-        service = new UserInsertClassServiceImpl();
-        return (Map<String, String>) service.execute(request);
+        String id = request.getParameter("id");
+        String classId = request.getParameter("class_id");
+        return userService.addLecture(id, classId);
     }
 
     @RequestMapping(value = "/delete/class", method = RequestMethod.POST)
     @ResponseBody
     public Map<String, String> deleteClass(HttpServletRequest request) { // ?id=&class_id=
-        service = new UserDeleteClassServiceImpl();
-        return (Map<String, String>) service.execute(request);
+        String id = request.getParameter("id");
+        String classId = request.getParameter("class_id");
+        return userService.deleteLecture(id, classId);
     }
 
     @RequestMapping("/select/class")
     @ResponseBody
     public Map<String, ArrayList<Lecture>> selectClass(HttpServletRequest request) {
-        service = new UserSelectClassServiceImpl();
-        return (Map<String, ArrayList<Lecture>>) service.execute(request);
+        String id = request.getParameter("id");
+        return userService.showMyLecture(id);
     }
 
     @RequestMapping(value = "/check/id", method = RequestMethod.GET) // ?id=
     @ResponseBody
     public Map<String, String> idCheck(HttpServletRequest request) {
-        service = new UserIdCheckServiceImpl();
-        return (Map<String, String>) service.execute(request);
+        String id = request.getParameter("id");
+        return userService.idCheck(id);
     }
 
     @RequestMapping(value = "/selectAll", method = RequestMethod.GET)
     @ResponseBody
-    public ArrayList<User> selectAll(HttpServletRequest request) {
-        service = new UserSelectAllServiceImpl();
-        return (ArrayList<User>) service.execute(request);
+    public ArrayList<User> showAll() {
+        return userService.showAll();
     }
+
 
     @RequestMapping(value = "/login", method = RequestMethod.POST) // ?id=&password=
     @ResponseBody
     public Map<String, String> login(HttpServletRequest request) {
-        service = new UserLoginServiceImpl();
-        return (Map<String, String>) service.execute(request);
+        String id = request.getParameter("id");
+        String password = request.getParameter("password");
+        return userService.login(id, password);
     }
+
 }

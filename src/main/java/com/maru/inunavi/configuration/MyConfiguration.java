@@ -1,11 +1,23 @@
 package com.maru.inunavi.configuration;
 
+import com.maru.inunavi.entity.Constant;
 import com.maru.inunavi.entity.navi.Graph;
+import com.maru.inunavi.service.NaviService;
+import com.maru.inunavi.service.NaviServiceImpl;
+import com.maru.inunavi.service.UserService;
+import com.maru.inunavi.service.UserServiceImpl;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.jdbc.core.JdbcTemplate;
+
+import javax.sql.DataSource;
 
 @Configuration
 public class MyConfiguration {
+
+    @Autowired
+    public void setTemplate(DataSource dataSource){ Constant.template = new JdbcTemplate(dataSource); }
 
     @Bean
     public Graph graph() {
@@ -28,5 +40,17 @@ public class MyConfiguration {
         graph.addEdge(4, 0, 1);
 
         return graph;
+    }
+
+    @Bean
+    public UserService userService() {
+        UserService userService = new UserServiceImpl();
+        return userService;
+    }
+
+    @Bean
+    public NaviService naviService() {
+        NaviService naviService = new NaviServiceImpl();
+        return naviService;
     }
 }

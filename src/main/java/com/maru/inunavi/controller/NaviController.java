@@ -15,12 +15,8 @@ import java.util.Map;
 @RequestMapping("/navi")
 public class NaviController {
 
-    private Service service;
-
     @Autowired
-    public void setGraph(Graph graph){
-        Constant.graph = graph;
-    }
+    private NaviService naviService;
 
     @RequestMapping("/")
     public String home() {
@@ -28,13 +24,10 @@ public class NaviController {
     }
 
     @RequestMapping("/load")
-    public @ResponseBody Map<String, Object> load(HttpServletRequest request) { // ?start=&end=
-
-        service = new NaviServiceImpl();
-        Map<String, Object> json = (Map<String, Object>) service.execute(request);
-        //Map<String, ArrayList<Map<String, Integer>>> json = new HashMap<String, ArrayList<Map<String, Integer>>>();
-        //json.put("load", res);
-        return json;
+    public @ResponseBody Map<String, Object> showLoad(HttpServletRequest request) { // ?start=&end=
+        int start = Integer.parseInt(request.getParameter("start"));
+        int end = Integer.parseInt(request.getParameter("end"));
+        return naviService.showLoad(start, end);
     }
 
 }
