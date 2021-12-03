@@ -15,6 +15,7 @@ public class UserDao {
     private JdbcTemplate template;
 
     public UserDao() {
+        System.out.println("Hi2");
         this.template = Constant.template;
     }
 
