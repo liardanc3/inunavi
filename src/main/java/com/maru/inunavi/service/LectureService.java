@@ -12,6 +12,9 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Service;
 import org.springframework.util.AutoPopulatingList;
 
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.util.*;
 
@@ -225,8 +228,7 @@ public class LectureService {
         for(int i=0; i<tmp.size(); i++){
             Lecture now = tmp.get(i);
 
-            // main_keyword, keyword_option
-            if(main_keyword!=""){
+            if(!main_keyword.equals("")){
                 if(keyword_option.equals("전체")){
                     if(!now.getLecturename().contains(main_keyword) && !now.getProfessor().contains(main_keyword) &&
                             !now.getNumber().contains(main_keyword)) continue;
@@ -244,14 +246,18 @@ public class LectureService {
                 continue;
 
             // cse_option
-            if(!cse_option.equals("전체") && !cse_option.equals(now.getCategory()))
-                continue;
+            if(!cse_option.equals("전체")) {
+                if(!now.getCategory().equals("교양필수"))
+                    continue;
+                if (!cse_option.equals("기타") && !now.getLecturename().contains(cse_option))
+                    continue;
+                if (cse_option.equals("기타") && !major_option.equals("전체") && !now.getDepartment().equals(major_option))
+                    continue;
+            }
 
             // grade_option
             StringTokenizer gst = new StringTokenizer(grade_option);
             int grade_check[] = new int[]{1,0,0,0,0};
-            if(now.getLecturename().contains("그래픽스"))
-                System.out.println(grade_option);
             while(!grade_option.equals("전체") && gst.hasMoreTokens()){
                 String tok = gst.nextToken(", ");
                 if(tok.charAt(0)=='1') grade_check[1]++;
@@ -283,18 +289,13 @@ public class LectureService {
 
             // score_option
             StringTokenizer sst = new StringTokenizer(score_option);
-            int score_check[] = new int[]{0,0,0,0,0,0,0};
-            while(sst.hasMoreTokens()){
-                String tok = sst.nextToken(", ");
-                if(tok.charAt(0)=='1') score_check[1]++;
-                else if(tok.charAt(0)=='2') score_check[2]++;
-                else if(tok.charAt(0)=='3') score_check[3]++;
-                else if(tok.charAt(0)=='5') score_check[5]++;
-                else if(tok.charAt(0)=='6') score_check[6]++;
-            }
+            int score_check[] = new int[]{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+            while(!score_option.equals("전체") && sst.hasMoreTokens())
+                score_check[Integer.parseInt(sst.nextToken(", ").substring(0,1))]++;
             if(!score_option.equals("전체") && score_check[Integer.parseInt(now.getPoint())] == 0)
                 continue;
 
+            System.out.println(now.getLecturename());
             result.add(now);
         }
         return result;

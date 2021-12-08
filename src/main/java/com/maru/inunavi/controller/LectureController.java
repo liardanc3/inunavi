@@ -9,7 +9,6 @@ import java.util.HashMap;
 import java.util.List;
 
 @RestController
-
 public class LectureController {
 
     private final LectureService _LectureService;
@@ -17,7 +16,6 @@ public class LectureController {
         this._LectureService=_LectureService;
     }
 
-    //Æó±â
     @GetMapping("allLecture")
     @ResponseBody
     public List<Lecture> allLecture(){
