@@ -3,33 +3,26 @@ package com.maru.inunavi.service;
 import com.maru.inunavi.entity.Lecture;
 import com.maru.inunavi.entity.UserLecture;
 import com.maru.inunavi.repository.AllLectureRepository;
+import com.maru.inunavi.repository.NaviRepository;
+import com.maru.inunavi.repository.UserInfoRepository;
 import com.maru.inunavi.repository.UserLectureRepository;
+import lombok.RequiredArgsConstructor;
 import org.apache.commons.io.FileUtils;
 import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Service;
-import org.springframework.util.AutoPopulatingList;
-
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.util.*;
 
-import static org.apache.commons.io.FileUtils.copyInputStreamToFile;
 
 @Service
+@RequiredArgsConstructor
 public class LectureService {
-    private final AllLectureRepository _AllLectureRepository;
-    private final UserLectureRepository _UserLectureRepository;
-    public LectureService(AllLectureRepository _AllLectureRepository, UserLectureRepository _UserLectureRepository) {
-        this._AllLectureRepository = _AllLectureRepository;
-        this._UserLectureRepository = _UserLectureRepository;
-    }
 
-    //-------------------------------------------//
+    private final NaviRepository _NaviRepository;
+    private final UserInfoRepository _UserInfoRepository;
+    private final UserLectureRepository _UserLectureRepository;
+    private final AllLectureRepository _AllLectureRepository;
 
     public List<Lecture> allLecture(){
         return _AllLectureRepository.findAll();
@@ -188,21 +181,6 @@ public class LectureService {
 
         _AllLectureRepository.saveAll(LL);
         return _AllLectureRepository.findAll();
-    }
-
-    // 폐기
-    public boolean addLecture(String userID, String lectureID) {
-        UserLecture _UserLecture = new UserLecture(userID,lectureID);
-        // 중복체크
-        try{
-            UserLecture _OverlapLecture = _UserLectureRepository.findByUserIDAndLectureID(userID,lectureID);
-            String name = _OverlapLecture.getLectureID();
-            System.out.println("Already done");
-            return false;
-        }catch(Exception e){
-            _UserLectureRepository.save(_UserLecture);
-            return true;
-        }
     }
 
     public List<Lecture> selectLecture(String main_keyword, String keyword_option, String major_option, String cse_option, String sort_option, String grade_option, String category_option, String score_option) {

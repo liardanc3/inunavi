@@ -25,4 +25,8 @@ public interface AllLectureRepository extends JpaRepository<Lecture,Long> {
     @Query(value = "select t from AllLecture t order by t.lecturename ASC")
     List<Lecture> findAllByOrderByLecturenameAsc();
 
+    @Query("select t from AllLecture as t where t.number= :_number")
+    Lecture findByLectureID(
+            @Param("_number") String _number);
+
 }

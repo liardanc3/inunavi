@@ -1,8 +1,19 @@
 package com.maru.inunavi.service;
 
-import java.util.Map;
+import com.maru.inunavi.repository.AllLectureRepository;
+import com.maru.inunavi.repository.NaviRepository;
+import com.maru.inunavi.repository.UserInfoRepository;
+import com.maru.inunavi.repository.UserLectureRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
 
-public interface NaviService {
+@Service
+@RequiredArgsConstructor
+public class NaviService {
 
-    public Map<String, Object> showLoad(int start, int end);
+    private final NaviRepository _NaviRepository;
+    private final UserInfoRepository _UserInfoRepository;
+    private final UserLectureRepository _UserLectureRepository;
+    private final AllLectureRepository _AllLectureRepository;
+
 }

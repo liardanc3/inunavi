@@ -3,22 +3,28 @@ package com.maru.inunavi.entity;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+
 import javax.persistence.*;
+import java.util.List;
 
 @Builder
 @AllArgsConstructor
-@Entity(name="UserLecture")
+@Entity(name="Navi")
 @Getter
-public class UserLecture {
-    public UserLecture(){}
+public class Navi {
+    public Navi() {}
 
-    // 아이디
     @Id
-    @Column(length = 45, nullable=false)
-    private String UserID;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-    // 과목번호
+    // name
     @Column(length = 45, nullable=false)
-    private String LectureID;
+    private String BuildingName;
+
+    // location
+    @Column(length = 45, nullable=false)
+    private String Location;
+
 
 }
