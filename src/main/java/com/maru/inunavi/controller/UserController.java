@@ -32,41 +32,39 @@ public class UserController {
     @RequestMapping(value = "/insert", method = RequestMethod.POST)
     @ResponseBody
     public Map<String, String> Resister(HttpServletRequest request) {
-        String id = request.getParameter("id");
-        String password = request.getParameter("password");
-        String name = request.getParameter("name");
         String email = request.getParameter("email");
-        return _UserService.resister(id, password, name, email);
+        String password = request.getParameter("password");
+        return _UserService.resister(email, password);
     }
 
     @RequestMapping(value = "/insert/class", method = RequestMethod.POST)
     @ResponseBody
     public Map<String, String> insertClass(HttpServletRequest request) { // ?id=&class_id=
-        String id = request.getParameter("id");
+        String email = request.getParameter("email");
         String classId = request.getParameter("class_id");
-        return _UserService.AddLecture(id, classId);
+        return _UserService.AddLecture(email, classId);
     }
 
     @RequestMapping(value = "/delete/class", method = RequestMethod.POST)
     @ResponseBody
     public Map<String, String> deleteClass(HttpServletRequest request) { // ?id=&class_id=
-        String id = request.getParameter("id");
+        String email = request.getParameter("email");
         String classId = request.getParameter("class_id");
-        return _UserService.deleteLecture(id, classId);
+        return _UserService.deleteLecture(email, classId);
     }
 
     @RequestMapping("/select/class")
     @ResponseBody
     public Map<String, ArrayList<Lecture>> selectClass(HttpServletRequest request) {
-        String id = request.getParameter("id");
-        return _UserService.showMyLecture(id);
+        String email = request.getParameter("email");
+        return _UserService.showMyLecture(email);
     }
 
     @RequestMapping(value = "/check/id", method = RequestMethod.GET)
     @ResponseBody
     public Map<String, String> idCheck(HttpServletRequest request) {
-        String id = request.getParameter("id");
-        return _UserService.idCheck(id);
+        String email = request.getParameter("email");
+        return _UserService.idCheck(email);
     }
 
     @RequestMapping(value = "/selectAll", method = RequestMethod.GET)
@@ -78,9 +76,17 @@ public class UserController {
     @RequestMapping(value = "/login", method = RequestMethod.POST)
     @ResponseBody
     public Map<String, String> login(HttpServletRequest request) {
-        String id = request.getParameter("id");
+        String email = request.getParameter("email");
         String password = request.getParameter("password");
-        return _UserService.login(id, password);
+        return _UserService.login(email, password);
+    }
+
+    @RequestMapping(value = "/verify", method = RequestMethod.POST)
+    @ResponseBody
+    public Map<String, String> verify(HttpServletRequest request) {
+        String email = request.getParameter("email");
+        String code = request.getParameter("verificationCode");
+        return _UserService.verify(email, code);
     }
 
 }

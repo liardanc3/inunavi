@@ -9,15 +9,10 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface UserInfoRepository extends JpaRepository<UserInfo, Long> {
 
-    @Query("select m from UserInfo AS m where m.UserID= :id")
-    UserInfo findById(
-            @Param("id") String id
+    @Query("select m from UserInfo as m where m.email= :email")
+    UserInfo findByEmail(
+            @Param("email") String email
     );
-
-    @Query("select m from UserInfo AS m where m.UserID= :id and m.UserPW= :password")
-    UserInfo findByIdAndUserPW(
-            @Param("id") String id,
-            @Param("password") String password);
 
 
 }
