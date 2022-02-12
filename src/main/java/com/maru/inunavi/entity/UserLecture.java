@@ -14,11 +14,11 @@ public class UserLecture {
 
     // 아이디
     @Id
-    @Column(length = 45, nullable=false)
-    private String UserID;
+    @Column(length = 100, nullable=false)
+    private String email;
 
     // 과목번호
     @Column(length = 45, nullable=false)
-    private String LectureID;
+    private String lectureId;
 
 }

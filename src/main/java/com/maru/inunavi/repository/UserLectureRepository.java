@@ -12,14 +12,14 @@ import java.util.List;
 @Repository
 public interface UserLectureRepository extends JpaRepository<UserLecture,Long> {
 
-    @Query("SELECT m FROM UserLecture AS m WHERE m.UserID= :_UserID AND m.LectureID= :_LectureID")
-    UserLecture findByUserIDAndLectureID(
-            @Param("_UserID") String _UserID,
-            @Param("_LectureID") String _LectureID);
+    @Query("SELECT m FROM UserLecture AS m WHERE m.email= :email AND m.lectureId= :lectureId")
+    UserLecture findByUserEmailAndLectureID(
+            @Param("email") String email,
+            @Param("lectureId") String lectureId);
 
-    @Query("select m from UserLecture as m where m.UserID= :_UserID")
-    List<UserLecture> findAllByUserID(
-            @Param("_UserID") String _UserID);
+    @Query("select m from UserLecture as m where m.email= :email")
+    List<UserLecture> findAllByUserEmail(
+            @Param("email") String email);
 
 
 }

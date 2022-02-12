@@ -8,7 +8,13 @@ import com.maru.inunavi.repository.NaviRepository;
 import com.maru.inunavi.repository.UserInfoRepository;
 import com.maru.inunavi.repository.UserLectureRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.stereotype.Service;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -24,55 +30,62 @@ public class UserService {
     private final UserLectureRepository _UserLectureRepository;
     private final AllLectureRepository _AllLectureRepository;
 
+    @Autowired
+    private JavaMailSender javaMailSender;
+
     public List<UserInfo> showAll(){
         return _UserInfoRepository.findAll();
     }
 
-    public Map<String, String> resister(String id, String password, String name, String email){
+    public Map<String, String> resister(String email, String password){
+        PasswordEncoder passwordencoder = new BCryptPasswordEncoder();
         Map<String, String> json = new HashMap<>();
-        json.put("id", id);
-        UserInfo _UserInfo = new UserInfo(id,password,name,email);
-        try{
-            _UserInfoRepository.findById(id);
-            json.put("success","false");
-        }
-        catch(Exception E){
+        json.put("email", email);
+        UserInfo _UserInfo = new UserInfo(email,passwordencoder.encode(password));
+        if (_UserInfoRepository.findByEmail(email) == null){
             _UserInfoRepository.save(_UserInfo);
             json.put("success", "true");
+        }else{
+            json.put("success","false");
         }
         return json;
     }
 
-    public Map<String, String> login(String id, String password) {
+    public Map<String, String> login(String email, String password) {
+        PasswordEncoder passwordencoder = new BCryptPasswordEncoder();
         Map<String, String> json = new HashMap<>();
-        json.put("id", id);
-        UserInfo _UserInfo = _UserInfoRepository.findByIdAndUserPW(id,password);
+        json.put("email", email);
+        UserInfo _UserInfo = _UserInfoRepository.findByEmail(email);
         if (_UserInfo==null) {
             json.put("success", "false");
             json.put("message", "로그인 실패");
         }
-        else {
+        else if (!passwordencoder.matches(password, _UserInfo.getPassword())){
+            json.put("success", "false");
+            json.put("message", "로그인 실패2");
+        } else {
             json.put("success", "true");
             json.put("message", "로그인 성공");
         }
+
         return json;
     }
 
-    public Map<String, String> idCheck(String id){
+    public Map<String, String> idCheck(String email){
         Map<String, String> json = new HashMap<>();
-        json.put("id", id);
-        if(_UserInfoRepository.findById(id) != null)
+        json.put("email", email);
+        if(_UserInfoRepository.findByEmail(email) != null)
             json.put("success", "true");
         else json.put("success", "false");
         return json;
     }
 
-    public Map<String, String> AddLecture(String userID, String lectureID) {
+    public Map<String, String> AddLecture(String email, String lectureID) {
         Map<String, String> json = new HashMap<>();
-        json.put("id", userID);
-        UserLecture _UserLecture = new UserLecture(userID,lectureID);
+        json.put("email", email);
+        UserLecture _UserLecture = new UserLecture(email,lectureID);
         try{
-            UserLecture _OverlapLecture = _UserLectureRepository.findByUserIDAndLectureID(userID,lectureID);
+            UserLecture _OverlapLecture = _UserLectureRepository.findByUserEmailAndLectureID(email,lectureID);
             json.put("success", "false");
         }catch(Exception e){
             _UserLectureRepository.save(_UserLecture);
@@ -81,11 +94,11 @@ public class UserService {
         return json;
     }
 
-    public Map<String, String> deleteLecture(String UserID, String LectureID){
+    public Map<String, String> deleteLecture(String email, String LectureID){
         Map<String, String> json = new HashMap<>();
-        json.put("id", UserID);
+        json.put("id", email);
         try{
-            UserLecture _UserLecture = _UserLectureRepository.findByUserIDAndLectureID(UserID, LectureID);
+            UserLecture _UserLecture = _UserLectureRepository.findByUserEmailAndLectureID(email, LectureID);
             _UserLectureRepository.delete(_UserLecture);
             json.put("success", "true");
         }
@@ -95,18 +108,36 @@ public class UserService {
         return json;
     }
 
-    public Map<String, ArrayList<Lecture>> showMyLecture(String id) {
+    public Map<String, ArrayList<Lecture>> showMyLecture(String email) {
         Map<String, ArrayList<Lecture>> json = new HashMap<>();
-        List<UserLecture> _UL = _UserLectureRepository.findAllByUserID(id);
+        List<UserLecture> _UL = _UserLectureRepository.findAllByUserEmail(email);
         ArrayList<Lecture> _LAL = new ArrayList<Lecture>();
         for(int i=0; i<_UL.size(); i++){
             try{
-                _LAL.add(_AllLectureRepository.findByLectureID(_UL.get(i).getLectureID()));
+                _LAL.add(_AllLectureRepository.findByLectureID(_UL.get(i).getLectureId()));
             }catch (Exception E) {
                 continue;
             }
         }
         json.put("response", _LAL);
         return json;
+    }
+
+    public Map<String, String> verify(String email, String code){
+        Map<String, String> json = new HashMap<>();
+        try{
+            SimpleMailMessage simpleMailMessage = new SimpleMailMessage();
+            simpleMailMessage.setTo(email);
+            simpleMailMessage.setSubject("verify");
+            simpleMailMessage.setText(code);
+            this.javaMailSender.send(simpleMailMessage);
+            json.put("success", "true");
+        }catch (Exception E){
+            json.put("messege", E.getMessage());
+            json.put("success", "false");
+        }
+
+        return json;
+
     }
 }

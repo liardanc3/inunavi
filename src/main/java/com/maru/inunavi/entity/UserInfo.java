@@ -11,29 +11,20 @@ import javax.persistence.*;
 @Getter
 public class UserInfo {
 
-    // id
+    // email
     @Id
-    @Column(length = 45, nullable=false)
-    private String UserID;
-
-    // name
-    @Column(length = 45, nullable=false)
-    private String UserName;
+    @Column(length=100, nullable = false)
+    private String email;
 
     // password
     @Column(length = 100, nullable=false)
-    private String UserPW;
+    private String password;
 
-    // email
-    @Column(length=100, nullable = false)
-    private String UserEmail;
 
     // creator
     public UserInfo(){}
-    public UserInfo(String UserID, String UserName, String UserPW, String UserEmail) {
-        this.UserID = UserID;
-        this.UserName=UserName;
-        this.UserPW=UserPW;
-        this.UserEmail=UserEmail;
+    public UserInfo(String email, String password) {
+        this.email=email;
+        this.password=password;
     }
 }
