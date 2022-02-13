@@ -40,8 +40,8 @@ public class LectureService {
         // csv파일 읽어서 DB에 수업정보 업데이트
         try {
             // 배포용 경로
-            InputStream inputStream = new ClassPathResource("ALLLECTURE2.txt").getInputStream();
-            File file =File.createTempFile("ALLLECTURE2",".txt");
+            InputStream inputStream = new ClassPathResource("_ALLLECTURE.txt").getInputStream();
+            File file =File.createTempFile("_ALLLECTURE",".txt");
             try {
                 FileUtils.copyInputStreamToFile(inputStream, file);
             } finally {
