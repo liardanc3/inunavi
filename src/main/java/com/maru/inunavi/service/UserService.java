@@ -140,4 +140,34 @@ public class UserService {
         return json;
 
     }
+
+    public Map<String, String> update(String email, String password){
+        PasswordEncoder passwordencoder = new BCryptPasswordEncoder();
+        Map<String, String> json = new HashMap<>();
+        json.put("email", email);
+        UserInfo _UserInfo = new UserInfo(email,passwordencoder.encode(password));
+        if (_UserInfoRepository.findByEmail(email) != null){
+            _UserInfoRepository.save(_UserInfo);
+            json.put("success", "true");
+        }else{
+            json.put("success","false");
+        }
+        return json;
+    }
+
+    public Map<String, String> delete(String email, String password){
+        PasswordEncoder passwordencoder = new BCryptPasswordEncoder();
+        Map<String, String> json = new HashMap<>();
+        json.put("email", email);
+        UserInfo _UserInfo = _UserInfoRepository.findByEmail(email);
+        if (_UserInfo == null){
+            json.put("success", "false");
+        }else if (!passwordencoder.matches(password, _UserInfo.getPassword())){
+            json.put("success","false");
+        }else{
+            _UserInfoRepository.delete(_UserInfo);
+            json.put("success","true");
+        }
+        return json;
+    }
 }

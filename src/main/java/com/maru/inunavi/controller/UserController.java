@@ -89,4 +89,20 @@ public class UserController {
         return _UserService.verify(email, code);
     }
 
+    @RequestMapping(value = "/update", method = RequestMethod.POST)
+    @ResponseBody
+    public Map<String, String> update(HttpServletRequest request) {
+        String email = request.getParameter("email");
+        String password = request.getParameter("newPassword");
+        return _UserService.update(email, password);
+    }
+
+    @RequestMapping(value = "/quit", method = RequestMethod.POST)
+    @ResponseBody
+    public Map<String, String> delete(HttpServletRequest request) {
+        String email = request.getParameter("email");
+        String password = request.getParameter("password");
+        return _UserService.delete(email, password);
+    }
+
 }
