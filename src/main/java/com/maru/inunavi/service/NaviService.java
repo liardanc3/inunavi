@@ -2,21 +2,18 @@ package com.maru.inunavi.service;
 
 import com.maru.inunavi.entity.Lecture;
 import com.maru.inunavi.entity.Navi;
-import com.maru.inunavi.repository.AllLectureRepository;
-import com.maru.inunavi.repository.NaviRepository;
-import com.maru.inunavi.repository.UserInfoRepository;
-import com.maru.inunavi.repository.UserLectureRepository;
+import com.maru.inunavi.entity.NodePath;
+import com.maru.inunavi.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.io.FileUtils;
 import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
 
 import java.io.*;
 import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.StringTokenizer;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -26,6 +23,22 @@ public class NaviService {
     private final UserInfoRepository _UserInfoRepository;
     private final UserLectureRepository _UserLectureRepository;
     private final AllLectureRepository _AllLectureRepository;
+    private final NodePathRepository _NodePathRepository;
+
+    //pair<double,int>
+    class pair implements Comparable<pair> {
+        private double dist;
+        private int node;
+        pair(double dist, int node){ this.dist=dist; this.node=node;}
+        public double getDist(){ return dist; }
+        public int getNode(){ return node; }
+
+        @Override
+        public int compareTo(final pair p){
+            if(dist == p.dist) return 1;
+            return Double.compare(dist, p.dist);
+        }
+    }
 
     private String epsg3857_to_epsg4326(String _epsg3857){
         StringTokenizer s = new StringTokenizer(_epsg3857);
@@ -68,6 +81,64 @@ public class NaviService {
         double a = Math.sin(DLa/2) * Math.sin(DLa/2) + Math.cos(lat1*toRadian) * Math.cos(lat2*toRadian) * Math.sin(DLo/2) * Math.sin(DLo/2);
         double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
         return (radius * c) * 1000;
+    }
+
+    public NodePath dijkstraPatial(int src, int dst){
+        int[] pathTrace = new int[(int)_NaviRepository.count()+2];
+        double[] distArray = new double[(int) _NaviRepository.count()+2];
+        for(int i=1; i<distArray.length; i++)
+            distArray[i] = 1e9;
+        distArray[src]=0.f;
+        PriorityQueue<pair> pq = new PriorityQueue<>();
+        pq.add(new pair(0,src));
+        while(!pq.isEmpty()){
+            double dist = pq.peek().getDist();
+            int now = pq.peek().getNode();
+            pq.remove();
+
+            if(dist < distArray[now]) continue;
+
+            String now_Epsg4326 = _NaviRepository.getById(now).getEpsg4326();
+            now_Epsg4326 = now_Epsg4326.substring(1,now_Epsg4326.length()-2);
+
+            String nearNode = _NaviRepository.getById(now).getNearNode();
+            if(nearNode.charAt(0)=='"')
+                nearNode = nearNode.substring(1,nearNode.length()-2);
+            StringTokenizer s = new StringTokenizer(nearNode);
+
+            while(s.hasMoreTokens()) {
+                int next = Integer.parseInt(s.nextToken(","));
+
+                String next_Epsg4326 = _NaviRepository.getById(next).getEpsg4326();
+                next_Epsg4326 = next_Epsg4326.substring(1,next_Epsg4326.length()-2);
+
+                double _dist = distanceNode(now_Epsg4326,next_Epsg4326);
+
+                if(dist+_dist < distArray[next]){
+                    pathTrace[now]=next;
+                    distArray[next]=dist+_dist;
+                    pq.add(new pair(dist+_dist,next));
+                }
+            }
+        }
+
+        String src2dst = Integer.toString(src)+"to"+Integer.toString(dst);
+        Double dist = distArray[dst];
+        String path = "";
+        int idx = src;
+        while(idx!=dst){
+            String epsg4326 = _NaviRepository.getById(idx).getEpsg4326();
+            path += epsg4326 + ',';
+            idx = pathTrace[idx];
+        }
+        path += _NaviRepository.getById(dst).getEpsg4326();
+
+        NodePath _NodePath = new NodePath(src2dst,dist,path);
+        return _NodePath;
+    }
+
+    public void dijkstraOverall(){
+
     }
 
     public List<Navi> updateNavi() {
@@ -122,6 +193,7 @@ public class NaviService {
         _NaviRepository.saveAll(NL);
         return _NaviRepository.findAll();
     }
+
 
 
 }

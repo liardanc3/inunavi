@@ -16,7 +16,7 @@ public class Navi {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private int id;
 
     // 주변노드
     @Column(length = 100, nullable=false)

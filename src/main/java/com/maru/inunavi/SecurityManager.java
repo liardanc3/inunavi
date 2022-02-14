@@ -12,7 +12,7 @@ public class SecurityManager extends WebSecurityConfigurerAdapter {
         http.csrf().disable();
         http.authorizeRequests()
                 .antMatchers("/").permitAll()
-                .antMatchers("/anananananaan").authenticated();
+                .antMatchers("/master").authenticated();
     }
 
 }
