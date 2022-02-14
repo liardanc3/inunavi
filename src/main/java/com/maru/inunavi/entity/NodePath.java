@@ -9,8 +9,11 @@ import javax.persistence.*;
 
 @Builder
 @Entity(name="Path")
+@AllArgsConstructor
 @Getter
 public class NodePath {
+    public NodePath(){};
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -27,8 +30,8 @@ public class NodePath {
     @Column(length = 10000, nullable = false)
     private String path;
 
-    public NodePath(){};
-    public NodePath(String src2dst, Double dist, String path){
+    //creator
+    public NodePath(String src2dst, Double dist, String path) {
         this.src2dst=src2dst;
         this.dist=dist;
         this.path=path;

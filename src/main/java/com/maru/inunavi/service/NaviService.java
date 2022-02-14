@@ -83,62 +83,87 @@ public class NaviService {
         return (radius * c) * 1000;
     }
 
-    public NodePath dijkstraPatial(int src, int dst){
+    public NodePath dijkstraPatial(int src, int dst, ArrayList<ArrayList<Integer>> AL){
         int[] pathTrace = new int[(int)_NaviRepository.count()+2];
         double[] distArray = new double[(int) _NaviRepository.count()+2];
         for(int i=1; i<distArray.length; i++)
             distArray[i] = 1e9;
         distArray[src]=0.f;
         PriorityQueue<pair> pq = new PriorityQueue<>();
+        Stack<String> st = new Stack<>();
         pq.add(new pair(0,src));
         while(!pq.isEmpty()){
+            System.out.println("pq.size() == "+pq.size());
             double dist = pq.peek().getDist();
             int now = pq.peek().getNode();
+            System.out.println("now = "+now);
             pq.remove();
 
             if(dist < distArray[now]) continue;
 
             String now_Epsg4326 = _NaviRepository.getById(now).getEpsg4326();
-            now_Epsg4326 = now_Epsg4326.substring(1,now_Epsg4326.length()-2);
+            now_Epsg4326 = now_Epsg4326.substring(1,now_Epsg4326.length()-1);
 
-            String nearNode = _NaviRepository.getById(now).getNearNode();
-            if(nearNode.charAt(0)=='"')
-                nearNode = nearNode.substring(1,nearNode.length()-2);
-            StringTokenizer s = new StringTokenizer(nearNode);
-
-            while(s.hasMoreTokens()) {
-                int next = Integer.parseInt(s.nextToken(","));
+            for(int i=0; i<AL.get(now).size(); i++) {
+                int next = AL.get(now).get(i);
+                System.out.println(next);
+                if(next==0) break;
+                System.out.println("next = "+next);
 
                 String next_Epsg4326 = _NaviRepository.getById(next).getEpsg4326();
-                next_Epsg4326 = next_Epsg4326.substring(1,next_Epsg4326.length()-2);
+                next_Epsg4326 = next_Epsg4326.substring(1,next_Epsg4326.length()-1);
 
                 double _dist = distanceNode(now_Epsg4326,next_Epsg4326);
-
+                System.out.println("dist = "+_dist);
                 if(dist+_dist < distArray[next]){
-                    pathTrace[now]=next;
+                    pathTrace[next]=now;
                     distArray[next]=dist+_dist;
                     pq.add(new pair(dist+_dist,next));
+                    if(next==dst){
+                        i=1000000;
+                        pq.clear();
+                    }
                 }
             }
         }
 
+        for(int i=1; i<=500; i++){
+            System.out.println(i+">"+pathTrace[i]);
+        }
+        System.out.println("탈출");
         String src2dst = Integer.toString(src)+"to"+Integer.toString(dst);
         Double dist = distArray[dst];
         String path = "";
-        int idx = src;
-        while(idx!=dst){
+        int idx = dst;
+        while(idx!=0){
+            System.out.print(idx + ", ");
             String epsg4326 = _NaviRepository.getById(idx).getEpsg4326();
-            path += epsg4326 + ',';
+            st.push(epsg4326);
             idx = pathTrace[idx];
         }
-        path += _NaviRepository.getById(dst).getEpsg4326();
+        while(!st.isEmpty()){
+            path += st.peek()+",";
+            st.pop();
+        }
+        path = path.substring(0,path.length()-1);
 
         NodePath _NodePath = new NodePath(src2dst,dist,path);
+        System.out.println(_NodePath.getSrc2dst() + " " + _NodePath.getPath() + "\n" + _NodePath.getDist()+"m");
         return _NodePath;
     }
 
-    public void dijkstraOverall(){
-
+    public boolean dijkstraOverall(ArrayList<ArrayList<Integer>> AL){
+        try{
+            int len = (int)_NaviRepository.count();
+            ArrayList<NodePath> _NAL = new ArrayList<>();
+            for(int i=1; i<2; i++) for(int j=i+1; j<=3; j++)
+                _NAL.add(dijkstraPatial(i,j,AL));
+            _NodePathRepository.saveAll(_NAL);
+            return true;
+        }catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 
     public List<Navi> updateNavi() {
@@ -147,6 +172,9 @@ public class NaviService {
         _NaviRepository.deleteINCREMENT();
 
         List<Navi> NL = new ArrayList<Navi>();
+        ArrayList<ArrayList<Integer>> AL = new ArrayList<>();
+        for(int i=1; i<=550; i++)
+            AL.add(new ArrayList<Integer>());
 
         try {
             InputStream inputStream = new ClassPathResource("_ALLNODE.txt").getInputStream();
@@ -175,10 +203,18 @@ public class NaviService {
                 // nearNode
                 String _nearNode = csv.get(1);
                 if(_nearNode.charAt(0)=='"')
-                    _nearNode = _nearNode.substring(1,_nearNode.length()-2);
+                    _nearNode = _nearNode.substring(1,_nearNode.length()-1);
+                if(_nearNode!="0"){
+                    StringTokenizer nearTmp = new StringTokenizer(_nearNode);
+                    while(nearTmp.hasMoreTokens()){
+                        int next = Integer.parseInt(nearTmp.nextToken(","));
+                        AL.get(NL.size()+1).add(next);
+                        AL.get(next).add(NL.size()+1);
+                    }
+                }
 
                 // 좌표계 변환
-                String _epsg3857 = csv.get(2).substring(1,csv.get(2).length()-2);
+                String _epsg3857 = csv.get(2).substring(1,csv.get(2).length()-1);
                 String _epsg4326 = epsg3857_to_epsg4326(_epsg3857);
 
                 Navi _Navi = new Navi(csv, _epsg4326);
@@ -189,11 +225,8 @@ public class NaviService {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
         _NaviRepository.saveAll(NL);
+        dijkstraOverall(AL);
         return _NaviRepository.findAll();
     }
-
-
-
 }
