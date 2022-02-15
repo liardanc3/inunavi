@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 import javax.persistence.*;
 
 @Builder
-@Entity(name="Path")
+@Entity(name="nodepath")
 @AllArgsConstructor
 @Getter
 public class NodePath {
@@ -20,20 +20,30 @@ public class NodePath {
 
     //from-to
     @Column(length = 10, nullable=false)
-    private String src2dst;
+    private String Src2dst;
 
     //dist
     @Column(length = 30, nullable = false)
-    private Double dist;
+    private Double Dist;
 
-    //path
+    //route
     @Column(length = 10000, nullable = false)
-    private String path;
+    private String Route;
+
+    //time
+    @Column(length = 4, nullable=false)
+    private int Time;
+
+    //steps
+    @Column(length = 5, nullable = false)
+    private int Steps;
 
     //creator
-    public NodePath(String src2dst, Double dist, String path) {
-        this.src2dst=src2dst;
-        this.dist=dist;
-        this.path=path;
+    public NodePath(String src2dst, Double dist, String route) {
+        this.Src2dst=src2dst;
+        this.Dist=dist;
+        this.Route=route;
+        this.Steps= (int) (1.65*dist);
+        this.Time=Steps/100;
     }
 }

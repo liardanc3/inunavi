@@ -68,19 +68,6 @@ public class LectureService {
                 String _classroom = "", _classtime="";
                 String classroom_raw = csv.get(6), classtime_raw=csv.get(7);
 
-                // classroom 정제(폐기)
-                /*if(classroom_raw.charAt(0) != '-'){
-                    StringTokenizer room = new StringTokenizer(classroom_raw);
-                    while(room.hasMoreTokens()){
-                        String tmp = room.nextToken("[");
-                        if(!room.hasMoreTokens()) break;
-                        tmp = room.nextToken("]");
-                        _classroom += tmp.substring(1,tmp.length());
-                        _classroom += ",";
-                        room_cnt++;
-                    }
-                } else _classroom = classroom_raw;*/
-                // classtime 정제
                 String classname = csv.get(4);
                 if(classtime_raw.charAt(0) != '-'){
                     StringTokenizer time = new StringTokenizer(classtime_raw);

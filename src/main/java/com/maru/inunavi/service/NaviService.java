@@ -1,6 +1,5 @@
 package com.maru.inunavi.service;
 
-import com.maru.inunavi.entity.Lecture;
 import com.maru.inunavi.entity.Navi;
 import com.maru.inunavi.entity.NodePath;
 import com.maru.inunavi.repository.*;
@@ -8,11 +7,9 @@ import lombok.RequiredArgsConstructor;
 import org.apache.commons.io.FileUtils;
 import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
 
 import java.io.*;
-import java.text.DecimalFormat;
 import java.util.*;
 
 @Service
@@ -23,9 +20,10 @@ public class NaviService {
     private final UserInfoRepository _UserInfoRepository;
     private final UserLectureRepository _UserLectureRepository;
     private final AllLectureRepository _AllLectureRepository;
-    private final NodePathRepository _NodePathRepository;
+    private final RouteRepository _RouteRepository;
 
-    //pair<double,int>
+    private ArrayList<String> SAL = new ArrayList<>();
+
     class pair implements Comparable<pair> {
         private double dist;
         private int node;
@@ -67,25 +65,31 @@ public class NaviService {
         return sLA+", "+SLO;
     }
 
-    public double distanceNode(String _src, String _dst){
-        StringTokenizer s = new StringTokenizer(_src);
-        StringTokenizer d = new StringTokenizer(_dst);
-        double lat1 = Double.parseDouble(s.nextToken(","));
-        double lng1 = Double.parseDouble(s.nextToken(","));
-        double lat2 = Double.parseDouble(d.nextToken(","));
-        double lng2 = Double.parseDouble(d.nextToken(","));
-        double radius = 6371.8;
-        double toRadian = Math.PI / 180;
-        double DLa = (lat2 - lat1) * toRadian;
-        double DLo = (lng2 - lng1) * toRadian;
-        double a = Math.sin(DLa/2) * Math.sin(DLa/2) + Math.cos(lat1*toRadian) * Math.cos(lat2*toRadian) * Math.sin(DLo/2) * Math.sin(DLo/2);
-        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-        return (radius * c) * 1000;
+    private double distanceNode(String _src, String _dst){
+        try{
+            StringTokenizer s = new StringTokenizer(_src);
+            StringTokenizer d = new StringTokenizer(_dst);
+            double lat1 = Double.parseDouble(s.nextToken(","));
+            double lng1 = Double.parseDouble(s.nextToken(","));
+            double lat2 = Double.parseDouble(d.nextToken(","));
+            double lng2 = Double.parseDouble(d.nextToken(","));
+            double radius = 6371.8;
+            double toRadian = Math.PI / 180;
+            double DLa = (lat2 - lat1) * toRadian;
+            double DLo = (lng2 - lng1) * toRadian;
+            double a = Math.sin(DLa/2) * Math.sin(DLa/2) + Math.cos(lat1*toRadian) * Math.cos(lat2*toRadian) * Math.sin(DLo/2) * Math.sin(DLo/2);
+            double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+            return (radius * c) * 1000;
+        }catch (Exception e){
+            System.out.println(_src);
+            System.out.println(_dst);
+            return -1;
+        }
     }
 
-    public NodePath dijkstraPatial(int src, int dst, ArrayList<ArrayList<Integer>> AL){
-        int[] pathTrace = new int[(int)_NaviRepository.count()+2];
-        double[] distArray = new double[(int) _NaviRepository.count()+2];
+    private NodePath dijkstraPatial(int src, int dst, ArrayList<ArrayList<Integer>> AL, int len){
+        int[] pathTrace = new int[len+2];
+        double[] distArray = new double[len+2];
         for(int i=1; i<distArray.length; i++)
             distArray[i] = 1e9;
         distArray[src]=0.f;
@@ -93,28 +97,22 @@ public class NaviService {
         Stack<String> st = new Stack<>();
         pq.add(new pair(0,src));
         while(!pq.isEmpty()){
-            System.out.println("pq.size() == "+pq.size());
             double dist = pq.peek().getDist();
             int now = pq.peek().getNode();
-            System.out.println("now = "+now);
             pq.remove();
 
             if(dist < distArray[now]) continue;
 
-            String now_Epsg4326 = _NaviRepository.getById(now).getEpsg4326();
+            String now_Epsg4326 = SAL.get(now-1);
             now_Epsg4326 = now_Epsg4326.substring(1,now_Epsg4326.length()-1);
 
             for(int i=0; i<AL.get(now).size(); i++) {
                 int next = AL.get(now).get(i);
-                System.out.println(next);
                 if(next==0) break;
-                System.out.println("next = "+next);
 
-                String next_Epsg4326 = _NaviRepository.getById(next).getEpsg4326();
+                String next_Epsg4326 = SAL.get(next-1);
                 next_Epsg4326 = next_Epsg4326.substring(1,next_Epsg4326.length()-1);
-
                 double _dist = distanceNode(now_Epsg4326,next_Epsg4326);
-                System.out.println("dist = "+_dist);
                 if(dist+_dist < distArray[next]){
                     pathTrace[next]=now;
                     distArray[next]=dist+_dist;
@@ -126,18 +124,12 @@ public class NaviService {
                 }
             }
         }
-
-        for(int i=1; i<=500; i++){
-            System.out.println(i+">"+pathTrace[i]);
-        }
-        System.out.println("탈출");
         String src2dst = Integer.toString(src)+"to"+Integer.toString(dst);
         Double dist = distArray[dst];
         String path = "";
         int idx = dst;
         while(idx!=0){
-            System.out.print(idx + ", ");
-            String epsg4326 = _NaviRepository.getById(idx).getEpsg4326();
+            String epsg4326 = SAL.get(idx-1);
             st.push(epsg4326);
             idx = pathTrace[idx];
         }
@@ -146,19 +138,21 @@ public class NaviService {
             st.pop();
         }
         path = path.substring(0,path.length()-1);
-
+        if(src%100==0)
+            System.out.println(src + "running");
         NodePath _NodePath = new NodePath(src2dst,dist,path);
-        System.out.println(_NodePath.getSrc2dst() + " " + _NodePath.getPath() + "\n" + _NodePath.getDist()+"m");
         return _NodePath;
     }
 
-    public boolean dijkstraOverall(ArrayList<ArrayList<Integer>> AL){
+    private boolean dijkstraOverall(ArrayList<ArrayList<Integer>> AL){
         try{
+            _RouteRepository.deleteAll();
+            _RouteRepository.deleteINCREMENT();
             int len = (int)_NaviRepository.count();
             ArrayList<NodePath> _NAL = new ArrayList<>();
-            for(int i=1; i<2; i++) for(int j=i+1; j<=3; j++)
-                _NAL.add(dijkstraPatial(i,j,AL));
-            _NodePathRepository.saveAll(_NAL);
+            for(int i=1; i<len; i++) for(int j=i+1; j<=len; j++)
+                _NAL.add(dijkstraPatial(i,j,AL,len));
+            _RouteRepository.saveAll(_NAL);
             return true;
         }catch (Exception e) {
             e.printStackTrace();
@@ -216,6 +210,7 @@ public class NaviService {
                 // 좌표계 변환
                 String _epsg3857 = csv.get(2).substring(1,csv.get(2).length()-1);
                 String _epsg4326 = epsg3857_to_epsg4326(_epsg3857);
+                SAL.add(_epsg4326);
 
                 Navi _Navi = new Navi(csv, _epsg4326);
                 NL.add(_Navi);
@@ -228,5 +223,58 @@ public class NaviService {
         _NaviRepository.saveAll(NL);
         dijkstraOverall(AL);
         return _NaviRepository.findAll();
+    }
+
+    public Map<String, List<NodePath>> getRoot(String startPlaceCode, String endPlaceCode, String startLocation, String endLocation){
+        startPlaceCode = startPlaceCode.substring(1,startPlaceCode.length()-1);
+        endPlaceCode = endPlaceCode.substring(1,endPlaceCode.length()-1);
+        startLocation = startLocation.substring(1,startLocation.length()-1);
+        endLocation = endLocation.substring(1,endLocation.length()-1);
+
+        Map<String, List<NodePath>> retGetPath = new HashMap<>();
+        boolean startWithLocation = startPlaceCode.equals("LOCATION");
+        boolean endWithLocation = endPlaceCode.equals("LOCATION");
+        int len = (int)_NaviRepository.count();
+        System.out.println(startPlaceCode + endPlaceCode + startLocation + endLocation);
+        System.out.println(SAL.size());
+        if(SAL.isEmpty()){
+            for(int i=1; i<= len; i++)
+                SAL.add(_NaviRepository.getById(i).getEpsg4326());
+        }
+
+        if(startWithLocation && endWithLocation){
+            Double minDistFromStart = 1e9;
+            Double minDistFromEnd = 1e9;
+            int minNodeFromStart = -1;
+            int minNodeFromEnd = -1;
+            for(int i=0; i<len; i++){
+                Double distFromStart = distanceNode(startLocation, SAL.get(i));
+                Double distFromEnd = distanceNode(endLocation, SAL.get(i));
+                if(distFromStart < minDistFromStart){
+                    minDistFromStart = distFromStart;
+                    minNodeFromStart = i+1;
+                }
+                if(distFromEnd < minDistFromEnd){
+                    minDistFromEnd = distFromEnd;
+                    minNodeFromEnd = i+1;
+                }
+            }
+
+            NodePath _NodePath = _RouteRepository.findBySrc2dst(minNodeFromStart+"to"+minNodeFromEnd);
+
+            Double _Dist = _NodePath.getDist();
+            _Dist += distanceNode(startLocation, SAL.get(minNodeFromStart-1));
+            _Dist += distanceNode(endLocation, SAL.get(minNodeFromEnd-1));
+
+            String _Path = startLocation+',';
+            _Path += _NodePath.getRoute();
+            _Path += ','+endLocation;
+
+            NodePath _retNodePath = new NodePath("",_Dist,_Path);
+            List<NodePath> _retList = new ArrayList<>();
+            _retList.add(_retNodePath);
+            retGetPath.put("response",_retList);
+        }
+        return retGetPath;
     }
 }
