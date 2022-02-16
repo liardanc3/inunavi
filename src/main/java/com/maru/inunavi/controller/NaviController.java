@@ -2,6 +2,7 @@ package com.maru.inunavi.controller;
 
 import com.maru.inunavi.entity.Navi;
 import com.maru.inunavi.entity.NodePath;
+import com.maru.inunavi.entity.Place;
 import com.maru.inunavi.service.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +24,10 @@ public class NaviController {
     @GetMapping("updateNavi")
     @ResponseBody
     public List<Navi> updateNavi(){ return _NaviService.updateNavi(); }
+
+    @GetMapping("updatePlace")
+    @ResponseBody
+    public List<Place> updatePlace(){ return _NaviService.updatePlace(); }
 
     @GetMapping("getRoot")
     @ResponseBody

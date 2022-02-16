@@ -2,6 +2,7 @@ package com.maru.inunavi.service;
 
 import com.maru.inunavi.entity.Navi;
 import com.maru.inunavi.entity.NodePath;
+import com.maru.inunavi.entity.Place;
 import com.maru.inunavi.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.io.FileUtils;
@@ -21,6 +22,7 @@ public class NaviService {
     private final UserLectureRepository _UserLectureRepository;
     private final AllLectureRepository _AllLectureRepository;
     private final RouteRepository _RouteRepository;
+    private final PlaceRepository _PlaceRepository;
 
     private ArrayList<String> SAL = new ArrayList<>();
 
@@ -160,6 +162,51 @@ public class NaviService {
         }
     }
 
+    public List<Place> updatePlace(){
+
+        _PlaceRepository.deleteAll();
+        _PlaceRepository.deleteINCREMENT();
+
+        List<Place> PL = new ArrayList<Place>();
+
+        try {
+            InputStream inputStream = new ClassPathResource("_PLACE.txt").getInputStream();
+            File file =File.createTempFile("_PLACE",".txt");
+            try {
+                FileUtils.copyInputStreamToFile(inputStream, file);
+            } finally {
+                IOUtils.closeQuietly(inputStream);
+            }
+            FileReader fileReader = new FileReader(file);
+            BufferedReader bufReader = new BufferedReader(fileReader);
+
+            String line = "";
+            line = bufReader.readLine();
+            while ((line = bufReader.readLine()) != null) {
+
+                List<String> csv = new ArrayList<>();
+                StringTokenizer s = new StringTokenizer(line);
+                System.out.println(line);
+                // placeCode title sort distance location time callNum 비고
+                for (int i = 0; i <= 7; i++) {
+                    String tmp = s.nextToken("\t");
+                    if(tmp.charAt(0)=='"')
+                        tmp = tmp.substring(1,tmp.length()-1);
+                    csv.add(tmp);
+                }
+
+                Place _Place = new Place(csv);
+                PL.add(_Place);
+            }
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        _PlaceRepository.saveAll(PL);
+        return _PlaceRepository.findAll();
+    }
+
     public List<Navi> updateNavi() {
 
         _NaviRepository.deleteAll();
@@ -277,4 +324,6 @@ public class NaviService {
         }
         return retGetPath;
     }
+
+
 }
