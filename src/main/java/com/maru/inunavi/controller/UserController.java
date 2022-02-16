@@ -53,7 +53,7 @@ public class UserController {
         return _UserService.deleteLecture(email, classId);
     }
 
-    @RequestMapping("/select/class")
+    @RequestMapping(value = "/select/class", method = RequestMethod.POST)
     @ResponseBody
     public Map<String, ArrayList<Lecture>> selectClass(HttpServletRequest request) {
         String email = request.getParameter("email");
@@ -85,8 +85,7 @@ public class UserController {
     @ResponseBody
     public Map<String, String> verify(HttpServletRequest request) {
         String email = request.getParameter("email");
-        String code = request.getParameter("verificationCode");
-        return _UserService.verify(email, code);
+        return _UserService.verify(email);
     }
 
     @RequestMapping(value = "/update", method = RequestMethod.POST)
