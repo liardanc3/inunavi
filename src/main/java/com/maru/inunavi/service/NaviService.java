@@ -235,8 +235,9 @@ public class NaviService {
                 List<String> csv = new ArrayList<>();
                 StringTokenizer s = new StringTokenizer(line);
 
-                // nodeNum, nearNode, placeCode, node, title, sort
-                for (int i = 0; i <= 6; i++) {
+                // nodeNum, nearNode, placeCode
+                System.out.println(line);
+                for (int i = 0; i <= 3; i++) {
                     String tmp = s.nextToken("\t");
                     csv.add(tmp);
                 }
@@ -259,7 +260,12 @@ public class NaviService {
                 String _epsg4326 = epsg3857_to_epsg4326(_epsg3857);
                 SAL.add(_epsg4326);
 
-                Navi _Navi = new Navi(csv, _epsg4326);
+                // placeCode
+                String _placeCode = csv.get(3);
+                if(_placeCode.charAt(0)=='"')
+                    _placeCode = _placeCode.substring(1,_placeCode.length()-1);
+
+                Navi _Navi = new Navi(_nearNode,csv.get(2),_epsg4326,_placeCode);
                 NL.add(_Navi);
             }
         } catch (FileNotFoundException e) {

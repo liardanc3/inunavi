@@ -31,29 +31,14 @@ public class Navi {
     private String epsg4326;
 
     // placeCode
-    @Column(length = 5, nullable = false)
+    @Column(length = 250, nullable = false)
     private String placeCode;
 
-    // node
-    @Column(length = 70, nullable = false)
-    private String node;
-
-    // title
-    @Column(length = 70, nullable = false)
-    private String title;
-
-    // sort
-    @Column(length = 20, nullable = false)
-    private String sort;
-
     // creator
-    public Navi(List<String> csv, String epsg4326) {
-        this.nearNode = csv.get(1);
-        this.epsg3857 = csv.get(2);
+    public Navi(String nearNode, String epsg3857, String epsg4326, String placeCode) {
+        this.nearNode = nearNode;
+        this.epsg3857 = epsg3857;
         this.epsg4326 = epsg4326;
-        this.placeCode = csv.get(3);
-        this.node = csv.get(4);
-        this.title = csv.get(5);
-        this.sort = csv.get(6);
+        this.placeCode = placeCode;
     }
 }
