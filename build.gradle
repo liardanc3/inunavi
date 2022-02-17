@@ -41,6 +41,6 @@ jar{
 }
 
 bootWar{
-	archiveName("inunavi.war")
+	archiveName("ROOT.war")
 
 }
