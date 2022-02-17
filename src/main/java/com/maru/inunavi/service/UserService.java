@@ -123,8 +123,14 @@ public class UserService {
         return json;
     }
 
-    public Map<String, String> verify(String email, String code){
+    public Map<String, String> verify(String email){
         Map<String, String> json = new HashMap<>();
+        String code = "";
+        int[][] d = {{48, 10}, {65, 26}, {97, 26}};
+        for(int i=0;i<12;i++){
+            int j = (int) (Math.random() * 3);
+            code += (char) ((int) (Math.random() * d[j][1] + d[j][0]));
+        }
         try{
             SimpleMailMessage simpleMailMessage = new SimpleMailMessage();
             simpleMailMessage.setTo(email);
@@ -132,6 +138,7 @@ public class UserService {
             simpleMailMessage.setText(code);
             this.javaMailSender.send(simpleMailMessage);
             json.put("success", "true");
+            json.put("code", code);
         }catch (Exception E){
             json.put("messege", E.getMessage());
             json.put("success", "false");
