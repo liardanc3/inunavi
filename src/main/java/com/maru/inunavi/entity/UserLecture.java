@@ -10,15 +10,24 @@ import javax.persistence.*;
 @Entity(name="UserLecture")
 @Getter
 public class UserLecture {
-    public UserLecture(){}
 
     // 아이디
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    //이메일
     @Column(length = 100, nullable=false)
     private String email;
 
     // 과목번호
     @Column(length = 45, nullable=false)
     private String lectureId;
+
+    public UserLecture(){}
+    public UserLecture(String email, String lectureId) {
+        this.email=email;
+        this.lectureId=lectureId;
+    }
 
 }

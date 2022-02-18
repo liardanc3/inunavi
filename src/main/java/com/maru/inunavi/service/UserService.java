@@ -83,26 +83,24 @@ public class UserService {
     public Map<String, String> AddLecture(String email, String lectureID) {
         Map<String, String> json = new HashMap<>();
         json.put("email", email);
-        UserLecture _UserLecture = new UserLecture(email,lectureID);
-        try{
-            UserLecture _OverlapLecture = _UserLectureRepository.findByUserEmailAndLectureID(email,lectureID);
-            json.put("success", "false");
-        }catch(Exception e){
-            _UserLectureRepository.save(_UserLecture);
+        if(_UserLectureRepository.findByUserEmailAndLectureID(email,lectureID) == null){
+            _UserLectureRepository.save(new UserLecture(email, lectureID));
             json.put("success", "true");
+        }else{
+            json.put("success", "false");
         }
         return json;
     }
 
-    public Map<String, String> deleteLecture(String email, String LectureID){
+    public Map<String, String> deleteLecture(String email, String lectureID){
         Map<String, String> json = new HashMap<>();
-        json.put("id", email);
-        try{
-            UserLecture _UserLecture = _UserLectureRepository.findByUserEmailAndLectureID(email, LectureID);
+        json.put("email", email);
+        UserLecture _UserLecture = _UserLectureRepository.findByUserEmailAndLectureID(email, lectureID) ;
+        if(_UserLecture != null){
             _UserLectureRepository.delete(_UserLecture);
             json.put("success", "true");
         }
-        catch (Exception E) {
+        else {
             json.put("success", "false");
         }
         return json;
@@ -113,11 +111,7 @@ public class UserService {
         List<UserLecture> _UL = _UserLectureRepository.findAllByUserEmail(email);
         ArrayList<Lecture> _LAL = new ArrayList<Lecture>();
         for(int i=0; i<_UL.size(); i++){
-            try{
-                _LAL.add(_AllLectureRepository.findByLectureID(_UL.get(i).getLectureId()));
-            }catch (Exception E) {
-                continue;
-            }
+            _LAL.add(_AllLectureRepository.findByLectureID(_UL.get(i).getLectureId()));
         }
         json.put("response", _LAL);
         return json;
@@ -127,7 +121,7 @@ public class UserService {
         Map<String, String> json = new HashMap<>();
         String code = "";
         int[][] d = {{48, 10}, {65, 26}, {97, 26}};
-        for(int i=0;i<12;i++){
+        for(int i=0;i<6;i++){
             int j = (int) (Math.random() * 3);
             code += (char) ((int) (Math.random() * d[j][1] + d[j][0]));
         }
