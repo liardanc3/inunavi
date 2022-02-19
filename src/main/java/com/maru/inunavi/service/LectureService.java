@@ -53,15 +53,15 @@ public class LectureService {
             String line = "";
             line = bufReader.readLine();
             while ((line = bufReader.readLine()) != null) {
-
+                System.out.println(line);
                 // tsv로 읽은 행 데이터 List에 넣어서 통채로 생성자로
                 List<String> csv = new ArrayList<>();
                 StringTokenizer s = new StringTokenizer(line);
 
-                // 학과(부),학년,이수구분,학수번호,교과목명,담당교수,강의실,시간표,수업방법관리,학점
-                for (int i = 1; i <= 12 && s.hasMoreTokens(); i++) {
+                // 학과(부),학년,이수구분,학수번호,교과목명,교과목명(영문),담당교수,강의실,시간표,수업방법관리,수업방법관리(영어),학점
+                for (int i = 1; i <= 14 && s.hasMoreTokens(); i++) {
                     String tmp = s.nextToken("\t");
-                    if(i<=2) continue;
+                    if(i<=2 || i==8 || i==13) continue;
                     csv.add(tmp);
                 }
 

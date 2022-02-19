@@ -1,9 +1,6 @@
 package com.maru.inunavi.entity;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import javax.persistence.*;
 
@@ -18,9 +15,11 @@ public class NodePath {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    //from-to
-    @Column(length = 10, nullable=false)
-    private String Src2dst;
+    @Column(length=1000, nullable = false)
+    private String Query;
+
+    @Column(length=10, nullable = false)
+    private String isArrived;
 
     //dist
     @Column(length = 30, nullable = false)
@@ -39,11 +38,13 @@ public class NodePath {
     private int Steps;
 
     //creator
-    public NodePath(String src2dst, Double dist, String route) {
-        this.Src2dst=src2dst;
+    public NodePath(String Query, String isArrived,Double dist, String route) {
+        this.Query=Query;
+        this.isArrived=isArrived;
         this.Dist=dist;
         this.Route=route;
         this.Steps= (int) (1.65*dist);
         this.Time=Steps/100;
     }
+
 }

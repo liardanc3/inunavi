@@ -3,6 +3,7 @@ package com.maru.inunavi.entity;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.Setter;
 
 import javax.persistence.*;
 import java.util.List;
@@ -40,5 +41,9 @@ public class Navi {
         this.epsg3857 = epsg3857;
         this.epsg4326 = epsg4326;
         this.placeCode = placeCode;
+    }
+
+    public void addNearNode(int nearNode){
+        this.nearNode+=","+nearNode;
     }
 }

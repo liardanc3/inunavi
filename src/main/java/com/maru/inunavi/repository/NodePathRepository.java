@@ -19,8 +19,6 @@ public interface NodePathRepository extends JpaRepository<NodePath, Long> {
     @Query(value = "alter TABLE nodepath AUTO_INCREMENT = 1",nativeQuery = true)
     void deleteINCREMENT();
 
-    @Query("select t from nodepath as t where t.Src2dst= :src2dst")
-    NodePath findBySrc2dst(
-            @Param("src2dst") String src2dst);
-
+    @Query("select t from nodepath as t where t.Query= :query")
+    NodePath findByQuery(String query);
 }

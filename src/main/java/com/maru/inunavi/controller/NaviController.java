@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import org.w3c.dom.Node;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
@@ -37,4 +38,14 @@ public class NaviController {
                                          @RequestParam(value = "endLocation") String endLocation){
         return _NaviService.getRoot(startPlaceCode,endPlaceCode,startLocation,endLocation);
     }
+
+    @GetMapping("getRootLive")
+    @ResponseBody
+    public Map<String, List<NodePath>> getRootLive(@RequestParam(value = "startPlaceCode") String startPlaceCode,
+                                              @RequestParam(value = "endPlaceCode") String endPlaceCode,
+                                              @RequestParam(value = "startLocation") String startLocation,
+                                              @RequestParam(value = "endLocation") String endLocation){
+        return _NaviService.getRoot(startPlaceCode,endPlaceCode,startLocation,endLocation);
+    }
+
 }

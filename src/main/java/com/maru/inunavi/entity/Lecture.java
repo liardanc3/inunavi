@@ -36,7 +36,7 @@ public class Lecture {
     private String lecturename;
 
     // H_담당교수
-    @Column(length = 45, nullable = true)
+    @Column(length = 100, nullable = true)
     private String professor;
 
     // I_강의실(raw)
@@ -54,7 +54,7 @@ public class Lecture {
     private String classtime;
 
     // K_수업방법
-    @Column(length = 45, nullable = true)
+    @Column(length = 100, nullable = true)
     private String how;
 
     // L_학점
