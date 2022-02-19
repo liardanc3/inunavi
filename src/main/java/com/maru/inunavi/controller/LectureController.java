@@ -30,6 +30,12 @@ public class LectureController {
         return _LectureService.updateLecture();
     }
 
+    @GetMapping("getTimeTableInfo")
+    @ResponseBody
+    public HashMap<String,List<LectureService.TimeTableInfo>> getTimeTableInfo(){
+        return _LectureService.getTimeTableInfo();
+    }
+
     @GetMapping("selectLecture")
     @ResponseBody
     public HashMap<String,List<Lecture>> selectLecture(@RequestParam(value = "main_keyword") String main_keyword,

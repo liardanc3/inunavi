@@ -1,5 +1,6 @@
 package com.maru.inunavi.service;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.maru.inunavi.entity.Lecture;
 import com.maru.inunavi.entity.UserLecture;
 import com.maru.inunavi.repository.AllLectureRepository;
@@ -9,9 +10,12 @@ import com.maru.inunavi.repository.UserLectureRepository;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.io.FileUtils;
 import org.apache.tomcat.util.http.fileupload.IOUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
+
 import java.io.*;
+import java.sql.Time;
 import java.util.*;
 
 
@@ -23,6 +27,73 @@ public class LectureService {
     private final UserInfoRepository _UserInfoRepository;
     private final UserLectureRepository _UserLectureRepository;
     private final AllLectureRepository _AllLectureRepository;
+
+    @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
+    public class TimeTableInfo{
+        String year;
+        String semester;
+        String majorArrayString;
+        String CSEArrayString;
+        String categoryListString;
+        public TimeTableInfo(String year,String semester,String majorArrayString,String CSEArrayString, String categoryListString){
+            this.year=year;
+            this.semester=semester;
+            this.majorArrayString=majorArrayString;
+            this.CSEArrayString=CSEArrayString;
+            this.categoryListString=categoryListString;
+        }
+    }
+
+    public HashMap<String, List<TimeTableInfo>> getTimeTableInfo(){
+        System.out.println("here");
+        HashMap<String, List<TimeTableInfo>> retInfo = new HashMap<>();
+        Set<String> _majorSet = new HashSet<>();
+        Set<String> _cseSet = new HashSet<>();
+        Set<String> _categorySet = new HashSet<>();
+        _majorSet.add("전체");
+        _cseSet.add("전체");
+        _categorySet.add("전체");
+
+        List<Lecture> lectureList = new ArrayList<>();
+        lectureList.addAll(_AllLectureRepository.findAll());
+
+        for(int i=0; i<lectureList.size(); i++){
+            Lecture _Lecture = lectureList.get(i);
+            String _majorTmp = _Lecture.getDepartment();
+            String _categoryTmp = _Lecture.getCategory();
+
+            if(!_majorTmp.equals("교양") && !_majorTmp.equals("교직") && !_majorTmp.equals("일선") && !_majorTmp.equals("군사학"))
+                _majorSet.add(_majorTmp);
+            _categorySet.add(_categoryTmp);
+            if(_categoryTmp.equals("교양필수") && !_Lecture.getGrade().equals("전학년") && _Lecture.getDepartment().equals("교양"))
+                _cseSet.add(_Lecture.getLecturename());
+        }
+
+        String major = "";
+        String cse = "";
+        String category = "";
+
+        Iterator<String> it = _majorSet.iterator();
+        while(it.hasNext())
+            major+=it.next()+",";
+        major=major.substring(0,major.length()-1);
+
+        it = _cseSet.iterator();
+        while(it.hasNext())
+            cse+=it.next()+",";
+        cse=cse.substring(0,cse.length()-1);
+
+        it = _categorySet.iterator();
+        while(it.hasNext())
+            category+=it.next()+",";
+        category=category.substring(0,category.length()-1);
+
+        TimeTableInfo _TimeTableInfo = new TimeTableInfo("2022","1",major,cse,category);
+        List<TimeTableInfo> retList = new ArrayList<>();
+        retList.add(_TimeTableInfo);
+        retInfo.put("response",retList);
+        return retInfo;
+    }
 
     public List<Lecture> allLecture(){
         return _AllLectureRepository.findAll();
