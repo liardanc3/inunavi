@@ -37,13 +37,12 @@ public class UserService {
         return _UserInfoRepository.findAll();
     }
 
-    public Map<String, String> resister(String email, String password){
+    public Map<String, String> resister(String email, String password, String major){
         PasswordEncoder passwordencoder = new BCryptPasswordEncoder();
         Map<String, String> json = new HashMap<>();
         json.put("email", email);
-        UserInfo _UserInfo = new UserInfo(email,passwordencoder.encode(password));
         if (_UserInfoRepository.findByEmail(email) == null){
-            _UserInfoRepository.save(_UserInfo);
+            _UserInfoRepository.save(new UserInfo(email,passwordencoder.encode(password), major));
             json.put("success", "true");
         }else{
             json.put("success","false");
@@ -58,13 +57,14 @@ public class UserService {
         UserInfo _UserInfo = _UserInfoRepository.findByEmail(email);
         if (_UserInfo==null) {
             json.put("success", "false");
-            json.put("message", "로그인 실패");
+            json.put("message", "아이디가 틀림");
         }
         else if (!passwordencoder.matches(password, _UserInfo.getPassword())){
             json.put("success", "false");
-            json.put("message", "로그인 실패2");
+            json.put("message", "비밀번호 오류");
         } else {
             json.put("success", "true");
+            json.put("major", _UserInfo.getMajor());
             json.put("message", "로그인 성공");
         }
 
@@ -142,13 +142,26 @@ public class UserService {
 
     }
 
-    public Map<String, String> update(String email, String password){
+    public Map<String, String> updatePassword(String email, String password){
         PasswordEncoder passwordencoder = new BCryptPasswordEncoder();
         Map<String, String> json = new HashMap<>();
         json.put("email", email);
-        UserInfo _UserInfo = new UserInfo(email,passwordencoder.encode(password));
-        if (_UserInfoRepository.findByEmail(email) != null){
-            _UserInfoRepository.save(_UserInfo);
+        UserInfo _UserInfo = _UserInfoRepository.findByEmail(email);
+        if (_UserInfo != null){
+            _UserInfoRepository.save(new UserInfo(email, passwordencoder.encode(password), _UserInfo.getMajor()));
+            json.put("success", "true");
+        }else{
+            json.put("success","false");
+        }
+        return json;
+    }
+
+    public Map<String, String> updateMajor(String email, String major){
+        Map<String, String> json = new HashMap<>();
+        json.put("email", email);
+        UserInfo _UserInfo = _UserInfoRepository.findByEmail(email);
+        if (_UserInfo != null){
+            _UserInfoRepository.save(new UserInfo(email, _UserInfo.getPassword(), major));
             json.put("success", "true");
         }else{
             json.put("success","false");
