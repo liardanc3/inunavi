@@ -20,11 +20,16 @@ public class UserInfo {
     @Column(length = 100, nullable=false)
     private String password;
 
+    // password
+    @Column(length = 50, nullable=false)
+    private String major;
+
 
     // creator
     public UserInfo(){}
-    public UserInfo(String email, String password) {
+    public UserInfo(String email, String password, String major) {
         this.email=email;
         this.password=password;
+        this.major = major;
     }
 }

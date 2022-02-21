@@ -34,7 +34,8 @@ public class UserController {
     public Map<String, String> Resister(HttpServletRequest request) {
         String email = request.getParameter("email");
         String password = request.getParameter("password");
-        return _UserService.resister(email, password);
+        String major = request.getParameter("major");
+        return _UserService.resister(email, password, major);
     }
 
     @RequestMapping(value = "/insert/class", method = RequestMethod.POST)
@@ -93,7 +94,15 @@ public class UserController {
     public Map<String, String> update(HttpServletRequest request) {
         String email = request.getParameter("email");
         String password = request.getParameter("newPassword");
-        return _UserService.update(email, password);
+        return _UserService.updatePassword(email, password);
+    }
+
+    @RequestMapping(value = "/update2", method = RequestMethod.POST)
+    @ResponseBody
+    public Map<String, String> update2(HttpServletRequest request) {
+        String email = request.getParameter("email");
+        String major = request.getParameter("newMajor");
+        return _UserService.updateMajor(email, major);
     }
 
     @RequestMapping(value = "/quit", method = RequestMethod.POST)
