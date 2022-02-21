@@ -25,8 +25,7 @@ public interface UserLectureRepository extends JpaRepository<UserLecture,Long> {
             @Param("lectureId") String lectureId);
 
     @Query("select m from UserLecture as m where m.email= :email")
-    List<UserLecture> findAllByUserEmail(
+    List<UserLecture> findAllByEmail(
             @Param("email") String email);
-
 
 }

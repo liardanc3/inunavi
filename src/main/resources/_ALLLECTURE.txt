@@ -2324,8 +2324,8 @@
 2323	기타	물류학전공(연계)	전학년	전공선택	0008819001	물류데이터분석	Data Analytics in Logistics	신광섭	제14호관 동북아경제·경영-104 강의실(물류대학원)[SO104]	" [SO104:화(7-8A),목(2B-3)]"	오프라인	offline class	3
 2324	기타	물류학전공(연계)	전학년	전공선택	0009545001	글로벌해운경제론	Global Maritime Economics	하민호	제14호관 동북아경제·경영-104 강의실(물류대학원)[SO104]	" [SO104:화(8B-9),목(8B-9)]"	오프라인	offline class	3
 2325	기타	인공지능소프트웨어연계전공	전학년	전공선택	0008868002	인공지능개론	Introduction to Artificial Intelligence	구민석	제7호관 정보기술대학-505 강의실(중)-2[SH505]	" [SH505:수(5B-6),목(2B-3)]"	오프라인	offline class	3
-2326	기타	"MICE,스포츠및관광연계전공"	전학년	전공선택	0010653001	서비스산업의실용적경험	Practical experience in Mice Sports and Tourism	김경미	제14호관 동북아경제·경영-201 컴퓨터실[SO201]	 [SO201:화(야1-2A)(야2B-3)]	오프라인	offline class	3
-2327	기타	"MICE,스포츠및관광연계전공"	전학년	전공선택	0010654001	서비스산업의회계관리	Accounting in Hospitality and Tourism 	이희정	제2호관 교수회관-213 강의실[SA213]	" [SA213:화(5B-6),금(5B-6)]"	오프라인	offline class	3
+2326	기타	MICE·스포츠및관광연계전공	전학년	전공선택	0010653001	서비스산업의실용적경험	Practical experience in Mice Sports and Tourism	김경미	제14호관 동북아경제·경영-201 컴퓨터실[SO201]	 [SO201:화(야1-2A)(야2B-3)]	오프라인	offline class	3
+2327	기타	MICE·스포츠및관광연계전공	전학년	전공선택	0010654001	서비스산업의회계관리	Accounting in Hospitality and Tourism 	이희정	제2호관 교수회관-213 강의실[SA213]	" [SA213:화(5B-6),금(5B-6)]"	오프라인	offline class	3
 2328	기타	국제개발협력연계전공	전학년	전공선택	0008884001	국제개발협력	Introduction to International Development and Cooperation	타오	제14호관 동북아경제·경영-121 세미나실-1[SO121]	" [SO121:목(2B-3),금(2B-3)]"	온라인(동영상+화상)+오프라인	online + offline class	3
 2329	기타	창의적디자인연계전공	전학년	전공선택	0008435001	디자인 및 혁신	Design and innovation	서명원	제16호관 예술체육대학-313A 강의실(소)[SQ313A]	 [SQ313A:월(2)(3)(4)]	오프라인	offline class	3
 2330	기타	창의적디자인연계전공	전학년	전공선택	0008437001	디자인 스튜디오 1 - 실험 디자인	Design studio 1 - experimental design	서명원	제16호관 예술체육대학-313A 강의실(소)[SQ313A]	 [SQ313A:월(6)(7)(8)]	오프라인	offline class	3

@@ -3,6 +3,7 @@ package com.maru.inunavi.service;
 import com.maru.inunavi.entity.Navi;
 import com.maru.inunavi.entity.NodePath;
 import com.maru.inunavi.entity.Place;
+import com.maru.inunavi.entity.UserLecture;
 import com.maru.inunavi.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.io.FileUtils;
@@ -13,6 +14,7 @@ import org.w3c.dom.Node;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import java.io.*;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 @Service
@@ -29,6 +31,82 @@ public class NaviService {
     // 임시로 캐시대신 사용
     private ArrayList<String> epsg4326List = new ArrayList<>();
     private ArrayList<String> placeCodeList = new ArrayList<>();
+
+    public Map<String, String> getNextPlace(String email) {
+        List<UserLecture> userLectureList = _UserLectureRepository.findAllByEmail(email);
+
+        Date today = new Date();
+        SimpleDateFormat dayOfWeek = new SimpleDateFormat("E");
+        SimpleDateFormat hourOfToday = new SimpleDateFormat("HH");
+        SimpleDateFormat minOfToday = new SimpleDateFormat("mm");
+
+        char charDayOfWeek = dayOfWeek.format(today).charAt(0);
+        int intHourOfToday = Integer.parseInt(hourOfToday.format(today));
+        int intMinOfToday = Integer.parseInt(minOfToday.format(today));
+
+        System.out.println(charDayOfWeek+","+intHourOfToday+","+intMinOfToday);
+
+        int nowTime = 0;
+        switch(charDayOfWeek){
+            case '화': nowTime+=48; break;
+            case '수': nowTime+=96; break;
+            case '목': nowTime+=144; break;
+            case '금': nowTime+=192; break;
+            case '토': nowTime+=240; break;
+            default: break;
+        }
+
+        nowTime+=intHourOfToday*2-1;
+        nowTime+=intMinOfToday/30;
+
+        String retLectureId = "";
+        int minTimeGap = 19999;
+        int token = 0;
+        for(int i=0; i<userLectureList.size(); i++){
+            String lectureId = userLectureList.get(i).getLectureId();
+            String lectureTime = _AllLectureRepository.findByLectureID(lectureId).getClasstime();
+            StringTokenizer st = new StringTokenizer(lectureTime);
+
+            int idx = -1;
+            while(st.hasMoreTokens()){
+                idx++;
+                String s = st.nextToken(",");
+                String[] timeRange = s.split("-");
+
+                int start = Integer.parseInt(timeRange[0]);
+
+                if(nowTime <= start && start-nowTime < minTimeGap && start/48 == nowTime/48){
+                    minTimeGap = start-nowTime;
+                    retLectureId = lectureId;
+                    token = idx;
+                }
+            }
+        }
+
+        Map<String, String> retNextPlace = new HashMap<>();
+
+        if(retLectureId.equals("")){
+            retNextPlace.put("success","false");
+            retNextPlace.put("nextPlaceCode","NONE");
+            retNextPlace.put("nextPlaceLocationString","0.0");
+            retNextPlace.put("nextPlaceTitle","NONE");
+        }
+        else{
+            String classRoom = _AllLectureRepository.findByLectureID(retLectureId).getClassroom();
+            String[] tokenedClassRoom = classRoom.split(",");
+            String nextPlaceCode = tokenedClassRoom[token].substring(0,tokenedClassRoom[token].length()-3);
+
+            Place nextPlace = _PlaceRepository.findByPlaceCode(nextPlaceCode);
+
+            String nextPlaceLocation = nextPlace.getEpsg4326();
+            String nextPlaceTitle = nextPlace.getTitle();
+            retNextPlace.put("success","true");
+            retNextPlace.put("nextPlaceCode",nextPlaceCode);
+            retNextPlace.put("nextPlaceLocationString",nextPlaceLocation);
+            retNextPlace.put("nextPlaceTitle",nextPlaceTitle);
+        }
+        return retNextPlace;
+    }
 
     class pair implements Comparable<pair> {
         private double dist;
@@ -318,7 +396,7 @@ public class NaviService {
         return _NaviRepository.findAll();
     }
 
-    public Map<String, List<NodePath>> getRoot(String startPlaceCode, String endPlaceCode, String startLocation, String endLocation){
+    public Map<String, List<NodePath>> getRootLive(String startPlaceCode, String endPlaceCode, String startLocation, String endLocation){
         Map<String, List<NodePath>> retGetPath = new HashMap<>();
         List<NodePath> _retList = new ArrayList<>();
         startPlaceCode = startPlaceCode.substring(1,startPlaceCode.length()-1);

@@ -266,10 +266,10 @@ public class LectureService {
 
             if(!main_keyword.equals("")){
                 if(keyword_option.equals("전체")){
-                    if(!now.getLecturename().contains(main_keyword) && !now.getProfessor().contains(main_keyword) &&
-                            !now.getNumber().contains(main_keyword)) continue;
+                    if(!now.getLecturename().toUpperCase().contains(main_keyword.toUpperCase())
+                            && !now.getProfessor().contains(main_keyword) && !now.getNumber().contains(main_keyword)) continue;
                 }
-                if(keyword_option.equals("과목명") && !now.getLecturename().contains(main_keyword))
+                if(keyword_option.equals("과목명") && !now.getLecturename().toUpperCase().contains(main_keyword.toUpperCase()))
                     continue;
                 else if(keyword_option.equals("교수명") && !now.getProfessor().contains(main_keyword))
                     continue;

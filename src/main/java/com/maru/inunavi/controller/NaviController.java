@@ -30,22 +30,19 @@ public class NaviController {
     @ResponseBody
     public List<Place> updatePlace(){ return _NaviService.updatePlace(); }
 
-    @GetMapping("getRoot")
-    @ResponseBody
-    public Map<String, List<NodePath>> getRoot(@RequestParam(value = "startPlaceCode") String startPlaceCode,
-                                         @RequestParam(value = "endPlaceCode") String endPlaceCode,
-                                         @RequestParam(value = "startLocation") String startLocation,
-                                         @RequestParam(value = "endLocation") String endLocation){
-        return _NaviService.getRoot(startPlaceCode,endPlaceCode,startLocation,endLocation);
-    }
-
     @GetMapping("getRootLive")
     @ResponseBody
     public Map<String, List<NodePath>> getRootLive(@RequestParam(value = "startPlaceCode") String startPlaceCode,
                                               @RequestParam(value = "endPlaceCode") String endPlaceCode,
                                               @RequestParam(value = "startLocation") String startLocation,
                                               @RequestParam(value = "endLocation") String endLocation){
-        return _NaviService.getRoot(startPlaceCode,endPlaceCode,startLocation,endLocation);
+        return _NaviService.getRootLive(startPlaceCode,endPlaceCode,startLocation,endLocation);
+    }
+
+    @PostMapping("getNextPlace")
+    @ResponseBody
+    public Map<String,String> getNextPlace(@RequestParam(value = "email") String email){
+        return _NaviService.getNextPlace(email);
     }
 
 }

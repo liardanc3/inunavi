@@ -108,7 +108,7 @@ public class UserService {
 
     public Map<String, ArrayList<Lecture>> showMyLecture(String email) {
         Map<String, ArrayList<Lecture>> json = new HashMap<>();
-        List<UserLecture> _UL = _UserLectureRepository.findAllByUserEmail(email);
+        List<UserLecture> _UL = _UserLectureRepository.findAllByEmail(email);
         ArrayList<Lecture> _LAL = new ArrayList<Lecture>();
         for(int i=0; i<_UL.size(); i++){
             _LAL.add(_AllLectureRepository.findByLectureID(_UL.get(i).getLectureId()));
