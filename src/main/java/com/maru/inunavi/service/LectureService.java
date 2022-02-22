@@ -45,7 +45,6 @@ public class LectureService {
     }
 
     public HashMap<String, List<TimeTableInfo>> getTimeTableInfo(){
-        System.out.println("here");
         HashMap<String, List<TimeTableInfo>> retInfo = new HashMap<>();
         Set<String> _majorSet = new HashSet<>();
         Set<String> _cseSet = new HashSet<>();
@@ -301,7 +300,8 @@ public class LectureService {
                 else if(tok.charAt(0)=='3') grade_check[3]++;
                 else if(tok.charAt(0)=='4') grade_check[4]++;
             }
-            if(!grade_option.equals("전체") && grade_check[now.getGrade().charAt(0)-'0'] != 1)
+            System.out.println(now.getGrade());
+            if(!grade_option.equals("전체") && (!now.getGrade().equals("전학년")  && grade_check[now.getGrade().charAt(0)-'0'] != 1))
                 continue;
 
             // category_option

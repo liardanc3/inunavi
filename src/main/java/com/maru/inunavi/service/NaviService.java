@@ -1,13 +1,11 @@
 package com.maru.inunavi.service;
 
-import com.maru.inunavi.entity.Navi;
-import com.maru.inunavi.entity.NodePath;
-import com.maru.inunavi.entity.Place;
-import com.maru.inunavi.entity.UserLecture;
+import com.maru.inunavi.entity.*;
 import com.maru.inunavi.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.io.FileUtils;
 import org.apache.tomcat.util.http.fileupload.IOUtils;
+import org.graalvm.compiler.core.common.util.ReversedList;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 import org.w3c.dom.Node;
@@ -108,18 +106,67 @@ public class NaviService {
         return retNextPlace;
     }
 
-    class pair implements Comparable<pair> {
-        private double dist;
-        private int node;
-        pair(double dist, int node){ this.dist=dist; this.node=node;}
-        public double getDist(){ return dist; }
-        public int getNode(){ return node; }
+    public Map<String, List<Map<String,String>>> placeSearchList(String searchKeyword,  String myLocation) {
 
-        @Override
-        public int compareTo(final pair p){
-            if(dist == p.dist) return 1;
-            return Double.compare(dist, p.dist);
+        List<Place> placeList = _PlaceRepository.findAll();
+        List<Navi> naviList = _NaviRepository.findAll();
+        int nowNode = 0;
+        double minDist = 1e9;
+        for(int i=0; i<naviList.size(); i++){
+            double _dist = distanceNode(myLocation,naviList.get(i).getEpsg4326());
+            if(_dist<minDist){
+                nowNode = i+1;
+                minDist = _dist;
+            }
         }
+        List<Place> requestPlaceList = new ArrayList<>();
+
+        for(int i=0; i<placeList.size(); i++){
+            String _title = placeList.get(i).getTitle();
+            String _sort = placeList.get(i).getSort();
+
+            if(_title.contains(searchKeyword) || _sort.contains(searchKeyword)){
+                String _dstPlaceCode = placeList.get(i).getPlaceCode();
+                ArrayList<Integer> _dstNodeNumList = new ArrayList<>();
+
+                for(int j=0; j<naviList.size(); j++){
+                    String _placeCode = naviList.get(j).getPlaceCode();
+                    StringTokenizer st = new StringTokenizer(_placeCode);
+                    while(st.hasMoreTokens()){
+                        String s = st.nextToken(",");
+                        if(s.equals(_dstPlaceCode)){
+                            _dstNodeNumList.add(j+1);
+                            break;
+                        }
+                    }
+                }
+
+                double dist = dijkstraPatial(nowNode,_dstNodeNumList).getDist();
+                Place _Place = placeList.get(i);
+                _Place.setDistance(Double.toString(dist));
+                requestPlaceList.add(_Place);
+            }
+        }
+
+        requestPlaceList.sort(Place::compareTo);
+
+        Map<String, List<Map<String, String>>> retMap = new HashMap<>();
+        List<Map<String,String>> retList = new ArrayList<>();
+        for(int i=0; i<requestPlaceList.size(); i++){
+            Map<String, String> retMapPartial = new HashMap<>();
+            Place retPlacePartial = requestPlaceList.get(i);
+            retMapPartial.put("placeCode",retPlacePartial.getPlaceCode());
+            retMapPartial.put("title",retPlacePartial.getTitle());
+            retMapPartial.put("sort",retPlacePartial.getSort());
+            retMapPartial.put("distance",retPlacePartial.getDistance().split(".")[0]);
+            retMapPartial.put("location",retPlacePartial.getEpsg4326());
+            retMapPartial.put("time",retPlacePartial.getTime());
+            retMapPartial.put("callNum",retPlacePartial.getCallNum());
+            retList.add(retMapPartial);
+        }
+
+        retMap.put("response",retList);
+        return retMap;
     }
 
     private String epsg3857_to_epsg4326(String _epsg3857){
@@ -169,6 +216,19 @@ public class NaviService {
         }
     }
 
+    class pair implements Comparable<pair> {
+        private double dist;
+        private int node;
+        pair(double dist, int node){ this.dist=dist; this.node=node;}
+        public double getDist(){ return dist; }
+        public int getNode(){ return node; }
+
+        @Override
+        public int compareTo(final pair p){
+            if(dist == p.dist) return 1;
+            return Double.compare(dist, p.dist);
+        }
+    }
     private NodePath dijkstraPatial(int src, ArrayList<Integer> dst){
         int len = (int) _NaviRepository.count();
         int idx = 0;

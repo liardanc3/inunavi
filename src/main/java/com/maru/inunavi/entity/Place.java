@@ -11,7 +11,7 @@ import java.util.List;
 @Entity(name="Place")
 @AllArgsConstructor
 @Getter
-public class Place {
+public class Place implements Comparable<Place>{
     public Place(){};
 
     @Id
@@ -60,5 +60,15 @@ public class Place {
         this.time = csv.get(5);
         this.callNum = csv.get(6);
         this.etc = csv.get(7);
+    }
+
+    //setter
+    public void setDistance(String distance){
+        this.distance=distance;
+    }
+
+    @Override
+    public int compareTo(Place target){
+        return (int)(Double.parseDouble(this.distance) - Double.parseDouble(target.distance));
     }
 }

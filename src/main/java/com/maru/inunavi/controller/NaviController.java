@@ -45,4 +45,11 @@ public class NaviController {
         return _NaviService.getNextPlace(email);
     }
 
+    @GetMapping("placeSearchList")
+    @ResponseBody
+    public Map<String, List<Map<String,String>>> placeSearchList(@RequestParam(value = "searchKeyword") String searchKeyword,
+                                                                 @RequestParam(value = "myLocation") String myLocation){
+        return _NaviService.placeSearchList(searchKeyword, myLocation);
+    }
+
 }
