@@ -135,8 +135,8 @@ public class UserService {
         try{
             SimpleMailMessage simpleMailMessage = new SimpleMailMessage();
             simpleMailMessage.setTo(email);
-            simpleMailMessage.setSubject("verify");
-            simpleMailMessage.setText(code);
+            simpleMailMessage.setSubject("inunavi 비밀번호 찾기 인증 코드 입니다.");
+            simpleMailMessage.setText("inunavi 비밀번호 찾기 인증 코드 입니다.\n\n" + code);
             this.javaMailSender.send(simpleMailMessage);
             json.put("success", "true");
             json.put("code", code);
@@ -187,6 +187,7 @@ public class UserService {
             json.put("success","false");
         }else{
             _UserInfoRepository.delete(_UserInfo);
+            _UserLectureRepository.dlelteAllByEmail(email);
             json.put("success","true");
         }
         return json;
