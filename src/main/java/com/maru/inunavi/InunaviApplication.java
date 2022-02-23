@@ -22,7 +22,8 @@ public class InunaviApplication extends SpringBootServletInitializer {
 		return application.sources(InunaviApplication.class);
 	}
 
-	public static void main(String[] args) {
+	public static void main(String[] args)
+	{
 		SpringApplication.run(InunaviApplication.class, args);
 	}
 

@@ -52,4 +52,10 @@ public class NaviController {
         return _NaviService.placeSearchList(searchKeyword, myLocation);
     }
 
+    /*@PostMapping("getOverviewRoot")
+    @ResponseBody
+    public Map<String, List<Map<String, String>>> getOverviewRoot(@RequestParam(value = "email") String email){
+        return _NaviService.getOverviewRoot(email);
+    }
+*/
 }

@@ -3,6 +3,7 @@ package com.maru.inunavi.repository;
 import com.maru.inunavi.entity.Lecture;
 import com.maru.inunavi.entity.NodePath;
 import com.maru.inunavi.service.NaviService;
+import org.hibernate.annotations.SQLDelete;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -21,4 +22,5 @@ public interface NodePathRepository extends JpaRepository<NodePath, Long> {
 
     @Query("select t from nodepath as t where t.Query= :query")
     NodePath findByQuery(String query);
+
 }

@@ -123,7 +123,7 @@ public class LectureService {
             String line = "";
             line = bufReader.readLine();
             while ((line = bufReader.readLine()) != null) {
-                System.out.println(line);
+
                 // tsv로 읽은 행 데이터 List에 넣어서 통채로 생성자로
                 List<String> csv = new ArrayList<>();
                 StringTokenizer s = new StringTokenizer(line);
@@ -300,7 +300,7 @@ public class LectureService {
                 else if(tok.charAt(0)=='3') grade_check[3]++;
                 else if(tok.charAt(0)=='4') grade_check[4]++;
             }
-            System.out.println(now.getGrade());
+
             if(!grade_option.equals("전체") && (!now.getGrade().equals("전학년")  && grade_check[now.getGrade().charAt(0)-'0'] != 1))
                 continue;
 
@@ -331,7 +331,6 @@ public class LectureService {
             if(!score_option.equals("전체") && score_check[Integer.parseInt(now.getPoint())] == 0)
                 continue;
 
-            System.out.println(now.getLecturename());
             result.add(now);
         }
         return result;

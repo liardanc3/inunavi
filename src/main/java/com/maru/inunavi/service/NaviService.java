@@ -42,8 +42,6 @@ public class NaviService {
         int intHourOfToday = Integer.parseInt(hourOfToday.format(today));
         int intMinOfToday = Integer.parseInt(minOfToday.format(today));
 
-        System.out.println(charDayOfWeek+","+intHourOfToday+","+intMinOfToday);
-
         int nowTime = 0;
         switch(charDayOfWeek){
             case '화': nowTime+=48; break;
@@ -107,7 +105,9 @@ public class NaviService {
     }
 
     public Map<String, List<Map<String,String>>> placeSearchList(String searchKeyword,  String myLocation) {
-
+        searchKeyword = searchKeyword.substring(1,searchKeyword.length()-1);
+        myLocation = myLocation.substring(1,myLocation.length()-1);
+        searchKeyword = searchKeyword.replaceAll(" ","");
         List<Place> placeList = _PlaceRepository.findAll();
         List<Navi> naviList = _NaviRepository.findAll();
         int nowNode = 0;
@@ -123,9 +123,11 @@ public class NaviService {
 
         for(int i=0; i<placeList.size(); i++){
             String _title = placeList.get(i).getTitle();
+            _title = _title.replaceAll(" ","");
             String _sort = placeList.get(i).getSort();
+            _sort = _sort.replaceAll(" ","");
 
-            if(_title.contains(searchKeyword) || _sort.contains(searchKeyword)){
+            if(_title.toUpperCase().contains(searchKeyword.toUpperCase()) || _sort.toUpperCase().contains(searchKeyword.toUpperCase())){
                 String _dstPlaceCode = placeList.get(i).getPlaceCode();
                 ArrayList<Integer> _dstNodeNumList = new ArrayList<>();
 
@@ -142,8 +144,9 @@ public class NaviService {
                 }
 
                 double dist = dijkstraPatial(nowNode,_dstNodeNumList).getDist();
+                double distFromStart = distanceNode(myLocation,_NaviRepository.getById(nowNode).getEpsg4326());
                 Place _Place = placeList.get(i);
-                _Place.setDistance(Double.toString(dist));
+                _Place.setDistance(Double.toString(dist+distFromStart));
                 requestPlaceList.add(_Place);
             }
         }
@@ -158,7 +161,12 @@ public class NaviService {
             retMapPartial.put("placeCode",retPlacePartial.getPlaceCode());
             retMapPartial.put("title",retPlacePartial.getTitle());
             retMapPartial.put("sort",retPlacePartial.getSort());
-            retMapPartial.put("distance",retPlacePartial.getDistance().split(".")[0]);
+
+            String _Distance = retPlacePartial.getDistance();
+            StringTokenizer st = new StringTokenizer(_Distance);
+            String s = st.nextToken(".");
+            retMapPartial.put("distance",s);
+
             retMapPartial.put("location",retPlacePartial.getEpsg4326());
             retMapPartial.put("time",retPlacePartial.getTime());
             retMapPartial.put("callNum",retPlacePartial.getCallNum());
@@ -230,6 +238,19 @@ public class NaviService {
         }
     }
     private NodePath dijkstraPatial(int src, ArrayList<Integer> dst){
+        List<Navi> tmp = new ArrayList<>();
+        if(epsg4326List.isEmpty()){
+            if(tmp.isEmpty())
+                tmp.addAll(_NaviRepository.findAll());
+            for(int i=0; i<tmp.size(); i++)
+                epsg4326List.add(tmp.get(i).getEpsg4326());
+        }
+        if(placeCodeList.isEmpty()){
+            if(tmp.isEmpty())
+                tmp.addAll(_NaviRepository.findAll());
+            for(int i=0; i<tmp.size(); i++)
+                placeCodeList.add(tmp.get(i).getPlaceCode());
+        }
         int len = (int) _NaviRepository.count();
         int idx = 0;
         int[] pathTrace = new int[len+2];
@@ -290,6 +311,7 @@ public class NaviService {
             path += st.peek()+",";
             st.pop();
         }
+
         path = path.substring(0,path.length()-1);
         String _isArrived = dist<5 ? "true" : "false";
         NodePath _NodePath = new NodePath("",_isArrived,dist,path);
@@ -440,9 +462,9 @@ public class NaviService {
 
         List<Navi> naviList = new ArrayList<>();
         int len = placeCode.size();
-        for(int i=1; i<len; i++){
+        for(int i=1; i<=len; i++){
             String _nearNode = "";
-            for(int j=1; j<len; j++){
+            for(int j=1; j<=len; j++){
                 if(visited[i][j]==1)
                     _nearNode+=j+",";
             }
@@ -652,5 +674,186 @@ public class NaviService {
         return retGetPath;
     }
 
+    public Map<String, List<Map<String, String>>> getOverviewRoot(String email) {
+        Map<String, List<Map<String,String>>> retOverview = new HashMap<>();
+        List<Map<String,String>> retList = new ArrayList<>();
+        // 유저 수업정보 저장
+        List<UserLecture> userLectureList = _UserLectureRepository.findAllByEmail(email);
+        String[] placeCodeArrByTime = new String[336];
+        String[] lectureNameArrByTime = new String[336];
+        String[] lectureTimeArrByTime = new String[336];
 
+        int[] dayCheck = new int[7];
+        for(int i=0; i<userLectureList.size(); i++){
+            String lectureID = userLectureList.get(i).getLectureId();
+            Lecture _Lecture = _AllLectureRepository.findByLectureID(lectureID);
+
+            int idx = -1;
+
+            String classRoom = _Lecture.getClassroom();
+            String classTime = _Lecture.getClasstime();
+
+            StringTokenizer stRoom = new StringTokenizer(classRoom);
+            StringTokenizer stTime = new StringTokenizer(classTime);
+            while(stRoom.hasMoreTokens() && stTime.hasMoreTokens()){
+                idx++;
+
+                // SM
+                String sRoom = stRoom.nextToken(",");
+                sRoom = sRoom.substring(0,sRoom.length()-3);
+
+                // 43
+                int sTime = Integer.parseInt(stTime.nextToken(",").split("-")[0]);
+
+                // 요일푸시
+                dayCheck[sTime/48] = 1;
+                // placeCode 푸시
+                placeCodeArrByTime[sTime] = sRoom;
+                // lectureName 푸시
+                lectureNameArrByTime[sTime] = _Lecture.getLecturename();
+
+                // lectureTime 푸시
+                String dayOfWeek = "";
+                switch(sTime/48){
+                    case 0: dayOfWeek = "월요일"; break;
+                    case 1: dayOfWeek = "화요일"; break;
+                    case 2: dayOfWeek = "수요일"; break;
+                    case 3: dayOfWeek = "목요일"; break;
+                    case 4: dayOfWeek = "금요일"; break;
+                    case 5: dayOfWeek = "토요일"; break;
+                    case 6: dayOfWeek = "일요일"; break;
+                    default: break;
+                }
+                int ssTime = sTime;
+                String timeString = "";
+                String amORpm = "";
+                amORpm = sTime >= 26 ? "PM" : "AM";
+                if(amORpm.equals("PM"))
+                    ssTime -= 24;
+                int hourTmp = ssTime%48;
+                if(hourTmp <= 19) timeString+="0";
+                timeString += Integer.toString(ssTime/2);
+                String minString = "";
+                minString = ssTime%2==0 ? ":00" : ":30";
+                String lectureTime = dayOfWeek + " " + timeString+minString + " " + amORpm;
+                lectureTimeArrByTime[sTime] = lectureTime;
+            }
+        }
+
+        // 유저 수업정보 시간순 정렬(분리해서)
+
+        ArrayList<Integer> correctTime = new ArrayList<>();
+        for(int i=0; i<336; i++){
+            int dayOfWeek = i/48;
+            int dayOfWeekStart = i%48;
+            if(dayOfWeekStart==0){
+                // 해당요일 수업없으면 스킵
+                if(dayCheck[dayOfWeek]==0){
+                    i+=47;
+                    continue;
+                }
+                correctTime.add(i);
+            }
+            else{
+                correctTime.add(i);
+            }
+        }
+
+        for(int i=0; i<correctTime.size()-1; i++){
+            int nowTime = correctTime.get(i);
+            int nextTime = correctTime.get(i+1);
+            if(nextTime/48 != nowTime/48) continue;
+            Map<String, String> retMap = new HashMap<>();
+            if(nowTime%48==0){
+
+                String nextPlaceCode = placeCodeArrByTime[correctTime.get(i+1)];
+                List<Navi> naviOfPlaceCode = _NaviRepository.findAllByPlaceCode(nextPlaceCode);
+                ArrayList<Integer> dstNodeNumList = new ArrayList<>();
+                for(int j=0; j<naviOfPlaceCode.size(); j++)
+                    dstNodeNumList.add(naviOfPlaceCode.get(j).getId());
+
+                Double minDist = 1e9;
+                NodePath minNodePath;
+
+                NodePath _NodePath = dijkstraPatial(252,dstNodeNumList);
+                if(_NodePath.getDist() < minDist){
+                    minDist = _NodePath.getDist();
+                    minNodePath=_NodePath;
+                }
+                _NodePath = dijkstraPatial(455,dstNodeNumList);
+                if(_NodePath.getDist() < minDist){
+                    minDist = _NodePath.getDist();
+                    minNodePath=_NodePath;
+                }
+                _NodePath = dijkstraPatial(17,dstNodeNumList);
+                if(_NodePath.getDist() < minDist){
+                    minDist = _NodePath.getDist();
+                    minNodePath=_NodePath;
+                }
+
+                String startLectureName="";
+                String endLectureName = lectureNameArrByTime[nextTime];
+                if(_NodePath.getId()==252)
+                    startLectureName = "인천대학교 공과대학(버스정류장)";
+                if(_NodePath.getId()==455)
+                    startLectureName = "인천대학교 자연과학대학(버스정류장)";
+                if(_NodePath.getId()==17)
+                    startLectureName = "인천대학교 정문(버스정류장)";
+                String endLectureTime = lectureTimeArrByTime[nextTime];
+                int totalTime = _NodePath.getTime();
+                double distance = _NodePath.getDist();
+                String directionString = _NodePath.getRoute();
+
+                retMap.put("startLectureName",startLectureName);
+                retMap.put("endLectureName",endLectureName);
+                retMap.put("endLectureTime",endLectureTime);
+                retMap.put("totalTime",Integer.toString(totalTime));
+                retMap.put("distance",Double.toString(distance));
+                retMap.put("directionString",directionString);
+
+                retList.add(retMap);
+            }
+            else{
+                String nowPlaceCode = placeCodeArrByTime[nowTime];
+                String nextPlaceCode = placeCodeArrByTime[nextTime];
+                List<Navi> nowNaviList = _NaviRepository.findAllByPlaceCode(nowPlaceCode);
+                List<Navi> nextNaviList = _NaviRepository.findAllByPlaceCode(nextPlaceCode);
+                ArrayList<Integer> srcNodeNumList = new ArrayList<>();
+                ArrayList<Integer> dstNodeNumList = new ArrayList<>();
+                for(int j=0; j<nowNaviList.size(); j++)
+                    srcNodeNumList.add(nowNaviList.get(j).getId());
+                for(int j=0; j<nextNaviList.size(); j++)
+                    dstNodeNumList.add(nextNaviList.get(j).getId());
+
+                Double minDist = 1e9;
+                NodePath minNodePath = null;
+                for(int j=0; j<srcNodeNumList.size(); j++){
+                    NodePath _NodePath = dijkstraPatial(srcNodeNumList.get(j),dstNodeNumList);
+                    double dist = _NodePath.getDist();
+                    if(dist < minDist){
+                        minDist = dist;
+                        minNodePath = _NodePath;
+                    }
+                }
+
+                String startLectureName=lectureNameArrByTime[nowTime];
+                String endLectureName = lectureNameArrByTime[nextTime];
+                String endLectureTime = lectureTimeArrByTime[nextTime];
+                int totalTime = minNodePath.getTime();
+                double distance = minNodePath.getDist();
+                String directionString = minNodePath.getRoute();
+
+                retMap.put("startLectureName",startLectureName);
+                retMap.put("endLectureName",endLectureName);
+                retMap.put("endLectureTime",endLectureTime);
+                retMap.put("totalTime",Integer.toString(totalTime));
+                retMap.put("distance",Double.toString(distance));
+                retMap.put("directionString",directionString);
+
+                retList.add(retMap);
+            }
+        }
+        retOverview.put("response",retList);
+        return retOverview;
+    }
 }
