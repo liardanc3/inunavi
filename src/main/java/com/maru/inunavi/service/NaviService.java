@@ -80,7 +80,7 @@ public class NaviService {
         }
 
         Map<String, String> retNextPlace = new HashMap<>();
-        System.out.println(nowTime);
+
         if(retLectureId.equals("")){
             retNextPlace.put("success","false");
             retNextPlace.put("nextPlaceCode","NONE");
@@ -283,9 +283,7 @@ public class NaviService {
         }
     }
     private NodePath dijkstraPatial(int src, ArrayList<Integer> dst){
-        System.out.println(src);
-        for(int i=0; i<dst.size(); i++)
-            System.out.println("dst : "+ dst.get(i));
+
         List<Navi> tmp = new ArrayList<>();
         if(epsg4326List.isEmpty()){
             if(tmp.isEmpty())
@@ -753,7 +751,6 @@ public class NaviService {
                 // 43
                 StringTokenizer st = new StringTokenizer(stTime.nextToken(","));
                 int sTime = Integer.parseInt(st.nextToken("-"));
-                System.out.println("stime : " + sTime);
 
                 // 요일푸시
                 dayCheck[sTime/48] = 1;
@@ -811,20 +808,16 @@ public class NaviService {
             }
         }
 
-        for(int i=0; i<correctTime.size(); i++)
-            System.out.println("correctTime"+ ", "+correctTime.get(i));
-
         for(int i=0; i<correctTime.size()-1; i++){
             int nowTime = correctTime.get(i);
             int nextTime = correctTime.get(i+1);
-            System.out.println("nowTime = "+nowTime);
-            System.out.println("nextTime = "+nextTime);
+
             if(nextTime/48 != nowTime/48) continue;
             Map<String, String> retMap = new HashMap<>();
             if(nowTime%48==0){
 
                 String nextPlaceCode = placeCodeArrByTime[nextTime];
-                System.out.println("nextPlaceCode = "+nextPlaceCode);
+
                 List<Navi> naviOfPlaceCode = _NaviRepository.findAllByPlaceCode(nextPlaceCode);
                 ArrayList<Integer> dstNodeNumList = new ArrayList<>();
                 for(int j=0; j<naviOfPlaceCode.size(); j++)
@@ -860,7 +853,6 @@ public class NaviService {
                 if(minNodeNum==17)
                     startLectureName = "정문(버스정류장)";
 
-                System.out.println("startLectureName"+"="+startLectureName);
                 String endLectureTime = lectureTimeArrByTime[nextTime];
                 int totalTime = _NodePath.getTime();
                 double distance = _NodePath.getDist();
