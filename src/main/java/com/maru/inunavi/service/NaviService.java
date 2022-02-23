@@ -224,6 +224,43 @@ public class NaviService {
         }
     }
 
+    public Map<String, String> getAnalysisResult(String email) {
+        Map<String, List<Map<String, String>>> userOverviewRoot = getOverviewRoot(email);
+        Map<String, String> retMap = new HashMap<>();
+        double totalDistance = 0.0;
+        for(int i=0; i<userOverviewRoot.get("response").size(); i++){
+            String distance = userOverviewRoot.get("response").get(i).get("distance");
+            totalDistance += Double.parseDouble(distance);
+        }
+        int tightnessPercentage = 0;
+        int distancePercentage = (int)totalDistance/1000;
+        int[] timeArr = new int[336];
+        List<UserLecture> userLectureList = _UserLectureRepository.findAllByEmail(email);
+        List<Lecture> lectureList = new ArrayList<>();
+        for(int i=0; i<userLectureList.size(); i++){
+            String lectureID = userLectureList.get(i).getLectureId();
+            Lecture _Lecture = _AllLectureRepository.findByLectureID(lectureID);
+            String classTime = _Lecture.getClasstime();
+            StringTokenizer st = new StringTokenizer(classTime);
+            while(st.hasMoreTokens()) {
+                String start2end = st.nextToken(",");
+                String[] timeTmp = start2end.split("-");
+                int start = Integer.parseInt(timeTmp[0]);
+                int end = Integer.parseInt(timeTmp[1]);
+                for (int j = start; j < end; j++)
+                    timeArr[j] = 1;
+            }
+        }
+        for(int i=1; i<335; i++){
+            if(timeArr[i-1]==1 && timeArr[i+1]==1 && timeArr[i]==0)
+                tightnessPercentage+=15;
+        }
+        retMap.put("distancePercentage",Integer.toString(distancePercentage));
+        retMap.put("tightnessPercentage",Integer.toString(tightnessPercentage));
+        retMap.put("totalDistance",Double.toString(totalDistance));
+        return retMap;
+    }
+
     class pair implements Comparable<pair> {
         private double dist;
         private int node;
