@@ -28,4 +28,8 @@ public interface UserLectureRepository extends JpaRepository<UserLecture,Long> {
     List<UserLecture> findAllByEmail(
             @Param("email") String email);
 
+    @Query("delete from UserLecture as m where m.email= :email")
+    List<UserLecture> dlelteAllByEmail(
+            @Param("email") String email);
+
 }
