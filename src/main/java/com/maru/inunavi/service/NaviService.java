@@ -5,12 +5,9 @@ import com.maru.inunavi.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.io.FileUtils;
 import org.apache.tomcat.util.http.fileupload.IOUtils;
-import org.graalvm.compiler.core.common.util.ReversedList;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
-import org.w3c.dom.Node;
 
-import javax.persistence.criteria.CriteriaBuilder;
 import java.io.*;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -30,245 +27,6 @@ public class NaviService {
     private ArrayList<String> epsg4326List = new ArrayList<>();
     private ArrayList<String> placeCodeList = new ArrayList<>();
 
-    public Map<String, String> getNextPlace(String email) {
-        List<UserLecture> userLectureList = _UserLectureRepository.findAllByEmail(email);
-
-        Date today = new Date();
-        SimpleDateFormat dayOfWeek = new SimpleDateFormat("E");
-        SimpleDateFormat hourOfToday = new SimpleDateFormat("HH");
-        SimpleDateFormat minOfToday = new SimpleDateFormat("mm");
-
-        char charDayOfWeek = dayOfWeek.format(today).charAt(0);
-        int intHourOfToday = Integer.parseInt(hourOfToday.format(today));
-        int intMinOfToday = Integer.parseInt(minOfToday.format(today));
-
-        int nowTime = 0;
-        switch(charDayOfWeek){
-            case '화': nowTime+=48; break;
-            case '수': nowTime+=96; break;
-            case '목': nowTime+=144; break;
-            case '금': nowTime+=192; break;
-            case '토': nowTime+=240; break;
-            default: break;
-        }
-
-        nowTime+=intHourOfToday*2;
-        nowTime+=intMinOfToday/30;
-
-        String retLectureId = "";
-        int minTimeGap = 19999;
-        int token = 0;
-        for(int i=0; i<userLectureList.size(); i++){
-            String lectureId = userLectureList.get(i).getLectureId();
-            String lectureTime = _AllLectureRepository.findByLectureID(lectureId).getClasstime();
-            StringTokenizer st = new StringTokenizer(lectureTime);
-
-            int idx = -1;
-            while(st.hasMoreTokens()){
-                idx++;
-                String s = st.nextToken(",");
-                String[] timeRange = s.split("-");
-
-                int start = Integer.parseInt(timeRange[0]);
-
-                if(nowTime <= start && start-nowTime < minTimeGap && start/48 == nowTime/48){
-                    minTimeGap = start-nowTime;
-                    retLectureId = lectureId;
-                    token = idx;
-                }
-            }
-        }
-
-        Map<String, String> retNextPlace = new HashMap<>();
-
-        if(retLectureId.equals("")){
-            retNextPlace.put("success","false");
-            retNextPlace.put("nextPlaceCode","NONE");
-            retNextPlace.put("nextPlaceLocationString","0.0");
-            retNextPlace.put("nextPlaceTitle","NONE");
-        }
-        else{
-            String classRoom = _AllLectureRepository.findByLectureID(retLectureId).getClassroom();
-            String[] tokenedClassRoom = classRoom.split(",");
-            String nextPlaceCode = tokenedClassRoom[token].substring(0,tokenedClassRoom[token].length()-3);
-
-            Place nextPlace = _PlaceRepository.findByPlaceCode(nextPlaceCode);
-
-            String nextPlaceLocation = nextPlace.getEpsg4326();
-            String nextPlaceTitle = nextPlace.getTitle();
-            retNextPlace.put("success","true");
-            retNextPlace.put("nextPlaceCode",nextPlaceCode);
-            retNextPlace.put("nextPlaceLocationString",nextPlaceLocation);
-            retNextPlace.put("nextPlaceTitle",nextPlaceTitle);
-        }
-        return retNextPlace;
-    }
-
-    public Map<String, List<Map<String,String>>> placeSearchList(String searchKeyword,  String myLocation) {
-        searchKeyword = searchKeyword.substring(1,searchKeyword.length()-1);
-        myLocation = myLocation.substring(1,myLocation.length()-1);
-        searchKeyword = searchKeyword.replaceAll(" ","");
-        List<Place> placeList = _PlaceRepository.findAll();
-        List<Navi> naviList = _NaviRepository.findAll();
-        int nowNode = 0;
-        double minDist = 1e9;
-        for(int i=0; i<naviList.size(); i++){
-            double _dist = distanceNode(myLocation,naviList.get(i).getEpsg4326());
-            if(_dist<minDist){
-                nowNode = i+1;
-                minDist = _dist;
-            }
-        }
-        List<Place> requestPlaceList = new ArrayList<>();
-
-        for(int i=0; i<placeList.size(); i++){
-            String _title = placeList.get(i).getTitle();
-            _title = _title.replaceAll(" ","");
-            String _sort = placeList.get(i).getSort();
-            _sort = _sort.replaceAll(" ","");
-
-            if(_title.toUpperCase().contains(searchKeyword.toUpperCase()) || _sort.toUpperCase().contains(searchKeyword.toUpperCase())){
-                String _dstPlaceCode = placeList.get(i).getPlaceCode();
-                ArrayList<Integer> _dstNodeNumList = new ArrayList<>();
-
-                for(int j=0; j<naviList.size(); j++){
-                    String _placeCode = naviList.get(j).getPlaceCode();
-                    StringTokenizer st = new StringTokenizer(_placeCode);
-                    while(st.hasMoreTokens()){
-                        String s = st.nextToken(",");
-                        if(s.equals(_dstPlaceCode)){
-                            _dstNodeNumList.add(j+1);
-                            break;
-                        }
-                    }
-                }
-
-                double dist = dijkstraPatial(nowNode,_dstNodeNumList).getDist();
-                double distFromStart = distanceNode(myLocation,_NaviRepository.getById(nowNode).getEpsg4326());
-                Place _Place = placeList.get(i);
-                _Place.setDistance(Double.toString(dist+distFromStart));
-                requestPlaceList.add(_Place);
-            }
-        }
-
-        requestPlaceList.sort(Place::compareTo);
-
-        Map<String, List<Map<String, String>>> retMap = new HashMap<>();
-        List<Map<String,String>> retList = new ArrayList<>();
-        for(int i=0; i<requestPlaceList.size(); i++){
-            Map<String, String> retMapPartial = new HashMap<>();
-            Place retPlacePartial = requestPlaceList.get(i);
-            retMapPartial.put("placeCode",retPlacePartial.getPlaceCode());
-            retMapPartial.put("title",retPlacePartial.getTitle());
-            retMapPartial.put("sort",retPlacePartial.getSort());
-
-            String _Distance = retPlacePartial.getDistance();
-            StringTokenizer st = new StringTokenizer(_Distance);
-            String s = st.nextToken(".");
-            retMapPartial.put("distance",s);
-
-            retMapPartial.put("location",retPlacePartial.getEpsg4326());
-            retMapPartial.put("time",retPlacePartial.getTime());
-            retMapPartial.put("callNum",retPlacePartial.getCallNum());
-            retList.add(retMapPartial);
-        }
-
-        retMap.put("response",retList);
-        return retMap;
-    }
-
-    private String epsg3857_to_epsg4326(String _epsg3857){
-        StringTokenizer s = new StringTokenizer(_epsg3857);
-
-        String sX = s.nextToken(",");
-        String sY = s.nextToken(",");
-
-        double X = Double.parseDouble(sX);
-        double Y = Double.parseDouble(sY);
-
-        double E = 2.7182818284;
-        double PARAM = 20037508.34;
-
-        double LO = (X * 180) / PARAM;
-        double LA = Y / (PARAM / 180);
-
-        double EXPONENT = (Math.PI / 180) * LA;
-
-        LA = Math.atan(Math.pow(E,EXPONENT));
-        LA = LA / (Math.PI / 360);
-        LA = LA - 90;
-
-        String sLA = Double.toString(LA);
-        String SLO = Double.toString(LO);
-
-        return sLA+", "+SLO;
-    }
-
-    private double distanceNode(String _src, String _dst){
-        try{
-            StringTokenizer s = new StringTokenizer(_src);
-            StringTokenizer d = new StringTokenizer(_dst);
-            double lat1 = Double.parseDouble(s.nextToken(","));
-            double lng1 = Double.parseDouble(s.nextToken(","));
-            double lat2 = Double.parseDouble(d.nextToken(","));
-            double lng2 = Double.parseDouble(d.nextToken(","));
-            double radius = 6371.8;
-            double toRadian = Math.PI / 180;
-            double DLa = (lat2 - lat1) * toRadian;
-            double DLo = (lng2 - lng1) * toRadian;
-            double a = Math.sin(DLa/2) * Math.sin(DLa/2) + Math.cos(lat1*toRadian) * Math.cos(lat2*toRadian) * Math.sin(DLo/2) * Math.sin(DLo/2);
-            double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-            return (radius * c) * 1000;
-        }catch (Exception e){
-            return -1;
-        }
-    }
-
-    public Map<String, String> getAnalysisResult(String email) {
-        Map<String, List<Map<String, String>>> userOverviewRoot = getOverviewRoot(email);
-        Map<String, String> retMap = new HashMap<>();
-        double totalDistance = 0.0;
-        for(int i=0; i<userOverviewRoot.get("response").size(); i++){
-            String distance = userOverviewRoot.get("response").get(i).get("distance");
-            totalDistance += Double.parseDouble(distance);
-        }
-        int tightnessPercentage = 0;
-        int distancePercentage = (int)totalDistance/1000;
-        int[] timeArr = new int[336];
-        List<UserLecture> userLectureList = _UserLectureRepository.findAllByEmail(email);
-        if(userLectureList.isEmpty()){
-            retMap.put("success","false");
-            retMap.put("distancePercentage","0");
-            retMap.put("tightnessPercentage","0");
-            retMap.put("totalDistance","0");
-            return retMap;
-        }
-        List<Lecture> lectureList = new ArrayList<>();
-        for(int i=0; i<userLectureList.size(); i++){
-            String lectureID = userLectureList.get(i).getLectureId();
-            Lecture _Lecture = _AllLectureRepository.findByLectureID(lectureID);
-            String classTime = _Lecture.getClasstime();
-            StringTokenizer st = new StringTokenizer(classTime);
-            while(st.hasMoreTokens()) {
-                String start2end = st.nextToken(",");
-                String[] timeTmp = start2end.split("-");
-                int start = Integer.parseInt(timeTmp[0]);
-                int end = Integer.parseInt(timeTmp[1]);
-                for (int j = start; j < end; j++)
-                    timeArr[j] = 1;
-            }
-        }
-        for(int i=1; i<335; i++){
-            if(timeArr[i-1]==1 && timeArr[i+1]==1 && timeArr[i]==0)
-                tightnessPercentage+=15;
-        }
-        retMap.put("success","true");
-        retMap.put("distancePercentage",Integer.toString(distancePercentage));
-        retMap.put("tightnessPercentage",Integer.toString(tightnessPercentage));
-        retMap.put("totalDistance",Double.toString(totalDistance));
-        return retMap;
-    }
-
     class pair implements Comparable<pair> {
         private double dist;
         private int node;
@@ -282,7 +40,7 @@ public class NaviService {
             return Double.compare(dist, p.dist);
         }
     }
-    private NodePath dijkstraPatial(int src, ArrayList<Integer> dst){
+    private NodePath dijkstraPartial(int src, ArrayList<Integer> dst){
 
         List<Navi> tmp = new ArrayList<>();
         if(epsg4326List.isEmpty()){
@@ -308,7 +66,7 @@ public class NaviService {
         distArray[src]=0.f;
         PriorityQueue<pair> pq = new PriorityQueue<>();
         Stack<String> st = new Stack<>();
-        pq.add(new pair(0,src));
+        pq.add(new pair(0, src));
         while(!pq.isEmpty()){
             double dist = pq.peek().getDist();
             int now = pq.peek().getNode();
@@ -340,7 +98,7 @@ public class NaviService {
                 if(dist+_dist < distArray[next]){
                     pathTrace[next]=now;
                     distArray[next]=dist+_dist;
-                    pq.add(new pair(dist+_dist,next));
+                    pq.add(new pair(dist + _dist, next));
                 }
             }
         }
@@ -359,41 +117,55 @@ public class NaviService {
         }
 
         path = path.substring(0,path.length()-1);
-        String _isArrived = dist<5 ? "true" : "false";
+        String _isArrived = dist<15 ? "true" : "false";
         NodePath _NodePath = new NodePath("",_isArrived,dist,path);
         return _NodePath;
     }
+    private String epsg3857_to_epsg4326(String _epsg3857){
+        StringTokenizer s = new StringTokenizer(_epsg3857);
 
-    // 폐기
-    private boolean dijkstraOverall(ArrayList<ArrayList<Integer>> AL){
+        String sX = s.nextToken(",");
+        String sY = s.nextToken(",");
+
+        double X = Double.parseDouble(sX);
+        double Y = Double.parseDouble(sY);
+
+        double E = 2.7182818284;
+        double PARAM = 20037508.34;
+
+        double LO = (X * 180) / PARAM;
+        double LA = Y / (PARAM / 180);
+
+        double EXPONENT = (Math.PI / 180) * LA;
+
+        LA = Math.atan(Math.pow(E,EXPONENT));
+        LA = LA / (Math.PI / 360);
+        LA = LA - 90;
+
+        String sLA = Double.toString(LA);
+        String SLO = Double.toString(LO);
+
+        return sLA+", "+SLO;
+    }
+    private double distanceNode(String _src, String _dst){
         try{
-            System.out.println("start dijkstraOverall(~)");
-            _NodePathRepository.deleteAll();
-            _NodePathRepository.deleteINCREMENT();
-            int len = (int)_NaviRepository.count();
-            ArrayList<NodePath> _NAL = new ArrayList<>();
-            for(int i=1; i<=len; i++) {
-                for(int j=1; j<=len; j++){
-                    if(i==j) continue;
-                    //_NAL.add(dijkstraPatial(i,j,AL,len));
-                    //_NodePathRepository.save(dijkstraPatial(i,j,AL,len));
-                }
-                // log
-                if(i==1 || i==len || i%50==0)
-                    System.out.println("Dijkstra from "+i+" is Done.");
-            }
-            //log
-            System.out.println("Dijkstra all is Done and start SaveAll");
-            _NodePathRepository.saveAll(_NAL);
-            //log
-            System.out.println("_NodePathRepository.saveAll is Done");
-            return true;
-        }catch (Exception e) {
-            e.printStackTrace();
-            return false;
+            StringTokenizer s = new StringTokenizer(_src);
+            StringTokenizer d = new StringTokenizer(_dst);
+            double lat1 = Double.parseDouble(s.nextToken(","));
+            double lng1 = Double.parseDouble(s.nextToken(","));
+            double lat2 = Double.parseDouble(d.nextToken(","));
+            double lng2 = Double.parseDouble(d.nextToken(","));
+            double radius = 6371.8;
+            double toRadian = Math.PI / 180;
+            double DLa = (lat2 - lat1) * toRadian;
+            double DLo = (lng2 - lng1) * toRadian;
+            double a = Math.sin(DLa/2) * Math.sin(DLa/2) + Math.cos(lat1*toRadian) * Math.cos(lat2*toRadian) * Math.sin(DLo/2) * Math.sin(DLo/2);
+            double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+            return (radius * c) * 1000;
+        }catch (Exception e){
+            return -1;
         }
     }
-
     public List<Place> updatePlace(){
 
         _PlaceRepository.deleteAll();
@@ -438,7 +210,6 @@ public class NaviService {
         _PlaceRepository.saveAll(PL);
         return _PlaceRepository.findAll();
     }
-
     public List<Navi> updateNavi() {
 
         _NaviRepository.deleteAll();
@@ -524,6 +295,79 @@ public class NaviService {
         return _NaviRepository.findAll();
     }
 
+    public Map<String, List<Map<String,String>>> placeSearchList(String searchKeyword,  String myLocation) {
+        searchKeyword = searchKeyword.substring(1,searchKeyword.length()-1);
+        myLocation = myLocation.substring(1,myLocation.length()-1);
+        searchKeyword = searchKeyword.replaceAll(" ","");
+        List<Place> placeList = _PlaceRepository.findAll();
+        List<Navi> naviList = _NaviRepository.findAll();
+        int nowNode = 0;
+        double minDist = 1e9;
+        for(int i=0; i<naviList.size(); i++){
+            double _dist = distanceNode(myLocation,naviList.get(i).getEpsg4326());
+            if(_dist<minDist){
+                nowNode = i+1;
+                minDist = _dist;
+            }
+        }
+        List<Place> requestPlaceList = new ArrayList<>();
+
+        for(int i=0; i<placeList.size(); i++){
+            String _title = placeList.get(i).getTitle();
+            _title = _title.replaceAll(" ","");
+            String _sort = placeList.get(i).getSort();
+            _sort = _sort.replaceAll(" ","");
+
+            if(_title.toUpperCase().contains(searchKeyword.toUpperCase()) || _sort.toUpperCase().contains(searchKeyword.toUpperCase())){
+                String _dstPlaceCode = placeList.get(i).getPlaceCode();
+                ArrayList<Integer> _dstNodeNumList = new ArrayList<>();
+
+                for(int j=0; j<naviList.size(); j++){
+                    String _placeCode = naviList.get(j).getPlaceCode();
+                    StringTokenizer st = new StringTokenizer(_placeCode);
+                    while(st.hasMoreTokens()){
+                        String s = st.nextToken(",");
+                        if(s.equals(_dstPlaceCode)){
+                            _dstNodeNumList.add(j+1);
+                            break;
+                        }
+                    }
+                }
+
+                double dist = dijkstraPartial(nowNode,_dstNodeNumList).getDist();
+                double distFromStart = distanceNode(myLocation,_NaviRepository.getById(nowNode).getEpsg4326());
+                Place _Place = placeList.get(i);
+                _Place.setDistance(Double.toString(dist+distFromStart));
+                requestPlaceList.add(_Place);
+            }
+        }
+
+        requestPlaceList.sort(Place::compareTo);
+
+        Map<String, List<Map<String, String>>> retMap = new HashMap<>();
+        List<Map<String,String>> retList = new ArrayList<>();
+        for(int i=0; i<requestPlaceList.size(); i++){
+            Map<String, String> retMapPartial = new HashMap<>();
+            Place retPlacePartial = requestPlaceList.get(i);
+            retMapPartial.put("placeCode",retPlacePartial.getPlaceCode());
+            retMapPartial.put("title",retPlacePartial.getTitle());
+            retMapPartial.put("sort",retPlacePartial.getSort());
+
+            String _Distance = retPlacePartial.getDistance();
+            StringTokenizer st = new StringTokenizer(_Distance);
+            String s = st.nextToken(".");
+            retMapPartial.put("distance",s);
+
+            retMapPartial.put("location",retPlacePartial.getEpsg4326());
+            retMapPartial.put("time",retPlacePartial.getTime());
+            retMapPartial.put("callNum",retPlacePartial.getCallNum());
+            retList.add(retMapPartial);
+        }
+
+        retMap.put("response",retList);
+        return retMap;
+    }
+
     public Map<String, List<NodePath>> getRootLive(String startPlaceCode, String endPlaceCode, String startLocation, String endLocation){
         Map<String, List<NodePath>> retGetPath = new HashMap<>();
         List<NodePath> _retList = new ArrayList<>();
@@ -571,7 +415,7 @@ public class NaviService {
             }
             ArrayList<Integer> dst = new ArrayList<>();
             dst.add(minNodeFromEnd);
-            NodePath _NodePath = dijkstraPatial(minNodeFromStart,dst);
+            NodePath _NodePath = dijkstraPartial(minNodeFromStart,dst);
 
             Double _Dist = _NodePath.getDist();
             _Dist += distanceNode(startLocation, epsg4326List.get(minNodeFromStart-1));
@@ -612,7 +456,7 @@ public class NaviService {
                 }
             }
 
-            NodePath _NodePath = dijkstraPatial(minNodeFromStart,targetNodeList);
+            NodePath _NodePath = dijkstraPartial(minNodeFromStart,targetNodeList);
             Double _Dist = _NodePath.getDist();
             _Dist += distanceNode(startLocation, epsg4326List.get(minNodeFromStart-1));
 
@@ -650,7 +494,7 @@ public class NaviService {
                 }
             }
 
-            NodePath _NodePath = dijkstraPatial(minNodeFromEnd,targetNodeList);
+            NodePath _NodePath = dijkstraPartial(minNodeFromEnd,targetNodeList);
             Double _Dist = _NodePath.getDist();
             _Dist += distanceNode(endLocation, epsg4326List.get(minNodeFromEnd-1));
 
@@ -703,7 +547,7 @@ public class NaviService {
             Double minDist = 1e9;
             NodePath _NodePath = null;
             for(int i=0; i<startNodeList.size(); i++){
-                NodePath targetNodePath = dijkstraPatial(startNodeList.get(i),endNodeList);
+                NodePath targetNodePath = dijkstraPartial(startNodeList.get(i),endNodeList);
                 Double targetDist = targetNodePath.getDist();
                 if(targetDist < minDist){
                     minDist = targetDist;
@@ -718,6 +562,151 @@ public class NaviService {
             retGetPath.put("response",_retList);
         }
         return retGetPath;
+    }
+
+    public Map<String, String> getNextPlace(String email) {
+        List<UserLecture> userLectureList = _UserLectureRepository.findAllByEmail(email);
+
+        Date today = new Date();
+        SimpleDateFormat dayOfWeek = new SimpleDateFormat("E");
+        SimpleDateFormat hourOfToday = new SimpleDateFormat("HH");
+        SimpleDateFormat minOfToday = new SimpleDateFormat("mm");
+
+        char charDayOfWeek = dayOfWeek.format(today).charAt(0);
+        int intHourOfToday = Integer.parseInt(hourOfToday.format(today));
+        int intMinOfToday = Integer.parseInt(minOfToday.format(today));
+
+        int nowTime = 0;
+        switch(charDayOfWeek){
+            case '화': nowTime+=48; break;
+            case '수': nowTime+=96; break;
+            case '목': nowTime+=144; break;
+            case '금': nowTime+=192; break;
+            case '토': nowTime+=240; break;
+            default: break;
+        }
+
+        nowTime+=intHourOfToday*2;
+        nowTime+=intMinOfToday/30;
+
+        String retLectureId = "";
+        int minTimeGap = 19999;
+        int token = 0;
+        for(int i=0; i<userLectureList.size(); i++){
+            String lectureId = userLectureList.get(i).getLectureId();
+            String lectureTime = _AllLectureRepository.findByLectureID(lectureId).getClasstime();
+            if(lectureTime.equals("-")) continue;
+            StringTokenizer st = new StringTokenizer(lectureTime);
+
+            int idx = -1;
+            while(st.hasMoreTokens()){
+                idx++;
+                String s = st.nextToken(",");
+                String[] timeRange = s.split("-");
+
+                int start = Integer.parseInt(timeRange[0]);
+
+                if(nowTime <= start && start-nowTime < minTimeGap && start/48 == nowTime/48){
+                    minTimeGap = start-nowTime;
+                    retLectureId = lectureId;
+                    token = idx;
+                }
+            }
+        }
+
+        Map<String, String> retNextPlace = new HashMap<>();
+
+        if(retLectureId.equals("")){
+            retNextPlace.put("success","false");
+            retNextPlace.put("nextPlaceCode","NONE");
+            retNextPlace.put("nextPlaceLocationString","0.0");
+            retNextPlace.put("nextPlaceTitle","NONE");
+        }
+        else{
+            String classRoom = _AllLectureRepository.findByLectureID(retLectureId).getClassroom();
+            String[] tokenedClassRoom = classRoom.split(",");
+            String nextPlaceCode = "";
+            try{
+                nextPlaceCode = tokenedClassRoom[token].substring(0,tokenedClassRoom[token].length()-3);
+            }catch (Exception e){
+                nextPlaceCode = "ZZ";
+            }
+            if(nextPlaceCode.equals("SXB"))
+                nextPlaceCode = "SX";
+            retNextPlace.put("success","true");
+            retNextPlace.put("nextPlaceCode",nextPlaceCode);
+
+            Place nextPlace = _PlaceRepository.findByPlaceCode(nextPlaceCode);
+            if(nextPlace==null){
+                retNextPlace.put("nextPlaceLocationString","NONE");
+                retNextPlace.put("nextPlaceTitle","NONE");
+
+                return retNextPlace;
+            }
+
+            String nextPlaceLocation = nextPlace.getEpsg4326();
+            String nextPlaceTitle = nextPlace.getTitle();
+
+            retNextPlace.put("nextPlaceLocationString",nextPlaceLocation);
+            retNextPlace.put("nextPlaceTitle",nextPlaceTitle);
+        }
+        return retNextPlace;
+    }
+
+    public Map<String, String> getAnalysisResult(String email) {
+        Map<String, List<Map<String, String>>> userOverviewRoot = getOverviewRoot(email);
+        double totalDistance = 0.0;
+        for(int i=0; i<userOverviewRoot.get("response").size(); i++){
+            String distance = "";
+            try{
+                distance = userOverviewRoot.get("response").get(i).get("distance");
+                totalDistance += Double.parseDouble(distance);
+            }catch (Exception e){
+                continue;
+            }
+        }
+        int tightnessPercentage = 0;
+        int distancePercentage = (int)totalDistance/200;
+        int[] timeArr = new int[336];
+        List<UserLecture> userLectureList = _UserLectureRepository.findAllByEmail(email);
+        Map<String, String> retMap = new HashMap<>();
+        if(userLectureList.isEmpty()){
+            retMap.put("success","false");
+            retMap.put("distancePercentage","0");
+            retMap.put("tightnessPercentage","0");
+            retMap.put("totalDistance","0");
+            return retMap;
+        }
+        List<Lecture> lectureList = new ArrayList<>();
+        for(int i=0; i<userLectureList.size(); i++){
+            String lectureID = userLectureList.get(i).getLectureId();
+            Lecture _Lecture = _AllLectureRepository.findByLectureID(lectureID);
+            String classTime = _Lecture.getClasstime();
+            if(classTime.equals("-") || _Lecture.getClassroom()==null) continue;
+
+            // NC ZZ 스킵~
+            String placeCode = _Lecture.getClassroom().substring(0,2);
+            if(placeCode.equals("NC") || placeCode.equals("ZZ")) continue;
+
+            StringTokenizer st = new StringTokenizer(classTime);
+            while(st.hasMoreTokens()) {
+                String start2end = st.nextToken(",");
+                String[] timeTmp = start2end.split("-");
+                int start = Integer.parseInt(timeTmp[0]);
+                int end = Integer.parseInt(timeTmp[1]);
+                for (int j = start; j < end; j++)
+                    timeArr[j] = 1;
+            }
+        }
+        for(int i=1; i<335; i++){
+            if(timeArr[i-1]==1 && timeArr[i+1]==1 && timeArr[i]==0)
+                tightnessPercentage+=15;
+        }
+        retMap.put("success","true");
+        retMap.put("distancePercentage",Integer.toString(distancePercentage));
+        retMap.put("tightnessPercentage",Integer.toString(tightnessPercentage));
+        retMap.put("totalDistance",Double.toString(totalDistance));
+        return retMap;
     }
 
     public Map<String, List<Map<String, String>>> getOverviewRoot(String email) {
@@ -739,6 +728,8 @@ public class NaviService {
             String classRoom = _Lecture.getClassroom();
             String classTime = _Lecture.getClasstime();
 
+            if(classTime.equals("-") || classRoom==null || classRoom.equals("")) continue;
+
             StringTokenizer stRoom = new StringTokenizer(classRoom);
             StringTokenizer stTime = new StringTokenizer(classTime);
             while(stRoom.hasMoreTokens() && stTime.hasMoreTokens()){
@@ -747,6 +738,10 @@ public class NaviService {
                 // SM
                 String sRoom = stRoom.nextToken(",");
                 sRoom = sRoom.substring(0,sRoom.length()-3);
+                if(sRoom.equals("SXB"))
+                    sRoom="SX";
+                if(sRoom.equals("NC") || sRoom.equals("ZZ"))
+                    continue;
 
                 // 43
                 StringTokenizer st = new StringTokenizer(stTime.nextToken(","));
@@ -826,23 +821,23 @@ public class NaviService {
                 Double minDist = 1e9;
                 int minNodeNum = -1;
 
-                NodePath _NodePath = dijkstraPatial(252,dstNodeNumList);
+                NodePath _NodePath = dijkstraPartial(252,dstNodeNumList);
                 if(_NodePath.getDist() < minDist){
                     minDist = _NodePath.getDist();
                     minNodeNum = 252;
                 }
-                _NodePath = dijkstraPatial(455,dstNodeNumList);
+                _NodePath = dijkstraPartial(455,dstNodeNumList);
                 if(_NodePath.getDist() < minDist){
                     minDist = _NodePath.getDist();
                     minNodeNum = 455;
                 }
-                _NodePath = dijkstraPatial(17,dstNodeNumList);
+                _NodePath = dijkstraPartial(17,dstNodeNumList);
                 if(_NodePath.getDist() < minDist){
                     minDist = _NodePath.getDist();
                     minNodeNum = 17;
                 }
 
-                _NodePath = dijkstraPatial(minNodeNum, dstNodeNumList);
+                _NodePath = dijkstraPartial(minNodeNum, dstNodeNumList);
                 String startLectureName="";
                 String endLectureName = lectureNameArrByTime[nextTime];
 
@@ -883,7 +878,7 @@ public class NaviService {
                 int minNodeNum = -1;
 
                 for(int j=0; j<srcNodeNumList.size(); j++){
-                    NodePath _NodePath = dijkstraPatial(srcNodeNumList.get(j),dstNodeNumList);
+                    NodePath _NodePath = dijkstraPartial(srcNodeNumList.get(j),dstNodeNumList);
                     double dist = _NodePath.getDist();
                     if(dist < minDist){
                         minDist = dist;
@@ -891,7 +886,7 @@ public class NaviService {
                     }
                 }
 
-                NodePath minNodePath = dijkstraPatial(minNodeNum, dstNodeNumList);
+                NodePath minNodePath = dijkstraPartial(minNodeNum, dstNodeNumList);
 
                 String startLectureName=lectureNameArrByTime[nowTime];
                 String endLectureName = lectureNameArrByTime[nextTime];
