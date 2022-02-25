@@ -207,6 +207,8 @@ public class LectureService {
 
                                 if(ttmp.charAt(idx+2) == 'B')
                                     start += 1;
+                                if(ttmp.contains("야"))
+                                    end+=18;
 
                                 if(ttmp.charAt(ttmp.length()-2) == 'A') {
                                     int2Str = ttmp.charAt(ttmp.length() - 3) - '0';
@@ -216,6 +218,8 @@ public class LectureService {
                                     int2Str = ttmp.charAt(ttmp.length()-2) - '0';
                                     end += 2 * int2Str + 1;
                                 }
+
+
                                 _classtime += Integer.toString(start) + '-' + Integer.toString(end) + ',';
                                 time_cnt++;
                             }

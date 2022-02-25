@@ -592,6 +592,7 @@ public class NaviService {
         String retLectureId = "";
         int minTimeGap = 19999;
         int token = 0;
+
         for(int i=0; i<userLectureList.size(); i++){
             String lectureId = userLectureList.get(i).getLectureId();
             String lectureTime = _AllLectureRepository.findByLectureID(lectureId).getClasstime();
@@ -684,9 +685,9 @@ public class NaviService {
             String classTime = _Lecture.getClasstime();
             if(classTime.equals("-") || _Lecture.getClassroom()==null) continue;
 
-            // NC ZZ 스킵~
+            // 가상건물 제외
             String placeCode = _Lecture.getClassroom().substring(0,2);
-            if(placeCode.equals("NC") || placeCode.equals("ZZ")) continue;
+            if(placeCode.equals("ZZ")) continue;
 
             StringTokenizer st = new StringTokenizer(classTime);
             while(st.hasMoreTokens()) {
