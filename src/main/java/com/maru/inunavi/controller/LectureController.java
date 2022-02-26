@@ -18,6 +18,7 @@ public class LectureController {
     private final NaviService _NaviService;
     private final UserService _UserService;
 
+
     @GetMapping("allLecture")
     @ResponseBody
     public List<Lecture> allLecture(){

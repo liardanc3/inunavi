@@ -13,7 +13,7 @@ public class Lecture {
     // A_ 순번
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private int id;
 
     // C_학과(부)
     @Column(length = 45, nullable = false)

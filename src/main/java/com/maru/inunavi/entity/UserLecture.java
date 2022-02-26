@@ -22,12 +22,12 @@ public class UserLecture {
 
     // 과목번호
     @Column(length = 45, nullable=false)
-    private String lectureId;
+    private int lectureIdx;
 
     public UserLecture(){}
-    public UserLecture(String email, String lectureId) {
+    public UserLecture(String email, int lectureIdx) {
         this.email=email;
-        this.lectureId=lectureId;
+        this.lectureIdx=lectureIdx;
     }
 
 }

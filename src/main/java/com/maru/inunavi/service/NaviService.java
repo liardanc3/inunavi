@@ -117,7 +117,7 @@ public class NaviService {
         }
 
         path = path.substring(0,path.length()-1);
-        String _isArrived = dist<15 ? "true" : "false";
+        String _isArrived = dist < 15 ? "true" : "false";
         NodePath _NodePath = new NodePath("",_isArrived,dist,path);
         return _NodePath;
     }
@@ -425,7 +425,7 @@ public class NaviService {
             _Path += _NodePath.getRoute();
             _Path += ','+endLocation;
 
-            String _isArrived = _Dist < 5 ? "true" : "false";
+            String _isArrived = _Dist < 15 ? "true" : "false";
             NodePath _retNodePath = new NodePath(Query,_isArrived,_Dist,_Path);
             _retList.add(_retNodePath);
             retGetPath.put("response",_retList);
@@ -463,7 +463,7 @@ public class NaviService {
             String _Path = startLocation+',';
             _Path += _NodePath.getRoute();
 
-            String _isArrived = _Dist < 5 ? "true" : "false";
+            String _isArrived = _Dist < 15 ? "true" : "false";
             NodePath _retNodePath = new NodePath(Query,_isArrived,_Dist,_Path);
             _retList.add(_retNodePath);
             retGetPath.put("response",_retList);
@@ -515,7 +515,7 @@ public class NaviService {
                 _Path+=_37+","+_126+",";
             }
             _Path = _Path.substring(0,_Path.length()-1);
-            String _isArrived = _Dist < 5 ? "true" : "false";
+            String _isArrived = _Dist < 15 ? "true" : "false";
             NodePath _retNodePath = new NodePath(Query,_isArrived,_Dist,_Path);
             _retList.add(_NodePath);
             retGetPath.put("response",_retList);
@@ -555,7 +555,7 @@ public class NaviService {
                 }
             }
 
-            String _isArrived = _NodePath.getDist() < 5 ? "true" : "false";
+            String _isArrived = _NodePath.getDist() < 15 ? "true" : "false";
             NodePath _retNodePath = new NodePath(Query,_isArrived,_NodePath.getDist(),_NodePath.getRoute());
             _NodePathRepository.save(_retNodePath);
             _retList.add(_retNodePath);

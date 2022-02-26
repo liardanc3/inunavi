@@ -80,11 +80,15 @@ public class UserService {
         return json;
     }
 
-    public Map<String, String> AddLecture(String email, String lectureID) {
+    public Map<String, String> AddLecture(String email, String lectureId) {
         Map<String, String> json = new HashMap<>();
+
+        // lectureId -> lectureIdx
+        int lectureIdx = _AllLectureRepository.findByLectureId(lectureId).getId();
+
         json.put("email", email);
-        if(_UserLectureRepository.findByUserEmailAndLectureID(email,lectureID) == null){
-            _UserLectureRepository.save(new UserLecture(email, lectureID));
+        if(_UserLectureRepository.findByUserEmailAndLectureIdx(email,lectureIdx) == null){
+            _UserLectureRepository.save(new UserLecture(email, lectureIdx));
             json.put("success", "true");
         }else{
             json.put("success", "false");
@@ -94,8 +98,11 @@ public class UserService {
 
     public Map<String, String> deleteLecture(String email, String lectureID){
         Map<String, String> json = new HashMap<>();
+
+        int lectureIdx = _AllLectureRepository.findByLectureId(lectureID).getId();
+
         json.put("email", email);
-        UserLecture _UserLecture = _UserLectureRepository.findByUserEmailAndLectureID(email, lectureID) ;
+        UserLecture _UserLecture = _UserLectureRepository.findByUserEmailAndLectureIdx(email, lectureIdx) ;
         if(_UserLecture != null){
             _UserLectureRepository.delete(_UserLecture);
             json.put("success", "true");
@@ -111,7 +118,7 @@ public class UserService {
         List<UserLecture> _UL = _UserLectureRepository.findAllByEmail(email);
         ArrayList<Lecture> _LAL = new ArrayList<Lecture>();
         for(int i=0; i<_UL.size(); i++){
-            _LAL.add(_AllLectureRepository.findByLectureID(_UL.get(i).getLectureId()));
+            _LAL.add(_AllLectureRepository.getById((long) _UL.get(i).getLectureIdx()));
         }
         json.put("response", _LAL);
         return json;
