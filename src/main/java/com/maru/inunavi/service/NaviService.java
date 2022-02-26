@@ -594,8 +594,8 @@ public class NaviService {
         int token = 0;
 
         for(int i=0; i<userLectureList.size(); i++){
-            String lectureId = userLectureList.get(i).getLectureId();
-            String lectureTime = _AllLectureRepository.findByLectureID(lectureId).getClasstime();
+            String lectureId = _AllLectureRepository.getById((long) userLectureList.get(i).getLectureIdx()).getNumber();
+            String lectureTime = _AllLectureRepository.findByLectureId(lectureId).getClasstime();
             if(lectureTime.equals("-")) continue;
             StringTokenizer st = new StringTokenizer(lectureTime);
 
@@ -624,7 +624,7 @@ public class NaviService {
             retNextPlace.put("nextPlaceTitle","NONE");
         }
         else{
-            String classRoom = _AllLectureRepository.findByLectureID(retLectureId).getClassroom();
+            String classRoom = _AllLectureRepository.findByLectureId(retLectureId).getClassroom();
             String[] tokenedClassRoom = classRoom.split(",");
             String nextPlaceCode = "";
             try{
@@ -680,8 +680,8 @@ public class NaviService {
         }
         List<Lecture> lectureList = new ArrayList<>();
         for(int i=0; i<userLectureList.size(); i++){
-            String lectureID = userLectureList.get(i).getLectureId();
-            Lecture _Lecture = _AllLectureRepository.findByLectureID(lectureID);
+            int lectureIdx = userLectureList.get(i).getLectureIdx();
+            Lecture _Lecture = _AllLectureRepository.getById((long) lectureIdx);
             String classTime = _Lecture.getClasstime();
             if(classTime.equals("-") || _Lecture.getClassroom()==null) continue;
 
@@ -721,8 +721,8 @@ public class NaviService {
 
         int[] dayCheck = new int[7];
         for(int i=0; i<userLectureList.size(); i++){
-            String lectureID = userLectureList.get(i).getLectureId();
-            Lecture _Lecture = _AllLectureRepository.findByLectureID(lectureID);
+            int lectureIdx = userLectureList.get(i).getLectureIdx();
+            Lecture _Lecture = _AllLectureRepository.getById((long) lectureIdx);
 
             int idx = -1;
 

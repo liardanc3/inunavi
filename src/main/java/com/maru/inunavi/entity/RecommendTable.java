@@ -15,7 +15,7 @@ public class RecommendTable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private int id;
 
     @Column(length = 20000, nullable = false)
     private String similarityString;
