@@ -18,8 +18,6 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class RecommendController {
 
-    private final LectureService _LectureService;
-    private final UserService _UserService;
     private final RecommendService _RecommendService;
 
     @GetMapping("getRecommendLecture")

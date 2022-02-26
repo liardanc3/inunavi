@@ -3,10 +3,7 @@ package com.maru.inunavi.service;
 import com.maru.inunavi.entity.Lecture;
 import com.maru.inunavi.entity.UserInfo;
 import com.maru.inunavi.entity.UserLecture;
-import com.maru.inunavi.repository.AllLectureRepository;
-import com.maru.inunavi.repository.NaviRepository;
-import com.maru.inunavi.repository.UserInfoRepository;
-import com.maru.inunavi.repository.UserLectureRepository;
+import com.maru.inunavi.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
@@ -16,19 +13,16 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
 public class UserService {
 
-    private final NaviRepository _NaviRepository;
     private final UserInfoRepository _UserInfoRepository;
     private final UserLectureRepository _UserLectureRepository;
     private final AllLectureRepository _AllLectureRepository;
+    private final RecommendTableRepository _RecommendTableRepository;
 
     @Autowired
     private JavaMailSender javaMailSender;
@@ -90,6 +84,7 @@ public class UserService {
         if(_UserLectureRepository.findByUserEmailAndLectureIdx(email,lectureIdx) == null){
             _UserLectureRepository.save(new UserLecture(email, lectureIdx));
             json.put("success", "true");
+            updateRecommendTable(email,lectureIdx,true);
         }else{
             json.put("success", "false");
         }
@@ -106,6 +101,7 @@ public class UserService {
         if(_UserLecture != null){
             _UserLectureRepository.delete(_UserLecture);
             json.put("success", "true");
+            updateRecommendTable(email,lectureIdx,false);
         }
         else {
             json.put("success", "false");
@@ -191,4 +187,42 @@ public class UserService {
         }
         return json;
     }
+
+    public void updateRecommendTable(String email, int lectureIdx, boolean add){
+        List<UserLecture> userLectureList = _UserLectureRepository.findAllByEmail(email);
+
+        // 유저가 듣는 수업의 인덱스 리스트
+        List<Integer> userLectureIdxList = new ArrayList<>();
+        for(int i=0; i<userLectureList.size(); i++)
+            userLectureIdxList.add(userLectureList.get(i).getLectureIdx());
+
+        // 유사도행렬 업데이트
+        int len = (int) _AllLectureRepository.count();
+        int[][] similarityArr = new int[len+1][len+1];
+        for(int i=0; i<userLectureIdxList.size(); i++){
+            int idx = userLectureIdxList.get(i);
+            String similarityString = _RecommendTableRepository.getById(idx).getSimilarityString();
+            StringTokenizer st = new StringTokenizer(similarityString);
+            for(int j=1; j<=len; j++){
+                String s = st.nextToken(",");
+                int similarityPoint = Integer.parseInt(s);
+                similarityArr[idx][j] += similarityPoint;
+            }
+            if(idx==lectureIdx) continue;
+
+            // 추가면 +1, 삭제면 -1
+            similarityArr[idx][lectureIdx] += add ? 1 : -1;
+            similarityArr[lectureIdx][idx] += add ? 1 : -1;
+        }
+
+        // recommendTable 업데이트
+        for(int i=0; i<userLectureIdxList.size(); i++){
+            int idx = userLectureIdxList.get(i);
+            String similarityString = "";
+            for(int j=1; j<=len; j++)
+                similarityString += Integer.toString(similarityArr[idx][j]) + ",";
+            _RecommendTableRepository.updateSimilarityString(idx,similarityString);
+        }
+    }
+
 }
