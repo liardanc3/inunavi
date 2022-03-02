@@ -8,7 +8,6 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import javax.transaction.Transactional;
-import java.util.ArrayList;
 import java.util.List;
 
 @Repository
@@ -27,5 +26,10 @@ public interface UserLectureRepository extends JpaRepository<UserLecture,Long> {
     @Query("select m from userlecture as m where m.email= :email")
     List<UserLecture> findAllByEmail(
             @Param("email") String email);
+
+    @Transactional
+    @Modifying
+    @Query("delete from userlecture m where m.email= :email")
+    void deleteAllByEmail(String email);
 
 }

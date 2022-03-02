@@ -663,7 +663,7 @@ public class NaviService {
             }
         }
         int tightnessPercentage = 0;
-        int distancePercentage = (int)totalDistance/200;
+        int distancePercentage = (int)totalDistance/50;
         int[] timeArr = new int[336];
         List<UserLecture> userLectureList = _UserLectureRepository.findAllByEmail(email);
         Map<String, String> retMap = new HashMap<>();

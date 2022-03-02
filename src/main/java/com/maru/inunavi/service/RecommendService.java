@@ -119,21 +119,29 @@ public class RecommendService {
             }
 
             // 기존 수업시간 추가
-            String classTime = _AllLectureRepository
-                    .getById(userLecture.getLectureIdx())
-                    .getClasstime();
+            Lecture _Lecture = _AllLectureRepository.getById(userLecture.getLectureIdx());
+            String classTime = _Lecture.getClasstime();
+
             classTime = classTime.replaceAll(",", "-");
-            st = new StringTokenizer(classTime);
-            while (st.hasMoreTokens()) {
-                int time = Integer.parseInt(st.nextToken("-"));
-                userClassTime[time] = 1;
+
+            if(!classTime.equals("-")){
+                st = new StringTokenizer(classTime);
+                while (st.hasMoreTokens()) {
+                    int time = Integer.parseInt(st.nextToken("-"));
+                    userClassTime[time] = 1;
+                }
             }
         }
 
         // 유사도 높은순 정렬
         PriorityQueue<Pair> pq = new PriorityQueue<>();
-        for(int i=1; i<=len; i++)
-            pq.add(new Pair(i,similarityArr[i]));
+        for(int i=1; i<=len; i++){
+            if(similarityArr[i] < 1) continue;
+            Lecture _Lecture = _AllLectureRepository.getById(i);
+            if(_Lecture.getDepartment().equals(userMajor))
+                pq.add(new Pair(i,similarityArr[i]/2));
+            else pq.add(new Pair(i,similarityArr[i]));
+        }
 
 
         // 상위 4개 추출
@@ -146,6 +154,7 @@ public class RecommendService {
 
             Lecture _Lecture = _AllLectureRepository.getById(lectureIdx);
             String major = _Lecture.getDepartment();
+
             String classTime = _Lecture.getClasstime();
             String className = _Lecture.getLecturename();
             classTime = classTime.replaceAll(",","-");

@@ -4,7 +4,11 @@ import com.maru.inunavi.entity.Lecture;
 import com.maru.inunavi.entity.UserInfo;
 import com.maru.inunavi.service.*;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
@@ -19,6 +23,7 @@ public class UserController {
     private final LectureService _LectureService;
     private final NaviService _NaviService;
     private final UserService _UserService;
+    private final Logger logger = LoggerFactory.getLogger(this.getClass().getSimpleName());
 
     @RequestMapping("/session")
     @ResponseBody
@@ -28,11 +33,12 @@ public class UserController {
 
     @RequestMapping(value = "/insert", method = RequestMethod.POST)
     @ResponseBody
-    public Map<String, String> Resister(HttpServletRequest request) {
+    public Map<String, String> signUp(HttpServletRequest request) {
         String email = request.getParameter("email");
         String password = request.getParameter("password");
         String major = request.getParameter("major");
-        return _UserService.resister(email, password, major);
+        logger.info("signUp("+email+")");
+        return _UserService.signUp(email, password, major);
     }
 
     @RequestMapping(value = "/insert/class", method = RequestMethod.POST)
@@ -40,6 +46,7 @@ public class UserController {
     public Map<String, String> insertClass(HttpServletRequest request) { // ?id=&class_id=
         String email = request.getParameter("email");
         String classId = request.getParameter("class_id");
+        logger.info("insertClass("+email+" / "+classId+")");
         return _UserService.AddLecture(email, classId);
     }
 
@@ -48,6 +55,7 @@ public class UserController {
     public Map<String, String> deleteClass(HttpServletRequest request) { // ?id=&class_id=
         String email = request.getParameter("email");
         String classId = request.getParameter("class_id");
+        logger.info("deleteClass("+email+" / "+classId+")");
         return _UserService.deleteLecture(email, classId);
     }
 
@@ -55,6 +63,7 @@ public class UserController {
     @ResponseBody
     public Map<String, ArrayList<Lecture>> selectClass(HttpServletRequest request) {
         String email = request.getParameter("email");
+        logger.info("selectClass("+email+")");
         return _UserService.showMyLecture(email);
     }
 
@@ -62,13 +71,8 @@ public class UserController {
     @ResponseBody
     public Map<String, String> idCheck(HttpServletRequest request) {
         String email = request.getParameter("email");
+        logger.info("idCheck("+email+")");
         return _UserService.idCheck(email);
-    }
-
-    @RequestMapping(value = "/selectAll", method = RequestMethod.GET)
-    @ResponseBody
-    public List<UserInfo> showAll() {
-        return _UserService.showAll();
     }
 
     @RequestMapping(value = "/login", method = RequestMethod.POST)
@@ -76,6 +80,7 @@ public class UserController {
     public Map<String, String> login(HttpServletRequest request) {
         String email = request.getParameter("email");
         String password = request.getParameter("password");
+        logger.info("login("+email + ")");
         return _UserService.login(email, password);
     }
 
@@ -83,6 +88,7 @@ public class UserController {
     @ResponseBody
     public Map<String, String> verify(HttpServletRequest request) {
         String email = request.getParameter("email");
+        logger.info("verify("+email+")");
         return _UserService.verify(email);
     }
 
@@ -91,6 +97,7 @@ public class UserController {
     public Map<String, String> update(HttpServletRequest request) {
         String email = request.getParameter("email");
         String password = request.getParameter("newPassword");
+        logger.info("updatePassword("+email+")");
         return _UserService.updatePassword(email, password);
     }
 
@@ -99,6 +106,7 @@ public class UserController {
     public Map<String, String> update2(HttpServletRequest request) {
         String email = request.getParameter("email");
         String major = request.getParameter("newMajor");
+        logger.info("updateMajor("+email+" / "+major+")");
         return _UserService.updateMajor(email, major);
     }
 
@@ -107,6 +115,7 @@ public class UserController {
     public Map<String, String> delete(HttpServletRequest request) {
         String email = request.getParameter("email");
         String password = request.getParameter("password");
+        logger.info("delete("+email+")");
         return _UserService.delete(email, password);
     }
 }

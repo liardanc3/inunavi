@@ -26,11 +26,7 @@ public class UserService {
     @Autowired
     private JavaMailSender javaMailSender;
 
-    public List<UserInfo> showAll(){
-        return _UserInfoRepository.findAll();
-    }
-
-    public Map<String, String> resister(String email, String password, String major){
+    public Map<String, String> signUp(String email, String password, String major){
         PasswordEncoder passwordencoder = new BCryptPasswordEncoder();
         Map<String, String> json = new HashMap<>();
         json.put("email", email);
@@ -74,12 +70,12 @@ public class UserService {
     }
 
     public Map<String, String> AddLecture(String email, String lectureId) {
-        System.out.println("in AddLecture1");
+
         Map<String, String> json = new HashMap<>();
 
         // lectureId -> lectureIdx
         int lectureIdx = _AllLectureRepository.findByLectureId(lectureId).getId();
-        System.out.println("lectureIdx = " + lectureIdx);
+
         json.put("email", email);
         if(_UserLectureRepository.findByUserEmailAndLectureIdx(email,lectureIdx) == null){
             _UserLectureRepository.save(new UserLecture(email, lectureIdx));
@@ -99,9 +95,9 @@ public class UserService {
         json.put("email", email);
         UserLecture _UserLecture = _UserLectureRepository.findByUserEmailAndLectureIdx(email, lectureIdx) ;
         if(_UserLecture != null){
-            _UserLectureRepository.delete(_UserLecture);
             json.put("success", "true");
             updateRecommendTable(email,lectureIdx,false);
+            _UserLectureRepository.delete(_UserLecture);
         }
         else {
             json.put("success", "false");
@@ -183,6 +179,11 @@ public class UserService {
             json.put("success","false");
         }else{
             _UserInfoRepository.delete(_UserInfo);
+            List<UserLecture> userLectureList = _UserLectureRepository.findAllByEmail(email);
+            for(int i=0; i<userLectureList.size(); i++){
+                updateRecommendTable(email,userLectureList.get(i).getLectureIdx(),false);
+                _UserLectureRepository.delete(userLectureList.get(i));
+            }
             json.put("success","true");
         }
         return json;
