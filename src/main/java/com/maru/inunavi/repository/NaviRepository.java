@@ -18,7 +18,7 @@ public interface NaviRepository extends JpaRepository<Navi, Integer> {
     @Query(value = "alter TABLE navi AUTO_INCREMENT = 1",nativeQuery = true)
     void deleteINCREMENT();
 
-    @Query("select m from Navi as m where m.placeCode= :placeCode")
+    @Query("select m from navi as m where m.placeCode= :placeCode")
     List<Navi> findAllByPlaceCode(String placeCode);
 
 }

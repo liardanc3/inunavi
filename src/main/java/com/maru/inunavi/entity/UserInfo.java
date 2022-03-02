@@ -7,7 +7,7 @@ import lombok.Getter;
 import javax.persistence.*;
 
 @Builder
-@Entity(name="UserInfo")
+@Entity(name="userinfo")
 @Getter
 public class UserInfo {
 

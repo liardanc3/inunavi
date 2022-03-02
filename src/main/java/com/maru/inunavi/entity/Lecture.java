@@ -1,14 +1,16 @@
 package com.maru.inunavi.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.*;
 import javax.persistence.*;
 import java.util.Comparator;
 import java.util.List;
 
 @Builder
+@Entity(name="lecture")
 @AllArgsConstructor
-@Entity(name="AllLecture")
 @Getter
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Lecture {
     // A_ 순번
     @Id

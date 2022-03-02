@@ -16,7 +16,7 @@ public interface PlaceRepository extends JpaRepository<Place, Long> {
     @Query(value = "alter TABLE place AUTO_INCREMENT = 1",nativeQuery = true)
     void deleteINCREMENT();
 
-    @Query("select m from Place as m where m.placeCode= :nextPlaceCode")
+    @Query("select m from place as m where m.placeCode= :nextPlaceCode")
     Place findByPlaceCode(String nextPlaceCode);
 
 }

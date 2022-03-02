@@ -6,7 +6,6 @@ import com.maru.inunavi.entity.UserLecture;
 import com.maru.inunavi.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.stereotype.Service;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -22,7 +21,7 @@ public class UserService {
     private final UserInfoRepository _UserInfoRepository;
     private final UserLectureRepository _UserLectureRepository;
     private final AllLectureRepository _AllLectureRepository;
-    private final RecommendTableRepository _RecommendTableRepository;
+    private final RecommendRepository _RecommendRepository;
 
     @Autowired
     private JavaMailSender javaMailSender;
@@ -75,11 +74,12 @@ public class UserService {
     }
 
     public Map<String, String> AddLecture(String email, String lectureId) {
+        System.out.println("in AddLecture1");
         Map<String, String> json = new HashMap<>();
 
         // lectureId -> lectureIdx
         int lectureIdx = _AllLectureRepository.findByLectureId(lectureId).getId();
-
+        System.out.println("lectureIdx = " + lectureIdx);
         json.put("email", email);
         if(_UserLectureRepository.findByUserEmailAndLectureIdx(email,lectureIdx) == null){
             _UserLectureRepository.save(new UserLecture(email, lectureIdx));
@@ -114,7 +114,7 @@ public class UserService {
         List<UserLecture> _UL = _UserLectureRepository.findAllByEmail(email);
         ArrayList<Lecture> _LAL = new ArrayList<Lecture>();
         for(int i=0; i<_UL.size(); i++){
-            _LAL.add(_AllLectureRepository.getById((long) _UL.get(i).getLectureIdx()));
+            _LAL.add(_AllLectureRepository.getById(_UL.get(i).getLectureIdx()));
         }
         json.put("response", _LAL);
         return json;
@@ -201,7 +201,7 @@ public class UserService {
         int[][] similarityArr = new int[len+1][len+1];
         for(int i=0; i<userLectureIdxList.size(); i++){
             int idx = userLectureIdxList.get(i);
-            String similarityString = _RecommendTableRepository.getById(idx).getSimilarityString();
+            String similarityString = _RecommendRepository.getById(idx).getSimilarityString();
             StringTokenizer st = new StringTokenizer(similarityString);
             for(int j=1; j<=len; j++){
                 String s = st.nextToken(",");
@@ -221,7 +221,7 @@ public class UserService {
             String similarityString = "";
             for(int j=1; j<=len; j++)
                 similarityString += Integer.toString(similarityArr[idx][j]) + ",";
-            _RecommendTableRepository.updateSimilarityString(idx,similarityString);
+            _RecommendRepository.updateSimilarityString(idx,similarityString);
         }
     }
 

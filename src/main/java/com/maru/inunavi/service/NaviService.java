@@ -202,8 +202,6 @@ public class NaviService {
                 Place _Place = new Place(csv);
                 PL.add(_Place);
             }
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -271,8 +269,6 @@ public class NaviService {
                     _placeCode = _placeCode.substring(1,_placeCode.length()-1);
                 placeCode.add(_placeCode);
             }
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -312,32 +308,32 @@ public class NaviService {
         }
         List<Place> requestPlaceList = new ArrayList<>();
 
-        for(int i=0; i<placeList.size(); i++){
-            String _title = placeList.get(i).getTitle();
-            _title = _title.replaceAll(" ","");
-            String _sort = placeList.get(i).getSort();
-            _sort = _sort.replaceAll(" ","");
+        for (Place place : placeList) {
+            String _title = place.getTitle();
+            _title = _title.replaceAll(" ", "");
+            String _sort = place.getSort();
+            _sort = _sort.replaceAll(" ", "");
 
-            if(_title.toUpperCase().contains(searchKeyword.toUpperCase()) || _sort.toUpperCase().contains(searchKeyword.toUpperCase())){
-                String _dstPlaceCode = placeList.get(i).getPlaceCode();
+            if (_title.toUpperCase().contains(searchKeyword.toUpperCase()) || _sort.toUpperCase().contains(searchKeyword.toUpperCase())) {
+                String _dstPlaceCode = place.getPlaceCode();
                 ArrayList<Integer> _dstNodeNumList = new ArrayList<>();
 
-                for(int j=0; j<naviList.size(); j++){
+                for (int j = 0; j < naviList.size(); j++) {
                     String _placeCode = naviList.get(j).getPlaceCode();
                     StringTokenizer st = new StringTokenizer(_placeCode);
-                    while(st.hasMoreTokens()){
+                    while (st.hasMoreTokens()) {
                         String s = st.nextToken(",");
-                        if(s.equals(_dstPlaceCode)){
-                            _dstNodeNumList.add(j+1);
+                        if (s.equals(_dstPlaceCode)) {
+                            _dstNodeNumList.add(j + 1);
                             break;
                         }
                     }
                 }
 
-                double dist = dijkstraPartial(nowNode,_dstNodeNumList).getDist();
-                double distFromStart = distanceNode(myLocation,_NaviRepository.getById(nowNode).getEpsg4326());
-                Place _Place = placeList.get(i);
-                _Place.setDistance(Double.toString(dist+distFromStart));
+                double dist = dijkstraPartial(nowNode, _dstNodeNumList).getDist();
+                double distFromStart = distanceNode(myLocation, _NaviRepository.getById(nowNode).getEpsg4326());
+                Place _Place = place;
+                _Place.setDistance(Double.toString(dist + distFromStart));
                 requestPlaceList.add(_Place);
             }
         }
@@ -517,7 +513,7 @@ public class NaviService {
             _Path = _Path.substring(0,_Path.length()-1);
             String _isArrived = _Dist < 15 ? "true" : "false";
             NodePath _retNodePath = new NodePath(Query,_isArrived,_Dist,_Path);
-            _retList.add(_NodePath);
+            _retList.add(_retNodePath);
             retGetPath.put("response",_retList);
         }
 
@@ -594,7 +590,7 @@ public class NaviService {
         int token = 0;
 
         for(int i=0; i<userLectureList.size(); i++){
-            String lectureId = _AllLectureRepository.getById((long) userLectureList.get(i).getLectureIdx()).getNumber();
+            String lectureId = _AllLectureRepository.getById(userLectureList.get(i).getLectureIdx()).getNumber();
             String lectureTime = _AllLectureRepository.findByLectureId(lectureId).getClasstime();
             if(lectureTime.equals("-")) continue;
             StringTokenizer st = new StringTokenizer(lectureTime);
@@ -681,7 +677,7 @@ public class NaviService {
         List<Lecture> lectureList = new ArrayList<>();
         for(int i=0; i<userLectureList.size(); i++){
             int lectureIdx = userLectureList.get(i).getLectureIdx();
-            Lecture _Lecture = _AllLectureRepository.getById((long) lectureIdx);
+            Lecture _Lecture = _AllLectureRepository.getById(lectureIdx);
             String classTime = _Lecture.getClasstime();
             if(classTime.equals("-") || _Lecture.getClassroom()==null) continue;
 
@@ -722,7 +718,7 @@ public class NaviService {
         int[] dayCheck = new int[7];
         for(int i=0; i<userLectureList.size(); i++){
             int lectureIdx = userLectureList.get(i).getLectureIdx();
-            Lecture _Lecture = _AllLectureRepository.getById((long) lectureIdx);
+            Lecture _Lecture = _AllLectureRepository.getById(lectureIdx);
 
             int idx = -1;
 

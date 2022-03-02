@@ -12,20 +12,20 @@ import javax.transaction.Transactional;
 import java.util.List;
 
 @Repository
-public interface AllLectureRepository extends JpaRepository<Lecture,Long> {
+public interface AllLectureRepository extends JpaRepository<Lecture, Integer> {
 
     @Transactional
     @Modifying
-    @Query(value = "alter TABLE all_lecture AUTO_INCREMENT = 1",nativeQuery = true)
+    @Query(value = "alter TABLE lecture AUTO_INCREMENT = 1",nativeQuery = true)
     void deleteINCREMENT();
 
-    @Query(value = "select t from AllLecture t order by t.number ASC")
+    @Query(value = "select t from lecture t order by t.number ASC")
     List<Lecture> findAllByOrderByNumberAsc();
 
-    @Query(value = "select t from AllLecture t order by t.lecturename ASC")
+    @Query(value = "select t from lecture t order by t.lecturename ASC")
     List<Lecture> findAllByOrderByLecturenameAsc();
 
-    @Query("select t from AllLecture as t where t.number= :_number")
+    @Query("select t from lecture as t where t.number= :_number")
     Lecture findByLectureId(
             @Param("_number") String _number);
 }

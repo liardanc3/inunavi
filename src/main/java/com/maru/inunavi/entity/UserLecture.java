@@ -7,7 +7,7 @@ import javax.persistence.*;
 
 @Builder
 @AllArgsConstructor
-@Entity(name="UserLecture")
+@Entity(name="userlecture")
 @Getter
 public class UserLecture {
 
@@ -20,7 +20,7 @@ public class UserLecture {
     @Column(length = 100, nullable=false)
     private String email;
 
-    // 과목번호
+    // 과목 인덱스
     @Column(length = 45, nullable=false)
     private int lectureIdx;
 

@@ -10,7 +10,7 @@ import java.util.List;
 
 @Builder
 @AllArgsConstructor
-@Entity(name="Navi")
+@Entity(name="navi")
 @Getter
 public class Navi {
     public Navi() {}

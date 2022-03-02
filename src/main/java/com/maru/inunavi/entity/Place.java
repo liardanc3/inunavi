@@ -8,7 +8,7 @@ import javax.persistence.*;
 import java.util.List;
 
 @Builder
-@Entity(name="Place")
+@Entity(name="place")
 @AllArgsConstructor
 @Getter
 public class Place implements Comparable<Place>{
