@@ -11,7 +11,6 @@ public class SecurityManager extends WebSecurityConfigurerAdapter {
     public void configure(HttpSecurity http) throws Exception {
         http.csrf().disable();
         http.authorizeRequests()
-                .antMatchers("/").permitAll()
                 .antMatchers("/master").authenticated();
     }
 

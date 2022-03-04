@@ -226,4 +226,7 @@ public class UserService {
         }
     }
 
+    public List<UserInfo> memberList() {
+        return _UserInfoRepository.findAll();
+    }
 }

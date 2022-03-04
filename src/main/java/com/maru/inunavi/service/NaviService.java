@@ -5,6 +5,8 @@ import com.maru.inunavi.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.io.FileUtils;
 import org.apache.tomcat.util.http.fileupload.IOUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 
@@ -22,6 +24,7 @@ public class NaviService {
     private final AllLectureRepository _AllLectureRepository;
     private final NodePathRepository _NodePathRepository;
     private final PlaceRepository _PlaceRepository;
+    private final Logger logger = LoggerFactory.getLogger(this.getClass().getSimpleName());
 
     // 임시로 캐시대신 사용
     private ArrayList<String> epsg4326List = new ArrayList<>();
@@ -64,6 +67,7 @@ public class NaviService {
         for(int i=1; i<distArray.length; i++)
             distArray[i] = 1e9;
         distArray[src]=0.f;
+
         PriorityQueue<pair> pq = new PriorityQueue<>();
         Stack<String> st = new Stack<>();
         pq.add(new pair(0, src));
@@ -115,8 +119,9 @@ public class NaviService {
             path += st.peek()+",";
             st.pop();
         }
-
         path = path.substring(0,path.length()-1);
+
+
         String _isArrived = dist < 15 ? "true" : "false";
         NodePath _NodePath = new NodePath("",_isArrived,dist,path);
         return _NodePath;
@@ -682,7 +687,9 @@ public class NaviService {
             if(classTime.equals("-") || _Lecture.getClassroom()==null) continue;
 
             // 가상건물 제외
-            String placeCode = _Lecture.getClassroom().substring(0,2);
+            String placeCode = _Lecture.getClassroom().substring(0,3);
+            if(!placeCode.equals("SY1") && !placeCode.equals("SY2") && !placeCode.equals("SY3"))
+                placeCode = placeCode.substring(0,2);
             if(placeCode.equals("ZZ")) continue;
 
             StringTokenizer st = new StringTokenizer(classTime);
@@ -734,9 +741,10 @@ public class NaviService {
 
                 // SM
                 String sRoom = stRoom.nextToken(",");
-                sRoom = sRoom.substring(0,sRoom.length()-3);
-                if(sRoom.equals("SXB"))
-                    sRoom="SX";
+                if(sRoom.contains("SY1")) sRoom="SY1";
+                else if(sRoom.contains("SY2")) sRoom="SY2";
+                else if(sRoom.contains("SY3")) sRoom="SY3";
+                else sRoom = sRoom.substring(0,2);
                 if(sRoom.equals("NC") || sRoom.equals("ZZ"))
                     continue;
 
@@ -810,10 +818,21 @@ public class NaviService {
 
                 String nextPlaceCode = placeCodeArrByTime[nextTime];
 
-                List<Navi> naviOfPlaceCode = _NaviRepository.findAllByPlaceCode(nextPlaceCode);
+                List<Navi> naviOfPlaceCode = _NaviRepository.findAll();
                 ArrayList<Integer> dstNodeNumList = new ArrayList<>();
-                for(int j=0; j<naviOfPlaceCode.size(); j++)
-                    dstNodeNumList.add(naviOfPlaceCode.get(j).getId());
+                for(int j=0; j<naviOfPlaceCode.size(); j++){
+                    Navi _Navi = naviOfPlaceCode.get(j);
+                    String naviPlaceCode = _Navi.getPlaceCode();
+                    if(naviPlaceCode.equals("-")) continue;
+                    StringTokenizer st = new StringTokenizer(naviPlaceCode);
+                    while(st.hasMoreTokens()){
+                        String tmp = st.nextToken(",");
+                        if(tmp.equals(nextPlaceCode)){
+                            dstNodeNumList.add(_Navi.getId());
+                            break;
+                        }
+                    }
+                }
 
                 Double minDist = 1e9;
                 int minNodeNum = -1;
@@ -862,8 +881,24 @@ public class NaviService {
             else{
                 String nowPlaceCode = placeCodeArrByTime[nowTime];
                 String nextPlaceCode = placeCodeArrByTime[nextTime];
-                List<Navi> nowNaviList = _NaviRepository.findAllByPlaceCode(nowPlaceCode);
-                List<Navi> nextNaviList = _NaviRepository.findAllByPlaceCode(nextPlaceCode);
+
+                List<Navi> nowNaviList = new ArrayList<>();
+                List<Navi> nextNaviList = new ArrayList<>();
+                List<Navi> naviList = _NaviRepository.findAll();
+                for(int idx=0; idx<naviList.size(); idx++){
+                    Navi now = naviList.get(idx);
+                    String _placeCode = now.getPlaceCode();
+                    if(_placeCode.equals("-")) continue;
+                    StringTokenizer st = new StringTokenizer(_placeCode);
+                    while(st.hasMoreTokens()){
+                        String tmp = st.nextToken(",");
+                        if(tmp.equals(nowPlaceCode))
+                            nowNaviList.add(now);
+                        if(tmp.equals(nextPlaceCode))
+                            nextNaviList.add(now);
+                    }
+                }
+
                 ArrayList<Integer> srcNodeNumList = new ArrayList<>();
                 ArrayList<Integer> dstNodeNumList = new ArrayList<>();
                 for(int j=0; j<nowNaviList.size(); j++)

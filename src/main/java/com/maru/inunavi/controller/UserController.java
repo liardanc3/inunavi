@@ -25,6 +25,12 @@ public class UserController {
     private final UserService _UserService;
     private final Logger logger = LoggerFactory.getLogger(this.getClass().getSimpleName());
 
+    @GetMapping("memberList")
+    @ResponseBody
+    public List<UserInfo> memberList(){
+        return _UserService.memberList();
+    }
+
     @RequestMapping("/session")
     @ResponseBody
     public String session(HttpServletRequest request) {
