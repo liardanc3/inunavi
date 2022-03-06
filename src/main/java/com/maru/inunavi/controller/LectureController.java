@@ -25,7 +25,7 @@ public class LectureController {
     private final UserService _UserService;
     private final Logger logger = LoggerFactory.getLogger(this.getClass().getSimpleName());
 
-    @GetMapping("allLecture")
+    @GetMapping("/allLecture")
     @ResponseBody
     public List<Lecture> allLecture(){
         HttpServletRequest req = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();
@@ -35,7 +35,7 @@ public class LectureController {
         return _LectureService.allLecture();
     }
 
-    @GetMapping("master/updateLecture")
+    @GetMapping("/admin/updateLecture")
     @ResponseBody
     public List<Lecture> updateLecture(){
         HttpServletRequest req = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();
@@ -45,7 +45,7 @@ public class LectureController {
         return _LectureService.updateLecture();
     }
 
-    @GetMapping("getTimeTableInfo")
+    @GetMapping("/getTimeTableInfo")
     @ResponseBody
     public HashMap<String,List<LectureService.TimeTableInfo>> getTimeTableInfo(){
         HttpServletRequest req = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();
@@ -54,7 +54,7 @@ public class LectureController {
         return _LectureService.getTimeTableInfo();
     }
 
-    @GetMapping("selectLecture")
+    @GetMapping("/selectLecture")
     @ResponseBody
     public HashMap<String,List<Lecture>> selectLecture(@RequestParam(value = "main_keyword") String main_keyword,
                                                        @RequestParam(value = "keyword_option") String keyword_option,

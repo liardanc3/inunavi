@@ -21,14 +21,14 @@ public class RecommendController {
     private final RecommendService _RecommendService;
     private final Logger logger = LoggerFactory.getLogger(this.getClass().getSimpleName());
 
-    @PostMapping("getRecommendLecture")
+    @PostMapping("/getRecommendLecture")
     @ResponseBody
     public Map<String, List<Lecture>> getRecommendLecture(@RequestParam("email") String email){
         logger.info("getRecommendLecture("+email+")");
         return _RecommendService.getRecommendLecture(email);
     }
 
-    @GetMapping("master/updateRecommend")
+    @GetMapping("/admin/updateRecommend")
     @ResponseBody
     public List<Recommend> updateRecommend(){
         HttpServletRequest req = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();

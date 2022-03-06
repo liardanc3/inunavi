@@ -27,7 +27,7 @@ public class NaviController {
     private final UserService _UserService;
     private final Logger logger = LoggerFactory.getLogger(this.getClass().getSimpleName());
 
-    @GetMapping("master/updateNavi")
+    @GetMapping("/admin/updateNavi")
     @ResponseBody
     public List<Navi> updateNavi(){
         HttpServletRequest req = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();
@@ -37,7 +37,7 @@ public class NaviController {
         return _NaviService.updateNavi();
     }
 
-    @GetMapping("master/updatePlace")
+    @GetMapping("/admin/updatePlace")
     @ResponseBody
     public List<Place> updatePlace(){
         HttpServletRequest req = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();
@@ -47,7 +47,7 @@ public class NaviController {
         return _NaviService.updatePlace();
     }
 
-    @GetMapping("getRootLive")
+    @GetMapping("/getRootLive")
     @ResponseBody
     public Map<String, List<NodePath>> getRootLive(@RequestParam(value = "startPlaceCode") String startPlaceCode,
                                               @RequestParam(value = "endPlaceCode") String endPlaceCode,
@@ -60,14 +60,14 @@ public class NaviController {
         return _NaviService.getRootLive(startPlaceCode,endPlaceCode,startLocation,endLocation);
     }
 
-    @PostMapping("getNextPlace")
+    @PostMapping("/getNextPlace")
     @ResponseBody
     public Map<String,String> getNextPlace(@RequestParam(value = "email") String email){
         logger.info("getNextPlace("+email+")");
         return _NaviService.getNextPlace(email);
     }
 
-    @GetMapping("placeSearchList")
+    @GetMapping("/placeSearchList")
     @ResponseBody
     public Map<String, List<Map<String,String>>> placeSearchList(@RequestParam(value = "searchKeyword") String searchKeyword,
                                                                  @RequestParam(value = "myLocation") String myLocation){
@@ -78,14 +78,14 @@ public class NaviController {
         return _NaviService.placeSearchList(searchKeyword, myLocation);
     }
 
-    @PostMapping("getOverviewRoot")
+    @PostMapping("/getOverviewRoot")
     @ResponseBody
     public Map<String, List<Map<String, String>>> getOverviewRoot(@RequestParam(value = "email") String email){
         logger.info("getOverviewRoot("+email+")");
         return _NaviService.getOverviewRoot(email);
     }
 
-    @PostMapping("getAnalysisResult")
+    @PostMapping("/getAnalysisResult")
     @ResponseBody
     public Map<String, String> getAnalysisResult(@RequestParam("email") String email){
         logger.info("getAnalysisResult("+email+")");

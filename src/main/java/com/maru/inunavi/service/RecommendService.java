@@ -127,8 +127,10 @@ public class RecommendService {
             if(!classTime.equals("-")){
                 st = new StringTokenizer(classTime);
                 while (st.hasMoreTokens()) {
-                    int time = Integer.parseInt(st.nextToken("-"));
-                    userClassTime[time] = 1;
+                    int _start = Integer.parseInt(st.nextToken("-"));
+                    int _end = Integer.parseInt(st.nextToken("-"));
+                    for(int time=_start; time<=_end; time++)
+                        userClassTime[time] = 1;
                 }
             }
         }
