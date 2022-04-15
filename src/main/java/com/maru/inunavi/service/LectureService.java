@@ -244,7 +244,7 @@ public class LectureService {
         return _AllLectureRepository.findAll();
     }
 
-    public List<Lecture> selectLecture(String main_keyword, String keyword_option, String major_option, String cse_option, String sort_option, String grade_option, String category_option, String score_option) {
+    public List<Map<String, String>> selectLecture(String main_keyword, String keyword_option, String major_option, String cse_option, String sort_option, String grade_option, String category_option, String score_option) {
         main_keyword = main_keyword.substring(1,main_keyword.length()-1);
         keyword_option = keyword_option.substring(1,keyword_option.length()-1);
         major_option = major_option.substring(1,major_option.length()-1);
@@ -256,7 +256,7 @@ public class LectureService {
 
         // sort_option
         List<Lecture> tmp = new ArrayList<Lecture>();
-        List<Lecture> result = new ArrayList<Lecture>();
+        List<Map<String, String>> result = new ArrayList<>();
         if(sort_option.equals("과목코드"))
             tmp = _AllLectureRepository.findAllByOrderByNumberAsc();
         else if(sort_option.equals("과목명"))
@@ -335,7 +335,64 @@ public class LectureService {
             if(!score_option.equals("전체") && score_check[Integer.parseInt(now.getPoint())] == 0)
                 continue;
 
-            result.add(now);
+            Map<String, String> retMap = new HashMap<>();
+            retMap.put("id",Integer.toString(now.getId()));
+            retMap.put("department",now.getDepartment());
+            retMap.put("grade",now.getGrade());
+            retMap.put("category",now.getCategory());
+            retMap.put("number",now.getNumber());
+            retMap.put("lecturename",now.getLecturename());
+            retMap.put("professor",now.getProfessor());
+            retMap.put("classroom_raw",now.getClassroom_raw());
+            retMap.put("classtime_raw",now.getClasstime_raw());
+            String __CLASSROOM__ = now.getClassroom();
+            if(__CLASSROOM__.length()>2)
+                retMap.put("classroom",__CLASSROOM__.substring(0,__CLASSROOM__.length()-1));
+            else retMap.put("classroom",__CLASSROOM__);
+            retMap.put("classtime",now.getClasstime());
+            retMap.put("how",now.getHow());
+            retMap.put("point",now.getPoint());
+
+            String __CLASSTIME__ = now.getClasstime();
+            String __RETCLASSTIME__ = "";
+            if(__CLASSTIME__.equals("-")){
+                retMap.put("realTime","-");
+                result.add(retMap);
+            }
+            else{
+                __CLASSTIME__ = __CLASSTIME__.replaceAll(",","-");
+                StringTokenizer st = new StringTokenizer(__CLASSTIME__);
+                while(st.hasMoreTokens()){
+                    int start = Integer.parseInt(st.nextToken("-"));
+                    int end = Integer.parseInt(st.nextToken("-"));
+
+                    int dayOfWeek = start/48;
+                    int startHour = (start%48)/2;
+                    int startHalf = (start%2);
+                    int endHour = (end%48)/2 + 1;
+                    int endHalf = ~(end%2);
+
+                    switch(dayOfWeek){
+                        case 0: __RETCLASSTIME__+="월 "; break;
+                        case 1: __RETCLASSTIME__+="화 "; break;
+                        case 2: __RETCLASSTIME__+="수 "; break;
+                        case 3: __RETCLASSTIME__+="목 "; break;
+                        case 4: __RETCLASSTIME__+="금 "; break;
+                        case 5: __RETCLASSTIME__+="토 "; break;
+                        case 6: __RETCLASSTIME__+="일 "; break;
+                    }
+
+                    __RETCLASSTIME__ += Integer.toString(startHour);
+                    __RETCLASSTIME__ += ":";
+                    __RETCLASSTIME__ += startHalf==1 ? "30 - " : "00 - ";
+                    __RETCLASSTIME__ += Integer.toString(endHour);
+                    __RETCLASSTIME__ += ":";
+                    __RETCLASSTIME__ += endHalf==1 ? "30, " : "00, ";
+                }
+                __RETCLASSTIME__ = __RETCLASSTIME__.substring(0,__RETCLASSTIME__.length()-2);
+                retMap.put("realTime",__RETCLASSTIME__);
+            }
+            result.add(retMap);
         }
         return result;
     }

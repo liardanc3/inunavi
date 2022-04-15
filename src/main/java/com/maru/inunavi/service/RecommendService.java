@@ -86,14 +86,15 @@ public class RecommendService {
             return this.similarityPoint < p.similarityPoint ? 1 : -1;
         }
     }
-    public Map<String, List<Lecture>> getRecommendLecture(String email) {
-        Map<String, List<Lecture>> retMap = new HashMap<>();
+    public Map<String, List<Map<String, String>>> getRecommendLecture(String email) {
+        Map<String, List<Map<String, String>>> retMap = new HashMap<>();
+
+        List<Map<String, String>> recommendLectureList = new ArrayList<>();
 
         // 유저가 듣는 수업 확인
         List<UserLecture> userLectureList = _UserLectureRepository.findAllByEmail(email);
         if(userLectureList.size()==0){
-            List<Lecture> retList = new ArrayList<>();
-            retMap.put("response",retList);
+            retMap.put("response",recommendLectureList);
             return retMap;
         }
 
@@ -147,7 +148,6 @@ public class RecommendService {
 
 
         // 상위 4개 추출
-        List<Lecture> recommendLectureList = new ArrayList<>();
         while(!pq.isEmpty() && recommendLectureList.size() < 4){
             int lectureIdx = pq.peek().idx;
             int similarityPoint = pq.peek().similarityPoint;
@@ -189,9 +189,65 @@ public class RecommendService {
             if(!major.equals("교양") && !major.equals("일선") && !major.equals(userMajor))
                 continue;
 
-            recommendLectureList.add(_Lecture);
-        }
+            Map<String, String> rretMap = new HashMap<>();
+            rretMap.put("id", Integer.toString(_Lecture.getId()));
+            rretMap.put("department", _Lecture.getDepartment());
+            rretMap.put("grade", _Lecture.getGrade());
+            rretMap.put("category", _Lecture.getCategory());
+            rretMap.put("number", _Lecture.getNumber());
+            rretMap.put("lecturename", _Lecture.getLecturename());
+            rretMap.put("professor", _Lecture.getProfessor());
+            rretMap.put("classroom_raw", _Lecture.getClassroom_raw());
+            rretMap.put("classtime_raw", _Lecture.getClasstime_raw());
+            String __CLASSROOM__ = _Lecture.getClassroom();
+            if(__CLASSROOM__.length()>2)
+                rretMap.put("classroom",__CLASSROOM__.substring(0,__CLASSROOM__.length()-1));
+            else rretMap.put("classroom",__CLASSROOM__);
+            rretMap.put("classtime", _Lecture.getClasstime());
+            rretMap.put("how", _Lecture.getHow());
+            rretMap.put("point", _Lecture.getPoint());
 
+            String __CLASSTIME__ = _Lecture.getClasstime();
+            String __RETCLASSTIME__ = "";
+            if (__CLASSTIME__.equals("-")) {
+                rretMap.put("realTime", "-");
+                recommendLectureList.add(rretMap);
+            }
+            else {
+                __CLASSTIME__ = __CLASSTIME__.replaceAll(",", "-");
+                StringTokenizer sst = new StringTokenizer(__CLASSTIME__);
+                while (sst.hasMoreTokens()) {
+                    int start = Integer.parseInt(sst.nextToken("-"));
+                    int end = Integer.parseInt(sst.nextToken("-"));
+
+                    int dayOfWeek = start / 48;
+                    int startHour = (start % 48) / 2;
+                    int startHalf = (start % 2);
+                    int endHour = (end % 48) / 2 + 1;
+                    int endHalf = ~(end % 2);
+
+                    switch (dayOfWeek) {
+                        case 0: __RETCLASSTIME__ += "월 ";break;
+                        case 1: __RETCLASSTIME__ += "화 ";break;
+                        case 2: __RETCLASSTIME__ += "수 ";break;
+                        case 3: __RETCLASSTIME__ += "목 ";break;
+                        case 4: __RETCLASSTIME__ += "금 ";break;
+                        case 5: __RETCLASSTIME__ += "토 ";break;
+                        case 6: __RETCLASSTIME__ += "일 ";break;
+                    }
+
+                    __RETCLASSTIME__ += Integer.toString(startHour);
+                    __RETCLASSTIME__ += ":";
+                    __RETCLASSTIME__ += startHalf == 1 ? "30 - " : "00 - ";
+                    __RETCLASSTIME__ += Integer.toString(endHour);
+                    __RETCLASSTIME__ += ":";
+                    __RETCLASSTIME__ += endHalf == 1 ? "30, " : "00, ";
+                }
+                __RETCLASSTIME__ = __RETCLASSTIME__.substring(0, __RETCLASSTIME__.length() - 2);
+                rretMap.put("realTime", __RETCLASSTIME__);
+                recommendLectureList.add(rretMap);
+            }
+        }
         retMap.put("response",recommendLectureList);
         return retMap;
     }

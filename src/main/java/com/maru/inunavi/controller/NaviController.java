@@ -34,7 +34,7 @@ public class NaviController {
         String ip = req.getHeader("X-Forwarded-For");
         if(ip==null) ip=req.getRemoteAddr();
         logger.info("updateNavi("+ip+")");
-        return _NaviService.updateNavi();
+        return _NaviService.updateNavi2();
     }
 
     @GetMapping("/admin/updatePlace")
@@ -57,7 +57,31 @@ public class NaviController {
         String ip = req.getHeader("X-Forwarded-For");
         if(ip==null) ip=req.getRemoteAddr();
         logger.info("getRootLive("+ip+")");
-        return _NaviService.getRootLive(startPlaceCode,endPlaceCode,startLocation,endLocation);
+//        double start = System.currentTimeMillis();
+//        Map<String, List<NodePath>> retMap = _NaviService.getRootLive(startPlaceCode,endPlaceCode,startLocation,endLocation);
+//        for(int i=0; i<2000; i++) retMap = _NaviService.getRootLive(startPlaceCode,endPlaceCode,startLocation,endLocation);
+//        double end = System.currentTimeMillis();
+//        logger.info("dijkstra 경과시간 : "+ (end-start)/1000.f );
+//        return retMap;*/
+        return _NaviService.AstarGetRootLive(startPlaceCode,endPlaceCode,startLocation,endLocation);
+    }
+
+    @GetMapping("/AstargetRootLive")
+    @ResponseBody
+    public Map<String, List<NodePath>> AstargetRootLive(@RequestParam(value = "startPlaceCode") String startPlaceCode,
+                                                   @RequestParam(value = "endPlaceCode") String endPlaceCode,
+                                                   @RequestParam(value = "startLocation") String startLocation,
+                                                   @RequestParam(value = "endLocation") String endLocation){
+        HttpServletRequest req = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();
+        String ip = req.getHeader("X-Forwarded-For");
+        if(ip==null) ip=req.getRemoteAddr();
+        logger.info("AstargetRootLive("+ip+")");
+        double start = System.currentTimeMillis();
+        Map<String, List<NodePath>> retMap = _NaviService.AstarGetRootLive(startPlaceCode,endPlaceCode,startLocation,endLocation);
+        for(int i=0; i<2000; i++) retMap = _NaviService.AstarGetRootLive(startPlaceCode,endPlaceCode,startLocation,endLocation);
+        double end = System.currentTimeMillis();
+        logger.info("Astar 경과시간 : "+ (end-start)/1000.f );
+        return retMap;
     }
 
     @PostMapping("/getNextPlace")

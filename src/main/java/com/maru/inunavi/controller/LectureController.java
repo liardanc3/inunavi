@@ -15,6 +15,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 import javax.servlet.http.HttpServletRequest;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
@@ -56,7 +57,7 @@ public class LectureController {
 
     @GetMapping("/selectLecture")
     @ResponseBody
-    public HashMap<String,List<Lecture>> selectLecture(@RequestParam(value = "main_keyword") String main_keyword,
+    public Map<String,List<Map<String, String>>> selectLecture(@RequestParam(value = "main_keyword") String main_keyword,
                                                        @RequestParam(value = "keyword_option") String keyword_option,
                                                        @RequestParam(value = "major_option") String major_option,
                                                        @RequestParam(value = "cse_option") String cse_option,
@@ -68,8 +69,8 @@ public class LectureController {
         String ip = req.getHeader("X-Forwarded-For");
         if(ip==null) ip=req.getRemoteAddr();
         logger.info("selectLecture("+ip+")");
-        List<Lecture> LL = _LectureService.selectLecture(main_keyword,keyword_option,major_option,cse_option,sort_option,grade_option,category_option,score_option);
-        HashMap<String,List<Lecture>> result = new HashMap<>();
+        List<Map<String,String>> LL = _LectureService.selectLecture(main_keyword,keyword_option,major_option,cse_option,sort_option,grade_option,category_option,score_option);
+        Map<String, List<Map<String, String>>> result = new HashMap<>();
         result.put("response",LL);
         return result;
     }

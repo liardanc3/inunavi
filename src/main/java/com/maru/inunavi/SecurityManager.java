@@ -9,9 +9,11 @@ public class SecurityManager extends WebSecurityConfigurerAdapter {
 
     @Override
     public void configure(HttpSecurity http) throws Exception {
+        http.csrf().disable();
         http.authorizeRequests()
-                .antMatchers("/admin/**").authenticated();
-        http.formLogin();
+                .antMatchers("/admin/**").authenticated()
+                .anyRequest().permitAll()
+                .and()
+                .formLogin();
     }
-
 }

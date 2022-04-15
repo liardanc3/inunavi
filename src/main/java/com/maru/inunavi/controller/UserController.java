@@ -66,7 +66,7 @@ public class UserController {
 
     @RequestMapping(value = "/user/select/class", method = RequestMethod.POST)
     @ResponseBody
-    public Map<String, ArrayList<Lecture>> selectClass(HttpServletRequest request) {
+    public Map<String, List<Map<String, String>>> selectClass(HttpServletRequest request) {
         String email = request.getParameter("email");
         logger.info("selectClass("+email+")");
         return _UserService.showMyLecture(email);

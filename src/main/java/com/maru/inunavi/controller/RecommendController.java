@@ -23,7 +23,7 @@ public class RecommendController {
 
     @PostMapping("/getRecommendLecture")
     @ResponseBody
-    public Map<String, List<Lecture>> getRecommendLecture(@RequestParam("email") String email){
+    public Map<String, List<Map<String, String>>> getRecommendLecture(@RequestParam("email") String email){
         logger.info("getRecommendLecture("+email+")");
         return _RecommendService.getRecommendLecture(email);
     }
