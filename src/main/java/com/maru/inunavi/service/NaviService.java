@@ -307,7 +307,6 @@ public class NaviService {
                 // placeCode title sort distance location time callNum 비고
                 for (int i = 0; i <= 7; i++) {
                     String tmp = s.nextToken("\t");
-                    System.out.println(tmp);
                     if(tmp.charAt(0)=='"')
                         tmp = tmp.substring(1,tmp.length()-1);
                     csv.add(tmp);
@@ -322,6 +321,8 @@ public class NaviService {
         _PlaceRepository.saveAll(PL);
         return _PlaceRepository.findAll();
     }
+
+    // 폐기
     public List<Navi> updateNavi() {
 
         _NaviRepository.deleteAll();
@@ -430,7 +431,6 @@ public class NaviService {
             BufferedReader bufReader = new BufferedReader(fileReader);
 
             String line = "";
-            line = bufReader.readLine();
             while ((line = bufReader.readLine()) != null) {
 
                 int idx = placeCode.size() + 1;
@@ -438,12 +438,11 @@ public class NaviService {
                 List<String> csv = new ArrayList<>();
                 StringTokenizer s = new StringTokenizer(line);
 
-                // NULL, NULL, NULL, nearNode, NULL, placeCode, Lo, La, NULL
-                for (int i = 0; i <= 8; i++) {
-                    if(i==3 || i==5 || i==6 || i==7) {
-                        String tmp = s.nextToken("\t");
+                // NULL, NULL, NULL, nearNode, NULL, placeCode, NULL, Lo, La, NULL
+                for (int i = 0; i <=9; i++) {
+                    String tmp = s.nextToken("\t");
+                    if(i==3 || i==5 || i==7 || i==8)
                         csv.add(tmp);
-                    }
                 }
 
                 // nearNode
@@ -453,6 +452,7 @@ public class NaviService {
                 StringTokenizer st = new StringTokenizer(_nearNode);
                 while(st.hasMoreTokens()){
                     String token = st.nextToken(",");
+                    token = token.replaceAll(" ","");
                     int nearNodeNum = Integer.parseInt(token);
                     visited[idx][nearNodeNum]=1;
                     visited[nearNodeNum][idx]=1;
@@ -465,8 +465,8 @@ public class NaviService {
                 placeCode.add(_placeCode);
 
                 // La Lo
-                String La = csv.get(2);
-                String Lo = csv.get(3);
+                String Lo = csv.get(2);
+                String La = csv.get(3);
                 String _epsg4326 = La + " " + Lo;
                 epsg4326.add(_epsg4326);
                 epsg3857.add("-");
@@ -477,13 +477,16 @@ public class NaviService {
 
         List<Navi> retNaviList = new ArrayList<>();
 
+        System.out.println(placeCode.size());
         for(int i=1; i<=placeCode.size(); i++){
             // nearNode
             String _nearNode = "";
             for(int j=1; j<=placeCode.size(); j++) {
-                if(visited[i][j]==1) _nearNode += Integer.toString(j) + ",";
-            } _nearNode = _nearNode.substring(0,_nearNode.length()-1);
-
+                if(i==1) System.out.println(i + "," + j + " : " + visited[i][j]);
+                if(visited[i][j]==1)
+                    _nearNode += Integer.toString(j) + ",";
+            }
+            _nearNode = _nearNode.substring(0,_nearNode.length()-1);
             Navi _Navi = new Navi(_nearNode,"-",epsg4326.get(i-1),placeCode.get(i-1));
             retNaviList.add(_Navi);
         }
