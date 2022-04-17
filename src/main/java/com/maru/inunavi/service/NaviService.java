@@ -166,6 +166,8 @@ public class NaviService {
         int idx = 0;
         int[] pathTrace = new int[len+2];
         double[] distArray = new double[len+2];
+        int[] visited = new int[len+2];
+        visited[src]=1;
         ArrayList<Navi> naviList = new ArrayList<>();
         naviList.addAll(_NaviRepository.findAll());
         for(int i=1; i<distArray.length; i++)
@@ -178,6 +180,7 @@ public class NaviService {
         while(!pq.isEmpty()){
             double dist = pq.peek().getDist();
             int now = pq.peek().getNode();
+
             pq.remove();
 
             for(int i=0; i<dst.size(); i++){
@@ -192,18 +195,18 @@ public class NaviService {
             if(dist < distArray[now]) continue;
 
             String now_Epsg4326 = epsg4326List.get(now-1);
-            now_Epsg4326 = now_Epsg4326.substring(1,now_Epsg4326.length()-1);
 
             String nearNode = naviList.get(now-1).getNearNode();
             StringTokenizer s = new StringTokenizer(nearNode);
             while(s.hasMoreTokens()){
                 int next = Integer.parseInt(s.nextToken(","));
                 if(next==0) continue;
+                if(visited[next]==1) continue;
 
                 String next_Epsg4326 = epsg4326List.get(next-1);
-                next_Epsg4326 = next_Epsg4326.substring(1,next_Epsg4326.length()-1);
                 double _dist = distanceNode(now_Epsg4326,next_Epsg4326);
                 if(dist+_dist < distArray[next]){
+                    visited[next]=1;
                     pathTrace[next]=now;
                     distArray[next]=dist+_dist;
                     pq.add(new pair(dist + _dist, next));
@@ -224,7 +227,6 @@ public class NaviService {
             st.pop();
         }
         path = path.substring(0,path.length()-1);
-
 
         String _isArrived = dist < 15 ? "true" : "false";
         NodePath _NodePath = new NodePath("",_isArrived,dist,path);
@@ -261,10 +263,10 @@ public class NaviService {
         try{
             StringTokenizer s = new StringTokenizer(_src);
             StringTokenizer d = new StringTokenizer(_dst);
-            double lat1 = Double.parseDouble(s.nextToken(","));
-            double lng1 = Double.parseDouble(s.nextToken(","));
-            double lat2 = Double.parseDouble(d.nextToken(","));
-            double lng2 = Double.parseDouble(d.nextToken(","));
+            double lat1 = Double.parseDouble(s.nextToken(", "));
+            double lng1 = Double.parseDouble(s.nextToken(", "));
+            double lat2 = Double.parseDouble(d.nextToken(", "));
+            double lng2 = Double.parseDouble(d.nextToken(", "));
             double radius = 6371;
             double toRadian = Math.PI / 180;
             double DLa = Math.abs(lat2 - lat1) * toRadian;
@@ -323,88 +325,88 @@ public class NaviService {
     }
 
     // 폐기
-    public List<Navi> updateNavi() {
-
-        _NaviRepository.deleteAll();
-        _NaviRepository.deleteINCREMENT();
-        _NodePathRepository.deleteAll();
-        _NodePathRepository.deleteINCREMENT();
-
-        int visited[][] = new int[550][550];
-
-        List<String> epsg3857 = new ArrayList<>();
-        List<String> epsg4326 = new ArrayList<>();
-        List<String> placeCode = new ArrayList<>();
-
-        try {
-            InputStream inputStream = new ClassPathResource("_ALLNODE.txt").getInputStream();
-            File file =File.createTempFile("_ALLNODE",".txt");
-            try {
-                FileUtils.copyInputStreamToFile(inputStream, file);
-            } finally {
-                IOUtils.closeQuietly(inputStream);
-            }
-            FileReader fileReader = new FileReader(file);
-            BufferedReader bufReader = new BufferedReader(fileReader);
-
-            String line = "";
-            line = bufReader.readLine();
-            while ((line = bufReader.readLine()) != null) {
-
-                List<String> csv = new ArrayList<>();
-                StringTokenizer s = new StringTokenizer(line);
-
-                // nodeNum, nearNode, placeCode
-                for (int i = 0; i <= 3; i++) {
-                    String tmp = s.nextToken("\t");
-                    csv.add(tmp);
-                }
-
-                // nearNode
-                String _nearNode = csv.get(1);
-                if(_nearNode.charAt(0)=='"')
-                    _nearNode = _nearNode.substring(1,_nearNode.length()-1);
-                StringTokenizer tmp = new StringTokenizer(_nearNode);
-                while(tmp.hasMoreTokens()){
-                    String _tmp = tmp.nextToken(",");
-                    int next = Integer.parseInt(_tmp);
-                    visited[placeCode.size()+1][next] = 1;
-                    visited[next][placeCode.size()+1] = 1;
-                }
-
-                // 좌표계 변환
-                String _epsg3857 = csv.get(2).substring(1,csv.get(2).length()-1);
-                String _epsg4326 = epsg3857_to_epsg4326(_epsg3857);
-                epsg3857.add(_epsg3857);
-                epsg4326.add(_epsg4326);
-
-                // placeCode
-                String _placeCode = csv.get(3);
-                if(_placeCode.charAt(0)=='"')
-                    _placeCode = _placeCode.substring(1,_placeCode.length()-1);
-                placeCode.add(_placeCode);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        List<Navi> naviList = new ArrayList<>();
-        int len = placeCode.size();
-        for(int i=1; i<=len; i++){
-            String _nearNode = "";
-            for(int j=1; j<=len; j++){
-                if(visited[i][j]==1)
-                    _nearNode+=j+",";
-            }
-            if(_nearNode.charAt(_nearNode.length()-1)==',')
-                _nearNode=_nearNode.substring(0,_nearNode.length()-1);
-            Navi _Navi = new Navi(_nearNode,epsg3857.get(i-1),epsg4326.get(i-1),placeCode.get(i-1));
-            naviList.add(_Navi);
-        }
-
-        _NaviRepository.saveAll(naviList);
-        return _NaviRepository.findAll();
-    }
+//    public List<Navi> updateNavi() {
+//
+//        _NaviRepository.deleteAll();
+//        _NaviRepository.deleteINCREMENT();
+//        _NodePathRepository.deleteAll();
+//        _NodePathRepository.deleteINCREMENT();
+//
+//        int visited[][] = new int[550][550];
+//
+//        List<String> epsg3857 = new ArrayList<>();
+//        List<String> epsg4326 = new ArrayList<>();
+//        List<String> placeCode = new ArrayList<>();
+//
+//        try {
+//            InputStream inputStream = new ClassPathResource("_ALLNODE.txt").getInputStream();
+//            File file =File.createTempFile("_ALLNODE",".txt");
+//            try {
+//                FileUtils.copyInputStreamToFile(inputStream, file);
+//            } finally {
+//                IOUtils.closeQuietly(inputStream);
+//            }
+//            FileReader fileReader = new FileReader(file);
+//            BufferedReader bufReader = new BufferedReader(fileReader);
+//
+//            String line = "";
+//            line = bufReader.readLine();
+//            while ((line = bufReader.readLine()) != null) {
+//
+//                List<String> csv = new ArrayList<>();
+//                StringTokenizer s = new StringTokenizer(line);
+//
+//                // nodeNum, nearNode, placeCode
+//                for (int i = 0; i <= 3; i++) {
+//                    String tmp = s.nextToken("\t");
+//                    csv.add(tmp);
+//                }
+//
+//                // nearNode
+//                String _nearNode = csv.get(1);
+//                if(_nearNode.charAt(0)=='"')
+//                    _nearNode = _nearNode.substring(1,_nearNode.length()-1);
+//                StringTokenizer tmp = new StringTokenizer(_nearNode);
+//                while(tmp.hasMoreTokens()){
+//                    String _tmp = tmp.nextToken(",");
+//                    int next = Integer.parseInt(_tmp);
+//                    visited[placeCode.size()+1][next] = 1;
+//                    visited[next][placeCode.size()+1] = 1;
+//                }
+//
+//                // 좌표계 변환
+//                String _epsg3857 = csv.get(2).substring(1,csv.get(2).length()-1);
+//                String _epsg4326 = epsg3857_to_epsg4326(_epsg3857);
+//                epsg3857.add(_epsg3857);
+//                epsg4326.add(_epsg4326);
+//
+//                // placeCode
+//                String _placeCode = csv.get(3);
+//                if(_placeCode.charAt(0)=='"')
+//                    _placeCode = _placeCode.substring(1,_placeCode.length()-1);
+//                placeCode.add(_placeCode);
+//            }
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//
+//        List<Navi> naviList = new ArrayList<>();
+//        int len = placeCode.size();
+//        for(int i=1; i<=len; i++){
+//            String _nearNode = "";
+//            for(int j=1; j<=len; j++){
+//                if(visited[i][j]==1)
+//                    _nearNode+=j+",";
+//            }
+//            if(_nearNode.charAt(_nearNode.length()-1)==',')
+//                _nearNode=_nearNode.substring(0,_nearNode.length()-1);
+//            Navi _Navi = new Navi(_nearNode,epsg3857.get(i-1),epsg4326.get(i-1),placeCode.get(i-1));
+//            naviList.add(_Navi);
+//        }
+//
+//        _NaviRepository.saveAll(naviList);
+//        return _NaviRepository.findAll();
+//    }
 
     public List<Navi> updateNavi2() {
 
@@ -413,7 +415,7 @@ public class NaviService {
         _NodePathRepository.deleteAll();
         _NodePathRepository.deleteINCREMENT();
 
-        int visited[][] = new int[1000][1000];
+        int visited[][] = new int[820][820];
 
         List<String> epsg3857 = new ArrayList<>();
         List<String> epsg4326 = new ArrayList<>();
@@ -434,7 +436,6 @@ public class NaviService {
             while ((line = bufReader.readLine()) != null) {
 
                 int idx = placeCode.size() + 1;
-
                 List<String> csv = new ArrayList<>();
                 StringTokenizer s = new StringTokenizer(line);
 
@@ -467,7 +468,7 @@ public class NaviService {
                 // La Lo
                 String Lo = csv.get(2);
                 String La = csv.get(3);
-                String _epsg4326 = La + " " + Lo;
+                String _epsg4326 = La + ", " + Lo;
                 epsg4326.add(_epsg4326);
                 epsg3857.add("-");
             }
@@ -477,12 +478,10 @@ public class NaviService {
 
         List<Navi> retNaviList = new ArrayList<>();
 
-        System.out.println(placeCode.size());
         for(int i=1; i<=placeCode.size(); i++){
             // nearNode
             String _nearNode = "";
             for(int j=1; j<=placeCode.size(); j++) {
-                if(i==1) System.out.println(i + "," + j + " : " + visited[i][j]);
                 if(visited[i][j]==1)
                     _nearNode += Integer.toString(j) + ",";
             }
@@ -510,6 +509,7 @@ public class NaviService {
                 minDist = _dist;
             }
         }
+
         List<Place> requestPlaceList = new ArrayList<>();
 
         for (Place place : placeList) {
@@ -535,6 +535,7 @@ public class NaviService {
                 }
 
                 double dist = dijkstraPartial(nowNode, _dstNodeNumList).getDist();
+
                 double distFromStart = distanceNode(myLocation, _NaviRepository.getById(nowNode).getEpsg4326());
                 Place _Place = place;
                 _Place.setDistance(Double.toString(dist + distFromStart));
@@ -1233,31 +1234,31 @@ public class NaviService {
                 Double minDist = 1e9;
                 int minNodeNum = -1;
 
-                NodePath _NodePath = dijkstraPartial(252,dstNodeNumList);
+                NodePath _NodePath = dijkstraPartial(67,dstNodeNumList);
                 if(_NodePath.getDist() < minDist){
                     minDist = _NodePath.getDist();
-                    minNodeNum = 252;
+                    minNodeNum = 67;
                 }
-                _NodePath = dijkstraPartial(455,dstNodeNumList);
+                _NodePath = dijkstraPartial(60,dstNodeNumList);
                 if(_NodePath.getDist() < minDist){
                     minDist = _NodePath.getDist();
-                    minNodeNum = 455;
+                    minNodeNum = 60;
                 }
-                _NodePath = dijkstraPartial(17,dstNodeNumList);
+                _NodePath = dijkstraPartial(22,dstNodeNumList);
                 if(_NodePath.getDist() < minDist){
                     minDist = _NodePath.getDist();
-                    minNodeNum = 17;
+                    minNodeNum = 22;
                 }
 
                 _NodePath = dijkstraPartial(minNodeNum, dstNodeNumList);
                 String startLectureName="";
                 String endLectureName = lectureNameArrByTime[nextTime];
 
-                if(minNodeNum==252)
+                if(minNodeNum==67)
                     startLectureName = "공과대학(버스정류장)";
-                if(minNodeNum==455)
+                if(minNodeNum==60)
                     startLectureName = "자연과학대학(버스정류장)";
-                if(minNodeNum==17)
+                if(minNodeNum==22)
                     startLectureName = "정문(버스정류장)";
 
                 String endLectureTime = lectureTimeArrByTime[nextTime];

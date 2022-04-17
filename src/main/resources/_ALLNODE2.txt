@@ -1,4 +1,4 @@
-1	갈수있는 노드: 2<br>placeCode: -	#icon-1899-0288D1-labelson	2	갈수있는 노드	-	placeCode	126.6324409	37.3792948	0
+1	갈수있는 노드: -<br>placeCode: -	#icon-1899-0288D1-labelson	2	갈수있는 노드	-	placeCode	126.6324409	37.3792948	0
 2	갈수있는 노드: 1<br>placeCode: -	#icon-1899-0288D1-labelson	1	갈수있는 노드	-	placeCode	126.632592	37.3792338	0
 3	"갈수있는 노드: 1,2<br>placeCode: -"	#icon-1899-0288D1-labelson	"1,2"	갈수있는 노드	-	placeCode	126.6327496	37.379133	0
 4	"갈수있는 노드: 1,2,3<br>placeCode: -"	#icon-1899-0288D1-labelson	"1,2,3"	갈수있는 노드	-	placeCode	126.63277246178	37.3789866658986	0
@@ -23,10 +23,10 @@
 23	"갈수있는 노드: 21,22<br>placeCode: -"	#icon-1899-0288D1-labelson	"21,22"	갈수있는 노드	-	placeCode	126.634404266451	37.3780893647412	0
 24	"갈수있는 노드: 14,15<br>placeCode: -"	#icon-1899-0288D1-labelson	"14,15"	갈수있는 노드	-	placeCode	126.634140154286	37.3781962500177	0
 25	갈수있는 노드: <br>placeCode: -	#icon-1899-0288D1-labelson	"17,22"	갈수있는 노드	-	placeCode	126.634743	37.3778421	0
-26	"갈수있는 노드: 22, 25<br>placeCode: -"	#icon-1899-0288D1-labelson	"22,25"	갈수있는 노드	-	placeCode	126.634799666569	37.3778590977865	0
+26	"갈수있는 노드: 22, 25<br>placeCode: -"	#icon-1899-0288D1-labelson	"22, 25"	갈수있는 노드	-	placeCode	126.634799666569	37.3778590977865	0
 27	갈수있는 노드: 26<br>placeCode: -	#icon-1899-0288D1-labelson	26	갈수있는 노드	-	placeCode	126.635094762938	37.3776748229542	0
 28	갈수있는 노드: 27<br>placeCode: -	#icon-1899-0288D1-labelson	27	갈수있는 노드	-	placeCode	126.635290770336	37.3775796281787	0
-29	"갈수있는 노드: 25, 27<br>placeCode: -"	#icon-1899-0288D1-labelson	"25,27"	갈수있는 노드	-	placeCode	126.635063020348	37.3776423828645	0
+29	"갈수있는 노드: 25, 27<br>placeCode: -"	#icon-1899-0288D1-labelson	"25, 27"	갈수있는 노드	-	placeCode	126.635063020348	37.3776423828645	0
 30	"갈수있는 노드: 28,29<br>placeCode: -"	#icon-1899-0288D1-labelson	"28,29"	갈수있는 노드	-	placeCode	126.635241951086	37.3775264065435	0
 31	"갈수있는 노드: 28,30<br>placeCode: -"	#icon-1899-0288D1-labelson	"28,30"	갈수있는 노드	-	placeCode	126.635495004799	37.377480001181	0
 32	"갈수있는 노드: 28,30,31<br>placeCode: -"	#icon-1899-0288D1-labelson	"28,30,31"	갈수있는 노드	-	placeCode	126.635436607789	37.377414812649	0
@@ -104,7 +104,7 @@
 104	"갈수있는 노드: 1,2,3,4,6,103<br>placeCode: -"	#icon-1899-0288D1-labelson	"1,2,3,4,6,103"	갈수있는 노드	-	placeCode	126.6324557	37.3789792	0
 105	"갈수있는 노드: 1,2,3,4,6,103,104<br>placeCode: -"	#icon-1899-0288D1-labelson	"1,2,3,4,6,103,104"	갈수있는 노드	-	placeCode	126.6325652	37.3791034	0
 106	"갈수있는 노드: 1,2,3,4,103,104,105<br>placeCode: -"	#icon-1899-0288D1-labelson	"1,2,3,4,103,104,105"	갈수있는 노드	-	placeCode	126.6326765	37.3788782	0
-107	"갈수있는 노드: 1,2,3,4,105,106,104<br>placeCode: "	#icon-1899-0288D1-labelson	"1,2,3,4,105,106,104"	갈수있는 노드	-	placeCode	126.6327364	37.3787183	0
+107	"갈수있는 노드: 1,2,3,4,105,106,104<br>placeCode: -"	#icon-1899-0288D1-labelson	"1,2,3,4,105,106,104"	갈수있는 노드	-	placeCode	126.6327364	37.3787183	0
 108	갈수있는 노드: 107<br>placeCode: -	#icon-1899-0288D1-labelson	107	갈수있는 노드	-	placeCode	126.6328283	37.3785512	0
 109	갈수있는 노드: 108<br>placeCode: -	#icon-1899-0288D1-labelson	108	갈수있는 노드	-	placeCode	126.6329141	37.3783914	0
 110	"갈수있는 노드: 108,109<br>placeCode: -"	#icon-1899-0288D1-labelson	"108,109"	갈수있는 노드	-	placeCode	126.6331502	37.3782976	0
@@ -159,7 +159,7 @@
 159	"갈수있는 노드: 157,158<br>placeCode: -"	#icon-1899-0288D1-labelson	"157,158"	갈수있는 노드	-	placeCode	126.6343933	37.3774829	0
 160	"갈수있는 노드: 131,159<br>placeCode: -"	#icon-1899-0288D1-labelson	"131,159"	갈수있는 노드	-	placeCode	126.6343106	37.3772815	0
 161	갈수있는 노드: 34<br>placeCode: -	#icon-1899-0288D1-labelson	34	갈수있는 노드	-	placeCode	126.6348202	37.3773817	0
-162	갈수있는 노드: <br>placeCode: -	#icon-1899-0288D1-labelson	"159,161"	갈수있는 노드	-	placeCode	126.6347364	37.3772812	0
+162	"갈수있는 노드: 159,161<br>placeCode: -"	#icon-1899-0288D1-labelson	"159,161"	갈수있는 노드	-	placeCode	126.6347364	37.3772812	0
 163	"갈수있는 노드: 158,161<br>placeCode: -"	#icon-1899-0288D1-labelson	"158,161"	갈수있는 노드	-	placeCode	126.6346586	37.3774754	0
 164	갈수있는 노드: 162<br>placeCode: -	#icon-1899-0288D1-labelson	162	갈수있는 노드	-	placeCode	126.634759	37.3771487	0
 165	"갈수있는 노드: 152,153,164<br>placeCode: -"	#icon-1899-0288D1-labelson	"152,153,164"	갈수있는 노드	-	placeCode	126.6348408	37.3770507	0
@@ -397,7 +397,7 @@
 397	"갈수있는 노드: 387,389,390,395,396<br>placeCode: SM<br>"	#icon-1899-0288D1-labelson	"387,389,390,395,396"	갈수있는 노드	SM	placeCode	126.6323935	37.3749611	0
 398	"갈수있는 노드: 389,390,395,396,397<br>placeCode: -"	#icon-1899-0288D1-labelson	"389,390,395,396,397"	갈수있는 노드	-	placeCode	126.6326301	37.374876	0
 399	"갈수있는 노드: 389,390,395,396,397,398<br>placeCode: -"	#icon-1899-0288D1-labelson	"389,390,395,396,397,398"	갈수있는 노드	-	placeCode	126.6327219	37.3747223	0
-400	갈수있는 노드: <br>placeCode: -	#icon-1899-0288D1-labelson	"395,396,399"	갈수있는 노드	-	placeCode	126.6327431	37.3746369	0
+400	"갈수있는 노드: 395,396,399<br>placeCode: -"	#icon-1899-0288D1-labelson	"395,396,399"	갈수있는 노드	-	placeCode	126.6327431	37.3746369	0
 401	갈수있는 노드: 399<br>placeCode: -	#icon-1899-0288D1-labelson	399	갈수있는 노드	-	placeCode	126.6326412	37.374671	0
 402	갈수있는 노드: 401<br>placeCode: -	#icon-1899-0288D1-labelson	401	갈수있는 노드	-	placeCode	126.6323274	37.3744653	0
 403	갈수있는 노드: 400<br>placeCode: -	#icon-1899-0288D1-labelson	400	갈수있는 노드	-	placeCode	126.6326372	37.3744802	0
@@ -409,7 +409,7 @@
 409	"갈수있는 노드: 402,405,408<br>placeCode: -"	#icon-1899-0288D1-labelson	"402,405,408"	갈수있는 노드	-	placeCode	126.6321399	37.3742153	0
 410	"갈수있는 노드: 402,405,406,407,408<br>placeCode: -"	#icon-1899-0288D1-labelson	"402,405,406,407,408"	갈수있는 노드	-	placeCode	126.632459	37.374269	0
 411	"갈수있는 노드: 406,409,410<br>placeCode: -"	#icon-1899-0288D1-labelson	"406,409,410"	갈수있는 노드	-	placeCode	126.6323034	37.3741123	0
-412	갈수있는 노드: <br>placeCode: -	#icon-1899-0288D1-labelson	"407,409"	갈수있는 노드	-	placeCode	126.6319391	37.3740276	0
+412	"갈수있는 노드: 407,409<br>placeCode: -"	#icon-1899-0288D1-labelson	"407,409"	갈수있는 노드	-	placeCode	126.6319391	37.3740276	0
 413	"갈수있는 노드: 411,412<br>placeCode: -"	#icon-1899-0288D1-labelson	"411,412"	갈수있는 노드	-	placeCode	126.6321223	37.3739132	0
 414	갈수있는 노드: 412<br>placeCode: -	#icon-1899-0288D1-labelson	412	갈수있는 노드	-	placeCode	126.6318541	37.3739236	0
 415	"갈수있는 노드: 413,414<br>placeCode: -"	#icon-1899-0288D1-labelson	"413,414"	갈수있는 노드	-	placeCode	126.6320392	37.3738288	0
@@ -726,6 +726,7 @@
 726	"갈수있는 노드: 156,724<br>placeCode: -"	#icon-1899-0288D1-labelson	"156,724"	갈수있는 노드	-	placeCode	126.6349649	37.3760478	0
 727	"갈수있는 노드: 156,177,178,724,726<br>placeCode: -"	#icon-1899-0288D1-labelson	"156,177,178,724,726"	갈수있는 노드	-	placeCode	126.6348858	37.376197	0
 728	갈수있는 노드: 726<br>placeCode: CONGSNAT<br>	#icon-1899-0288D1-labelson	726	갈수있는 노드	CONGSNAT	placeCode	126.635213	37.3758975	0
+729	갈수있는 노드: 728<br>placeCode: FOODFHO	#icon-1899-0288D1-labelson	728	갈수있는 노드	FOODFHO	placeCode	126.6351942	37.375825	0
 730	"갈수있는 노드: 728,729<br>placeCode: -"	#icon-1899-0288D1-labelson	"728,729"	갈수있는 노드	-	placeCode	126.6353951	37.3758215	0
 731	"갈수있는 노드: 200,730<br>placeCode: -"	#icon-1899-0288D1-labelson	"200,730"	갈수있는 노드	-	placeCode	126.6355117	37.3757767	0
 732	"갈수있는 노드: 200,731<br>placeCode: -"	#icon-1899-0288D1-labelson	"200,731"	갈수있는 노드	-	placeCode	126.6355909	37.3758119	0
@@ -765,6 +766,7 @@
 766	"갈수있는 노드: 649,650<br>placeCode: SY2<br>"	#icon-1899-0288D1-labelson	"649,650"	갈수있는 노드	SY2	placeCode	126.6323462	37.372111	0
 767	갈수있는 노드: 667<br>placeCode: IGH	#icon-1899-0288D1-labelson	667	갈수있는 노드	IGH	placeCode	126.6318513	37.3728187	0
 768	갈수있는 노드: 266<br>placeCode: IGH	#icon-1899-0288D1-labelson	266	갈수있는 노드	IGH	placeCode	126.6319211	37.3729114	0
+769	갈수있는 노드: 268<br>placeCode: FOODSAL	#icon-1899-0288D1-labelson	268	갈수있는 노드	FOODSAL	placeCode	126.6316783	37.3729626	0
 770	갈수있는 노드: 669<br>placeCode: -	#icon-1899-0288D1-labelson	669	갈수있는 노드	-	placeCode	126.6309054	37.3725141	0
 771	갈수있는 노드: 668<br>placeCode: -	#icon-1899-0288D1-labelson	668	갈수있는 노드	-	placeCode	126.6316255	37.3724256	0
 772	"갈수있는 노드: 669<br>placeCode: CAFEMD,CONGSBIO"	#icon-1899-0288D1-labelson	669	갈수있는 노드	"CAFEMD,CONGSBIO"	placeCode	126.6311749	37.3725929	0
@@ -794,8 +796,6 @@
 796	"갈수있는 노드: 521,795<br>placeCode: -"	#icon-1899-0288D1-labelson	"521,795"	갈수있는 노드	-	placeCode	126.6305823	37.3755745	0
 797	갈수있는 노드: 509<br>placeCode: SV<br>	#icon-1899-0288D1-labelson	509	갈수있는 노드	SV	placeCode	126.6299962	37.3754093	0
 798	갈수있는 노드: 538<br>placeCode: SW	#icon-1899-0288D1-labelson	538	갈수있는 노드	SW	placeCode	126.6307928	37.3758569	0
-729	갈수있는 노드: 728<br>placeCode: FOODFHO	#icon-1899-0288D1-labelson	728	갈수있는 노드	FOODFHO	placeCode	126.6351942	37.375825	0
-769	갈수있는 노드: 268<br>placeCode: FOODSAL	#icon-1899-0288D1-labelson	268	갈수있는 노드	FOODSAL	placeCode	126.6316783	37.3729626	0
 799	"갈수있는 노드: 699,700<br>placeCode: FOODDUP<br>"	#icon-1899-0288D1-labelson	"699,700"	갈수있는 노드	FOODDUP	placeCode	126.6325928	37.3737572	0
 800	"갈수있는 노드: 340,341,342,685,790<br>placeCode: FOODSTU2,CAFEJJCF,IST2"	#icon-1899-0288D1-labelson	"340,341,342,685,790"	갈수있는 노드	"FOODSTU2,CAFEJJCF,IST2"	placeCode	126.6290905	37.3741979	0
 801	"갈수있는 노드: 487,493<br>placeCode: CONGSSCL"	#icon-1899-0288D1-labelson	"487,493"	갈수있는 노드	CONGSSCL	placeCode	126.6328936	37.375908	0
@@ -804,8 +804,8 @@
 804	갈수있는 노드: 502<br>placeCode: SO<br>	#icon-1899-0288D1-labelson	502	갈수있는 노드	SO	placeCode	126.6328934	37.3765213	0
 805	갈수있는 노드: 208<br>placeCode: IKD	#icon-1899-0288D1-labelson	208	갈수있는 노드	IKD	placeCode	126.6358071	37.3753593	0
 806	갈수있는 노드: 211<br>placeCode: IWA	#icon-1899-0288D1-labelson	211	갈수있는 노드	IWA	placeCode	126.6355355	37.3752424	0
+807	"갈수있는 노드: 770<br>placeCode: SY3,SMK29<br>"	#icon-1899-0288D1-labelson	808	갈수있는 노드	"SY3,SMK29"	placeCode	126.6308753	37.3723285	0
 808	"갈수있는 노드: 807,771<br>placeCode: SY3<br>"	#icon-1899-0288D1-labelson	"807,771"	갈수있는 노드	SY3	placeCode	126.6313406	37.3721315	0
-807	"갈수있는 노드: <br>placeCode: SY3,SMK29<br>"	#icon-1899-0288D1-labelson	808	갈수있는 노드	"SY3,SMK29"	placeCode	126.6308753	37.3723285	0
 809	"갈수있는 노드: 204,737<br>placeCode: SMK5<br>"	#icon-1899-0288D1-labelson	"204,737"	갈수있는 노드	SMK5	placeCode	126.6347769	37.3752923	0
 810	"갈수있는 노드: 711,326<br>placeCode: SMK14"	#icon-1899-0288D1-labelson	"711,326"	갈수있는 노드	SMK14	placeCode	126.6328073	37.3767337	0
 811	"갈수있는 노드: 705,312,707<br>placeCode: SMK15<br>"	#icon-1899-0288D1-labelson	"705,312,707"	갈수있는 노드	SMK15	placeCode	126.6317677	37.3756193	0

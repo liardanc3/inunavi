@@ -57,13 +57,7 @@ public class NaviController {
         String ip = req.getHeader("X-Forwarded-For");
         if(ip==null) ip=req.getRemoteAddr();
         logger.info("getRootLive("+ip+")");
-//        double start = System.currentTimeMillis();
-//        Map<String, List<NodePath>> retMap = _NaviService.getRootLive(startPlaceCode,endPlaceCode,startLocation,endLocation);
-//        for(int i=0; i<2000; i++) retMap = _NaviService.getRootLive(startPlaceCode,endPlaceCode,startLocation,endLocation);
-//        double end = System.currentTimeMillis();
-//        logger.info("dijkstra 경과시간 : "+ (end-start)/1000.f );
-//        return retMap;*/
-        return _NaviService.AstarGetRootLive(startPlaceCode,endPlaceCode,startLocation,endLocation);
+        return _NaviService.getRootLive(startPlaceCode,endPlaceCode,startLocation,endLocation);
     }
 
     @GetMapping("/AstargetRootLive")
@@ -76,12 +70,7 @@ public class NaviController {
         String ip = req.getHeader("X-Forwarded-For");
         if(ip==null) ip=req.getRemoteAddr();
         logger.info("AstargetRootLive("+ip+")");
-        double start = System.currentTimeMillis();
-        Map<String, List<NodePath>> retMap = _NaviService.AstarGetRootLive(startPlaceCode,endPlaceCode,startLocation,endLocation);
-        for(int i=0; i<2000; i++) retMap = _NaviService.AstarGetRootLive(startPlaceCode,endPlaceCode,startLocation,endLocation);
-        double end = System.currentTimeMillis();
-        logger.info("Astar 경과시간 : "+ (end-start)/1000.f );
-        return retMap;
+        return _NaviService.AstarGetRootLive(startPlaceCode,endPlaceCode,startLocation,endLocation);
     }
 
     @PostMapping("/getNextPlace")
