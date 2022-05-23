@@ -736,11 +736,11 @@
 736	"갈수있는 노드: 359,361,367,368,369<br>placeCode: SF<br>"	#icon-1899-0288D1-labelson	"359,361,367,368,369"	갈수있는 노드	SF	placeCode	126.634286	37.3756465	0
 737	"갈수있는 노드: 204,364<br>placeCode: SF<br>"	#icon-1899-0288D1-labelson	"204,364"	갈수있는 노드	SF	placeCode	126.6347849	37.3754546	0
 738	"갈수있는 노드: 204,364<br>placeCode: SF<br>"	#icon-1899-0288D1-labelson	"204,364"	갈수있는 노드	SF	placeCode	126.6349753	37.3756528	0
-739	"갈수있는 노드: 378,379<br>placeCode: ILB<br>"	#icon-1899-0288D1-labelson	"378,379"	갈수있는 노드	ILB	placeCode	126.6338686	37.3752441	0
+739	"갈수있는 노드: 378,379<br>placeCode: ILB,CONEMLIB<br>"	#icon-1899-0288D1-labelson	"378,379"	갈수있는 노드	"ILB,CONEMLIB"	placeCode	126.6338686	37.3752441	0
 740	"갈수있는 노드: 379,658,739<br>placeCode: CAFECDLIB<br>"	#icon-1899-0288D1-labelson	"379,658,739"	갈수있는 노드	CAFECDLIB	placeCode	126.6336889	37.3751226	0
 741	"갈수있는 노드: 656,657,658<br>placeCode: SH<br>"	#icon-1899-0288D1-labelson	"656,657,658"	갈수있는 노드	SH	placeCode	126.6335347	37.374806	0
 742	"갈수있는 노드: 395,396,656,657,659<br>placeCode: -"	#icon-1899-0288D1-labelson	"395,396,656,657,659"	갈수있는 노드	-	placeCode	126.633253	37.3745172	0
-743	갈수있는 노드: 222<br>placeCode: SH<br>	#icon-1899-0288D1-labelson	222	갈수있는 노드	SH	placeCode	126.6339289	37.3744789	0
+743	갈수있는 노드: 222<br>placeCode: SH,FOODCHD<br>	#icon-1899-0288D1-labelson	222	갈수있는 노드	"SH,FOODCHD"	placeCode	126.6339289	37.3744789	0
 744	갈수있는 노드: 222<br>placeCode: SH<br>	#icon-1899-0288D1-labelson	222	갈수있는 노드	SH	placeCode	126.6336808	37.3743094	0
 745	"갈수있는 노드: 394,656,657<br>placeCode: -"	#icon-1899-0288D1-labelson	"394,656,657"	갈수있는 노드	-	placeCode	126.6334913	37.3746686	0
 746	"갈수있는 노드: 222,743,745<br>placeCode: -"	#icon-1899-0288D1-labelson	"222,743,745"	갈수있는 노드	-	placeCode	126.6337448	37.3745162	0

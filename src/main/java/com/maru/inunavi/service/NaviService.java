@@ -415,7 +415,7 @@ public class NaviService {
         _NodePathRepository.deleteAll();
         _NodePathRepository.deleteINCREMENT();
 
-        int visited[][] = new int[820][820];
+        int visited[][] = new int[1000][1000];
 
         List<String> epsg3857 = new ArrayList<>();
         List<String> epsg4326 = new ArrayList<>();
