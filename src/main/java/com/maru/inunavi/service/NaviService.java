@@ -30,7 +30,6 @@ public class NaviService {
     private ArrayList<String> epsg4326List = new ArrayList<>();
     private ArrayList<String> placeCodeList = new ArrayList<>();
 
-
     class _pair implements Comparable<_pair>{
         private double dist;
         private int node;
@@ -40,7 +39,21 @@ public class NaviService {
             this.dist=dist; this.node=node;
             this.dst =dst;
 
-            double _heuristics = 10*distanceNode(epsg4326List.get(node),epsg4326List.get(dst.get(0)));
+            /// 맨해튼거리 * 1.2
+            String epsg4326src = epsg4326List.get(node);
+            String epsg4326dst = epsg4326List.get(dst.get(0));
+
+            String AA = epsg4326src;
+            StringTokenizer st1 = new StringTokenizer(AA);
+            String Axx = st1.nextToken(", ");
+
+            StringTokenizer st = new StringTokenizer(epsg4326dst);
+            String Cyy = st.nextToken(", ");
+
+            String BB = Axx+", "+Cyy;
+            String CC = epsg4326dst;
+
+            double _heuristics = 1.2*(distanceNode(AA,BB)+distanceNode(BB,CC));
 
             this.heuristics = dist + _heuristics;
         }
