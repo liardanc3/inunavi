@@ -74,7 +74,7 @@ public class Lecture {
         this.professor = csv.get(8);
         this.classroom_raw = csv.get(9);
         this.classtime_raw = csv.get(10);
-        this.how = "";
+        this.how = "-";
         this.point = csv.get(11);
         this.classroom = classroom;
         this.classtime = classtime;

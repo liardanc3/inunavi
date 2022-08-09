@@ -100,7 +100,6 @@ public class LectureService {
 
     public List<Lecture> allLecture(){
         return _AllLectureRepository.findAll();
-
     }
 
     public List<Lecture> updateLecture() {
@@ -264,8 +263,8 @@ public class LectureService {
             tmp = _AllLectureRepository.findAllByOrderByNumberAsc();
         else if(sort_option.equals("과목명"))
             tmp = _AllLectureRepository.findAllByOrderByLecturenameAsc();
-        else tmp = _AllLectureRepository.findAll();
-
+        else
+            tmp = _AllLectureRepository.findAll();
 
         for(int i=0; i<tmp.size(); i++){
             Lecture now = tmp.get(i);
@@ -358,10 +357,8 @@ public class LectureService {
 
             String __CLASSTIME__ = now.getClasstime();
             String __RETCLASSTIME__ = "";
-            if(__CLASSTIME__.equals("-")){
+            if(__CLASSTIME__.equals("-"))
                 retMap.put("realTime","-");
-                result.add(retMap);
-            }
             else{
                 __CLASSTIME__ = __CLASSTIME__.replaceAll(",","-");
                 StringTokenizer st = new StringTokenizer(__CLASSTIME__);
