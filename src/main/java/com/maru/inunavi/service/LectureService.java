@@ -44,6 +44,10 @@ public class LectureService {
         }
     }
 
+    public void deleteAllUserLecture(){
+        _UserLectureRepository.deleteAll();
+    }
+
     public HashMap<String, List<TimeTableInfo>> getTimeTableInfo(){
         HashMap<String, List<TimeTableInfo>> retInfo = new HashMap<>();
         Set<String> _majorSet = new HashSet<>();
@@ -87,7 +91,7 @@ public class LectureService {
             category+=it.next()+",";
         category=category.substring(0,category.length()-1);
 
-        TimeTableInfo _TimeTableInfo = new TimeTableInfo("2022","1",major,cse,category);
+        TimeTableInfo _TimeTableInfo = new TimeTableInfo("2022","2",major,cse,category);
         List<TimeTableInfo> retList = new ArrayList<>();
         retList.add(_TimeTableInfo);
         retInfo.put("response",retList);
@@ -129,14 +133,13 @@ public class LectureService {
                 StringTokenizer s = new StringTokenizer(line);
 
                 // 학과(부),학년,이수구분,학수번호,교과목명,교과목명(영문),담당교수,강의실,시간표,수업방법관리,수업방법관리(영어),학점
-                for (int i = 1; i <= 14 && s.hasMoreTokens(); i++) {
+                for (int i = 1; i <= 12 && s.hasMoreTokens(); i++) {
                     String tmp = s.nextToken("\t");
-                    if(i<=2 || i==8 || i==13) continue;
                     csv.add(tmp);
                 }
 
                 String _classroom = "", _classtime="";
-                String classroom_raw = csv.get(6), classtime_raw=csv.get(7);
+                String classroom_raw = csv.get(9), classtime_raw=csv.get(10);
 
                 String classname = csv.get(4);
                 if(classtime_raw.charAt(0) != '-'){

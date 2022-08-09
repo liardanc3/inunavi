@@ -31,5 +31,4 @@ public interface UserLectureRepository extends JpaRepository<UserLecture,Long> {
     @Modifying
     @Query("delete from userlecture m where m.email= :email")
     void deleteAllByEmail(String email);
-
 }

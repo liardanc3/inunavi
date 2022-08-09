@@ -66,16 +66,16 @@ public class Lecture {
     // 생성자
     public Lecture() {}
     public Lecture(List<String> csv, String classroom, String classtime) {
-        this.department = csv.get(0);
-        this.grade = csv.get(1);
-        this.category = csv.get(2);
-        this.number = csv.get(3);
-        this.lecturename = csv.get(4);
-        this.professor = csv.get(5);
-        this.classroom_raw = csv.get(6);
-        this.classtime_raw = csv.get(7);
-        this.how = csv.get(8);
-        this.point = csv.get(9);
+        this.department = csv.get(2);
+        this.grade = csv.get(3);
+        this.category = csv.get(4);
+        this.number = csv.get(5);
+        this.lecturename = csv.get(6);
+        this.professor = csv.get(8);
+        this.classroom_raw = csv.get(9);
+        this.classtime_raw = csv.get(10);
+        this.how = "";
+        this.point = csv.get(11);
         this.classroom = classroom;
         this.classtime = classtime;
     }

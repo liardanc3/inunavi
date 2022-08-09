@@ -3,6 +3,7 @@ package com.maru.inunavi.controller;
 import com.maru.inunavi.entity.Lecture;
 import com.maru.inunavi.service.LectureService;
 import com.maru.inunavi.service.NaviService;
+import com.maru.inunavi.service.RecommendService;
 import com.maru.inunavi.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.aspectj.bridge.MessageUtil;
@@ -13,6 +14,7 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -24,6 +26,7 @@ public class LectureController {
     private final LectureService _LectureService;
     private final NaviService _NaviService;
     private final UserService _UserService;
+    private final RecommendService _RecommendService;
     private final Logger logger = LoggerFactory.getLogger(this.getClass().getSimpleName());
 
     @GetMapping("/allLecture")
@@ -34,6 +37,15 @@ public class LectureController {
         if(ip==null) ip=req.getRemoteAddr();
         logger.info("allLecture("+ip+")");
         return _LectureService.allLecture();
+    }
+
+    @GetMapping("/admin/newSemester")
+    @ResponseBody
+    public List<Lecture> newSemester(){
+        _LectureService.deleteAllUserLecture();
+        ArrayList<Lecture> ret = (ArrayList<Lecture>) updateLecture();
+        _RecommendService.updateRecommend();
+        return ret;
     }
 
     @GetMapping("/admin/updateLecture")
