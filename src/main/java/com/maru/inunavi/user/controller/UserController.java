@@ -1,12 +1,12 @@
 package com.maru.inunavi.user.controller;
 
-import com.maru.inunavi.lecture.service.LectureService;
-import com.maru.inunavi.navi.service.NaviService;
-import com.maru.inunavi.user.domain.entity.UserInfo;
+import com.maru.inunavi.user.domain.dto.SignUpDto;
+import com.maru.inunavi.user.domain.entity.User;
 import com.maru.inunavi.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.annotation.Order;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
@@ -18,26 +18,20 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class UserController {
 
-    private final LectureService lectureService;
-    private final NaviService naviService;
     private final UserService userService;
 
     @GetMapping("/admin/memberList")
-    public List<UserInfo> memberList(){
+    public List<User> memberList(){
         return userService.memberList();
     }
 
-    @RequestMapping("/user/session")
+    @GetMapping("/user/session")
     public String session(HttpServletRequest request) {
-        return (String)request.getSession().getAttribute("id");
+        return (String) request.getSession().getAttribute("id");
     }
 
-    @RequestMapping(value = "/user/insert", method = RequestMethod.POST)
-    public Map<String, String> signUp(HttpServletRequest request) {
-        String email = request.getParameter("email");
-        String password = request.getParameter("password");
-        String major = request.getParameter("major");
-        log.info("signUp("+email+")");
+    @PostMapping(value = "/user/insert")
+    public SignUpDto signUp(String email, String password, String major) {
         return userService.signUp(email, password, major);
     }
 

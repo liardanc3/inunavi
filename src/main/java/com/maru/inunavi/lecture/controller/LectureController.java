@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -25,12 +24,6 @@ public class LectureController {
     @GetMapping("/lecture")
     public List<Lecture> findLectures(){
         return lectureService.findLectures();
-    }
-
-    @Log
-    @GetMapping("/admin/updateLecture")
-    public List<Lecture> updateLecture(){
-        return lectureService.updateLecture();
     }
 
     @Log

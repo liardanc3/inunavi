@@ -4,7 +4,7 @@ import com.maru.inunavi.lecture.domain.entity.Lecture;
 import com.maru.inunavi.lecture.repository.LectureRepository;
 import com.maru.inunavi.recommend.repository.RecommendRepository;
 import com.maru.inunavi.recommend.domain.entity.Recommend;
-import com.maru.inunavi.user.domain.entity.UserInfo;
+import com.maru.inunavi.user.domain.entity.User;
 import com.maru.inunavi.user.domain.entity.UserLecture;
 import com.maru.inunavi.user.repository.UserInfoRepository;
 import com.maru.inunavi.user.repository.UserLectureRepository;
@@ -28,16 +28,16 @@ public class RecommendService {
         recommendRepository.deleteINCREMENT();
 
         List<Lecture> lectureList = LectureRepository.findAll();
-        List<UserInfo> userInfoList = userInfoRepository.findAll();
+        List<User> userList = userInfoRepository.findAll();
 
         // 수업 개수 + 유사도행렬
         int len = lectureList.size();
         int[][] similarityArr = new int[len+1][len+1];
 
         // 유저 수만큼 반복
-        for (UserInfo userInfo : userInfoList) {
+        for (User user : userList) {
             // 유저 이메일
-            String userEmail = userInfo.getEmail();
+            String userEmail = user.getEmail();
 
             // 유저 수강정보 리스트
             List<UserLecture> userLectureList = userLectureRepository.findAllByEmail(userEmail);
@@ -193,7 +193,7 @@ public class RecommendService {
                 continue;
 
             Map<String, String> rretMap = new HashMap<>();
-            rretMap.put("id", Integer.toString(lecture.getId()));
+            rretMap.put("id", Long.toString(lecture.getId()));
             rretMap.put("department", lecture.getDepartment());
             rretMap.put("grade", lecture.getGrade());
             rretMap.put("category", lecture.getCategory());

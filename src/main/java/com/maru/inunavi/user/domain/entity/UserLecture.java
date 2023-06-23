@@ -13,7 +13,8 @@ public class UserLecture {
 
     // 아이디
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue
+    @Column(name = "user_lecture_id")
     private Long id;
 
     //이메일

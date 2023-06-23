@@ -13,7 +13,8 @@ public class Lecture {
     // A_ 순번
     @Id
     @GeneratedValue
-    private int id;
+    @Column(name = "lecture_id")
+    private Long id;
 
     // C_학과(부)
     @Column(length = 45, nullable = false)

@@ -21,13 +21,14 @@ import java.util.*;
 @Transactional(readOnly = true)
 public class LectureService {
 
+    private final ObjectProvider<LectureService> lectureServiceProvider;
     private final UserLectureRepository userLectureRepository;
     private final LectureRepository lectureRepository;
 
     private LectureService lectureService;
 
     @PostConstruct
-    void init(ObjectProvider<LectureService> lectureServiceProvider){
+    void init(){
         lectureService = lectureServiceProvider.getObject();
     }
 
@@ -74,7 +75,7 @@ public class LectureService {
             String classTimeRaw = lineToken.nextToken("\t");
             String point = lineToken.nextToken("\t");
 
-            String[] parseResult = lectureService.parseTime(classTimeRaw);
+            String[] parseResult = parseTime(classTimeRaw);
             String classTime = parseResult[0];
             String classRoom = parseResult[1];
 
@@ -205,6 +206,9 @@ public class LectureService {
         return new String[]{classTime.toString(), classRoom.toString()};
     }
 
+    /**
+     * Delete lecture and reset auto increment
+     */
     @Log
     public void resetTable() {
         lectureRepository.deleteAll();
@@ -373,7 +377,7 @@ public class LectureService {
                 continue;
 
             Map<String, String> retMap = new HashMap<>();
-            retMap.put("id",Integer.toString(now.getId()));
+            retMap.put("id",Long.toString(now.getId()));
             retMap.put("department",now.getDepartment());
             retMap.put("grade",now.getGrade());
             retMap.put("category",now.getCategory());
