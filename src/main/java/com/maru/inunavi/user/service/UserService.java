@@ -1,7 +1,7 @@
 package com.maru.inunavi.user.service;
 
 import com.maru.inunavi.lecture.domain.entity.Lecture;
-import com.maru.inunavi.lecture.repository.AllLectureRepository;
+import com.maru.inunavi.lecture.repository.LectureRepository;
 import com.maru.inunavi.recommend.repository.RecommendRepository;
 import com.maru.inunavi.user.domain.entity.UserInfo;
 import com.maru.inunavi.user.domain.entity.UserLecture;
@@ -23,7 +23,7 @@ public class UserService {
 
     private final UserInfoRepository userInfoRepository;
     private final UserLectureRepository userLectureRepository;
-    private final AllLectureRepository _AllLectureRepository;
+    private final LectureRepository LectureRepository;
     private final RecommendRepository recommendRepository;
 
     @Autowired
@@ -77,7 +77,7 @@ public class UserService {
         Map<String, String> json = new HashMap<>();
 
         // lectureId -> lectureIdx
-        int lectureIdx = _AllLectureRepository.findByLectureId(lectureId).getId();
+        int lectureIdx = LectureRepository.findById(lectureId).getId();
 
         json.put("email", email);
         if(userLectureRepository.findByUserEmailAndLectureIdx(email,lectureIdx) == null){
@@ -93,7 +93,7 @@ public class UserService {
     public Map<String, String> deleteLecture(String email, String lectureID){
         Map<String, String> json = new HashMap<>();
 
-        int lectureIdx = _AllLectureRepository.findByLectureId(lectureID).getId();
+        int lectureIdx = LectureRepository.findById(lectureID).getId();
 
         json.put("email", email);
         UserLecture userLecture = userLectureRepository.findByUserEmailAndLectureIdx(email, lectureIdx) ;
@@ -114,13 +114,13 @@ public class UserService {
         List<Map<String, String>> _LAL = new ArrayList<>();
         for (int i = 0; i < _UL.size(); i++) {
             Map<String, String> retMap = new HashMap<>();
-            Lecture now = _AllLectureRepository.getById(_UL.get(i).getLectureIdx());
+            Lecture now = LectureRepository.getById(_UL.get(i).getLectureIdx());
             retMap.put("id", Integer.toString(now.getId()));
             retMap.put("department", now.getDepartment());
             retMap.put("grade", now.getGrade());
             retMap.put("category", now.getCategory());
             retMap.put("number", now.getNumber());
-            retMap.put("lecturename", now.getLecturename());
+            retMap.put("lecturename", now.getLectureName());
             retMap.put("professor", now.getProfessor());
             retMap.put("classroom_raw", now.getClassroom_raw());
             retMap.put("classtime_raw", now.getClasstime_raw());
@@ -273,7 +273,7 @@ public class UserService {
             userLectureIdxList.add(userLectureList.get(i).getLectureIdx());
 
         // 유사도행렬 업데이트
-        int len = (int) _AllLectureRepository.count();
+        int len = (int) LectureRepository.count();
         int[][] similarityArr = new int[len+1][len+1];
         for(int i=0; i<userLectureIdxList.size(); i++){
             int idx = userLectureIdxList.get(i);

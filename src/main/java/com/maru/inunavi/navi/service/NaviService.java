@@ -1,7 +1,7 @@
 package com.maru.inunavi.navi.service;
 
 import com.maru.inunavi.lecture.domain.entity.Lecture;
-import com.maru.inunavi.lecture.repository.AllLectureRepository;
+import com.maru.inunavi.lecture.repository.LectureRepository;
 import com.maru.inunavi.navi.domain.entity.Navi;
 import com.maru.inunavi.navi.domain.entity.NodePath;
 import com.maru.inunavi.navi.domain.entity.Place;
@@ -28,7 +28,7 @@ public class NaviService {
     private final NaviRepository naviRepository;
     private final UserInfoRepository userInfoRepository;
     private final UserLectureRepository userLectureRepository;
-    private final AllLectureRepository _AllLectureRepository;
+    private final LectureRepository LectureRepository;
     private final NodePathRepository _NodePathRepository;
     private final PlaceRepository _PlaceRepository;
 
@@ -1011,8 +1011,8 @@ public class NaviService {
         int token = 0;
 
         for(int i=0; i<userLectureList.size(); i++){
-            String lectureId = _AllLectureRepository.getById(userLectureList.get(i).getLectureIdx()).getNumber();
-            String lectureTime = _AllLectureRepository.findByLectureId(lectureId).getClasstime();
+            String lectureId = LectureRepository.getById(userLectureList.get(i).getLectureIdx()).getNumber();
+            String lectureTime = LectureRepository.findByNumber(lectureId).getClasstime();
             if(lectureTime.equals("-")) continue;
             StringTokenizer st = new StringTokenizer(lectureTime);
 
@@ -1041,7 +1041,7 @@ public class NaviService {
             retNextPlace.put("nextPlaceTitle","NONE");
         }
         else{
-            String classRoom = _AllLectureRepository.findByLectureId(retLectureId).getClassroom();
+            String classRoom = LectureRepository.findByNumber(retLectureId).getClassroom();
             String[] tokenedClassRoom = classRoom.split(",");
             String nextPlaceCode = "";
             try{
@@ -1098,7 +1098,7 @@ public class NaviService {
         List<Lecture> lectureList = new ArrayList<>();
         for(int i=0; i<userLectureList.size(); i++){
             int lectureIdx = userLectureList.get(i).getLectureIdx();
-            Lecture lecture = _AllLectureRepository.getById(lectureIdx);
+            Lecture lecture = LectureRepository.getById(lectureIdx);
             String classTime = lecture.getClasstime();
             if(classTime.equals("-") || lecture.getClassroom()==null) continue;
 
@@ -1141,7 +1141,7 @@ public class NaviService {
         int[] dayCheck = new int[7];
         for(int i=0; i<userLectureList.size(); i++){
             int lectureIdx = userLectureList.get(i).getLectureIdx();
-            Lecture lecture = _AllLectureRepository.getById(lectureIdx);
+            Lecture lecture = LectureRepository.getById(lectureIdx);
 
             int idx = -1;
 
@@ -1173,7 +1173,7 @@ public class NaviService {
                 // placeCode 푸시
                 placeCodeArrByTime[sTime] = sRoom;
                 // lectureName 푸시
-                lectureNameArrByTime[sTime] = lecture.getLecturename();
+                lectureNameArrByTime[sTime] = lecture.getLectureName();
 
                 // lectureTime 푸시
                 String dayOfWeek = "";

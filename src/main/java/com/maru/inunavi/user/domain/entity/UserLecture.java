@@ -6,8 +6,8 @@ import lombok.Getter;
 import javax.persistence.*;
 
 @Builder
+@Entity
 @AllArgsConstructor
-@Entity(name="userlecture")
 @Getter
 public class UserLecture {
 

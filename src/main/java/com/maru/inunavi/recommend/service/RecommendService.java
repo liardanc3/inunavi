@@ -1,7 +1,7 @@
 package com.maru.inunavi.recommend.service;
 
 import com.maru.inunavi.lecture.domain.entity.Lecture;
-import com.maru.inunavi.lecture.repository.AllLectureRepository;
+import com.maru.inunavi.lecture.repository.LectureRepository;
 import com.maru.inunavi.recommend.repository.RecommendRepository;
 import com.maru.inunavi.recommend.domain.entity.Recommend;
 import com.maru.inunavi.user.domain.entity.UserInfo;
@@ -19,7 +19,7 @@ public class RecommendService {
 
     private final UserInfoRepository userInfoRepository;
     private final UserLectureRepository userLectureRepository;
-    private final AllLectureRepository _AllLectureRepository;
+    private final LectureRepository LectureRepository;
     private final RecommendRepository recommendRepository;
 
     public List<Recommend> updateRecommend(){
@@ -27,7 +27,7 @@ public class RecommendService {
         recommendRepository.deleteAll();
         recommendRepository.deleteINCREMENT();
 
-        List<Lecture> lectureList = _AllLectureRepository.findAll();
+        List<Lecture> lectureList = LectureRepository.findAll();
         List<UserInfo> userInfoList = userInfoRepository.findAll();
 
         // 수업 개수 + 유사도행렬
@@ -108,7 +108,7 @@ public class RecommendService {
         int[] userClassTime = new int[336];
 
         // 유사도배열 할당
-        int len = (int) _AllLectureRepository.count();
+        int len = (int) LectureRepository.count();
         int[] similarityArr = new int[len+1];
         for (UserLecture userLecture : userLectureList) {
 
@@ -123,7 +123,7 @@ public class RecommendService {
             }
 
             // 기존 수업시간 추가
-            Lecture lecture = _AllLectureRepository.getById(userLecture.getLectureIdx());
+            Lecture lecture = LectureRepository.getById(userLecture.getLectureIdx());
             String classTime = lecture.getClasstime();
 
             classTime = classTime.replaceAll(",", "-");
@@ -143,7 +143,7 @@ public class RecommendService {
         PriorityQueue<Pair> pq = new PriorityQueue<>();
         for(int i=1; i<=len; i++){
             if(similarityArr[i] < 1) continue;
-            Lecture lecture = _AllLectureRepository.getById(i);
+            Lecture lecture = LectureRepository.getById(i);
             if(lecture.getDepartment().equals(userMajor))
                 pq.add(new Pair(i,similarityArr[i]/2));
             else pq.add(new Pair(i,similarityArr[i]));
@@ -157,11 +157,11 @@ public class RecommendService {
             pq.remove();
             if(similarityPoint==0) continue;
 
-            Lecture lecture = _AllLectureRepository.getById(lectureIdx);
+            Lecture lecture = LectureRepository.getById(lectureIdx);
             String major = lecture.getDepartment();
 
             String classTime = lecture.getClasstime();
-            String className = lecture.getLecturename();
+            String className = lecture.getLectureName();
             classTime = classTime.replaceAll(",","-");
 
             // 이미 듣고있는수업 + 이미 듣고있는 수업명 동일한지 체크
@@ -169,9 +169,9 @@ public class RecommendService {
             for(int i=0; i<userLectureList.size() && !flag; i++){
                 if(userLectureList.get(i).getLectureIdx() == lectureIdx)
                     flag = true;
-                if(className.equals(_AllLectureRepository
+                if(className.equals(LectureRepository
                         .getById(userLectureList.get(i)
-                                .getLectureIdx()).getLecturename()))
+                                .getLectureIdx()).getLectureName()))
                     flag = true;
             }
             if(flag) continue;
@@ -198,7 +198,7 @@ public class RecommendService {
             rretMap.put("grade", lecture.getGrade());
             rretMap.put("category", lecture.getCategory());
             rretMap.put("number", lecture.getNumber());
-            rretMap.put("lecturename", lecture.getLecturename());
+            rretMap.put("lecturename", lecture.getLectureName());
             rretMap.put("professor", lecture.getProfessor());
             rretMap.put("classroom_raw", lecture.getClassroom_raw());
             rretMap.put("classtime_raw", lecture.getClasstime_raw());

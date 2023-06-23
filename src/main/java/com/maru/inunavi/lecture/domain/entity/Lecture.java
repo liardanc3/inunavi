@@ -34,7 +34,7 @@ public class Lecture {
 
     // G_교과목명
     @Column(length = 45, nullable = true)
-    private String lecturename;
+    private String lectureName;
 
     // H_담당교수
     @Column(length = 100, nullable = true)
@@ -69,7 +69,7 @@ public class Lecture {
         this.grade = csv.get(3);
         this.category = csv.get(4);
         this.number = csv.get(5);
-        this.lecturename = csv.get(6);
+        this.lectureName = csv.get(6);
         this.professor = csv.get(8);
         this.classroom_raw = csv.get(9);
         this.classtime_raw = csv.get(10);

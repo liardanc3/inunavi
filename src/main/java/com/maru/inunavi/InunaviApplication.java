@@ -7,16 +7,9 @@ import org.springframework.boot.web.servlet.support.SpringBootServletInitializer
 import org.springframework.cache.annotation.EnableCaching;
 
 @SpringBootApplication
-@EnableCaching
 public class InunaviApplication extends SpringBootServletInitializer {
 
-	@Override
-	protected SpringApplicationBuilder configure(SpringApplicationBuilder application) {
-		return application.sources(InunaviApplication.class);
-	}
-
-	public static void main(String[] args)
-	{
+	public static void main(String[] args) {
 		SpringApplication.run(InunaviApplication.class, args);
 	}
 

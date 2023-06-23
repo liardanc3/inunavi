@@ -2,9 +2,7 @@ package com.maru.inunavi.lecture.service;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.maru.inunavi.lecture.domain.entity.Lecture;
-import com.maru.inunavi.lecture.repository.AllLectureRepository;
-import com.maru.inunavi.navi.repository.NaviRepository;
-import com.maru.inunavi.user.repository.UserInfoRepository;
+import com.maru.inunavi.lecture.repository.LectureRepository;
 import com.maru.inunavi.user.repository.UserLectureRepository;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.io.FileUtils;
@@ -15,15 +13,12 @@ import org.springframework.stereotype.Service;
 import java.io.*;
 import java.util.*;
 
-
 @Service
 @RequiredArgsConstructor
 public class LectureService {
 
-    private final NaviRepository naviRepository;
-    private final UserInfoRepository userInfoRepository;
     private final UserLectureRepository userLectureRepository;
-    private final AllLectureRepository _AllLectureRepository;
+    private final LectureRepository LectureRepository;
 
     @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
     public class TimeTableInfo{
@@ -55,7 +50,7 @@ public class LectureService {
         _categorySet.add("전체");
 
         List<Lecture> lectureList = new ArrayList<>();
-        lectureList.addAll(_AllLectureRepository.findAll());
+        lectureList.addAll(LectureRepository.findAll());
 
         for(int i=0; i<lectureList.size(); i++){
             Lecture lecture = lectureList.get(i);
@@ -66,7 +61,7 @@ public class LectureService {
                 _majorSet.add(_majorTmp);
             _categorySet.add(_categoryTmp);
             if(_categoryTmp.equals("교양필수") && !lecture.getGrade().equals("전학년") && lecture.getDepartment().equals("교양"))
-                _cseSet.add(lecture.getLecturename());
+                _cseSet.add(lecture.getLectureName());
         }
 
         String major = "";
@@ -95,23 +90,23 @@ public class LectureService {
         return retInfo;
     }
 
-    public List<Lecture> allLecture(){
-        return _AllLectureRepository.findAll();
+    public List<Lecture> findLectures(){
+        return LectureRepository.findAll();
     }
 
     public List<Lecture> updateLecture() {
 
         // 기존 테이블 삭제 후 순번 초기화
-        _AllLectureRepository.deleteAll();
-        _AllLectureRepository.deleteINCREMENT();
+        LectureRepository.deleteAll();
+        LectureRepository.deleteINCREMENT();
 
-        List<Lecture> LL = new ArrayList<Lecture>();
+        List<Lecture> lectureList = new ArrayList<Lecture>();
 
         // csv파일 읽어서 DB에 수업정보 업데이트
         try {
             // 배포용 경로
-            InputStream inputStream = new ClassPathResource("_ALLLECTURE.txt").getInputStream();
-            File file =File.createTempFile("_ALLLECTURE",".txt");
+            InputStream inputStream = new ClassPathResource("Lecture.txt").getInputStream();
+            File file =File.createTempFile("Lecture",".txt");
             try {
                 FileUtils.copyInputStreamToFile(inputStream, file);
             } finally {
@@ -230,7 +225,7 @@ public class LectureService {
                 } else _classtime = classtime_raw;
 
                 Lecture lecture = new Lecture(csv, _classroom, _classtime);
-                LL.add(lecture);
+                lectureList.add(lecture);
 
             }
         } catch (FileNotFoundException e) {
@@ -239,8 +234,8 @@ public class LectureService {
             e.printStackTrace();
         }
 
-        _AllLectureRepository.saveAll(LL);
-        return _AllLectureRepository.findAll();
+        LectureRepository.saveAll(lectureList);
+        return LectureRepository.findAll();
     }
 
     public List<Map<String, String>> selectLecture(String main_keyword, String keyword_option, String major_option, String cse_option, String sort_option, String grade_option, String category_option, String score_option) {
@@ -257,21 +252,21 @@ public class LectureService {
         List<Lecture> tmp = new ArrayList<Lecture>();
         List<Map<String, String>> result = new ArrayList<>();
         if(sort_option.equals("과목코드"))
-            tmp = _AllLectureRepository.findAllByOrderByNumberAsc();
+            tmp = LectureRepository.findAllByOrderByNumberAsc();
         else if(sort_option.equals("과목명"))
-            tmp = _AllLectureRepository.findAllByOrderByLecturenameAsc();
+            tmp = LectureRepository.findAllByOrderByLectureNameAsc();
         else
-            tmp = _AllLectureRepository.findAll();
+            tmp = LectureRepository.findAll();
 
         for(int i=0; i<tmp.size(); i++){
             Lecture now = tmp.get(i);
 
             if(!main_keyword.equals("")){
                 if(keyword_option.equals("전체")){
-                    if(!now.getLecturename().toUpperCase().contains(main_keyword.toUpperCase())
+                    if(!now.getLectureName().toUpperCase().contains(main_keyword.toUpperCase())
                             && !now.getProfessor().contains(main_keyword) && !now.getNumber().contains(main_keyword)) continue;
                 }
-                if(keyword_option.equals("과목명") && !now.getLecturename().toUpperCase().contains(main_keyword.toUpperCase()))
+                if(keyword_option.equals("과목명") && !now.getLectureName().toUpperCase().contains(main_keyword.toUpperCase()))
                     continue;
                 else if(keyword_option.equals("교수명") && !now.getProfessor().contains(main_keyword))
                     continue;
@@ -287,7 +282,7 @@ public class LectureService {
             if(!cse_option.equals("전체")) {
                 if(!now.getCategory().equals("교양필수"))
                     continue;
-                if (!cse_option.equals("기타") && !now.getLecturename().contains(cse_option))
+                if (!cse_option.equals("기타") && !now.getLectureName().contains(cse_option))
                     continue;
                 if (cse_option.equals("기타") && !major_option.equals("전체") && !now.getDepartment().equals(major_option))
                     continue;
@@ -340,7 +335,7 @@ public class LectureService {
             retMap.put("grade",now.getGrade());
             retMap.put("category",now.getCategory());
             retMap.put("number",now.getNumber());
-            retMap.put("lecturename",now.getLecturename());
+            retMap.put("lecturename",now.getLectureName());
             retMap.put("professor",now.getProfessor());
             retMap.put("classroom_raw",now.getClassroom_raw());
             retMap.put("classtime_raw",now.getClasstime_raw());
