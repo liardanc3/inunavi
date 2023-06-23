@@ -1,24 +1,219 @@
 package com.maru.inunavi.lecture.service;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.maru.inunavi.aop.log.Log;
 import com.maru.inunavi.lecture.domain.entity.Lecture;
 import com.maru.inunavi.lecture.repository.LectureRepository;
 import com.maru.inunavi.user.repository.UserLectureRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import org.apache.commons.io.FileUtils;
 import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.*;
 import java.util.*;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class LectureService {
 
     private final UserLectureRepository userLectureRepository;
     private final LectureRepository LectureRepository;
+
+    public List<Lecture> findLectures(){
+        return LectureRepository.findAll();
+    }
+
+    @Transactional
+    @SneakyThrows
+    public List<Lecture> updateLecture() {
+
+        resetTable();
+
+        InputStream inputStream = new ClassPathResource("lecture.txt").getInputStream();
+        BufferedReader buffer = new BufferedReader(new InputStreamReader(inputStream));
+
+        String line = "";
+        while ((line = buffer.readLine()) != null) {
+
+            // line
+            StringTokenizer lineToken = new StringTokenizer(line);
+
+            // 1번 x
+            lineToken.nextToken("\t");
+
+            // 2번 x
+            lineToken.nextToken("\t");
+
+            // 3번 department
+            String department = lineToken.nextToken("\t");
+
+            // 4번 grade
+            String grade = lineToken.nextToken("\t");
+
+            // 5번 category
+            String category = lineToken.nextToken("\t");
+
+            // 6번 number
+            String number = lineToken.nextToken("\t");
+
+            // 7번 lectureName
+            String lectureName = lineToken.nextToken("\t");
+
+            // 8번 x
+            lineToken.nextToken("\t");
+
+            // 9번 professor
+            String professor = lineToken.nextToken("\t");
+
+            // 10번 classRoomRaw
+            String classRoomRaw = lineToken.nextToken("\t");
+
+            // 11번 classTimeRaw
+            String classTimeRaw = lineToken.nextToken("\t");
+
+            // 12번 point
+            String point = lineToken.nextToken("\t");
+
+            // 시간, 장소 파싱
+            String[] parseResult = parseTime(classTimeRaw);
+            String classTime = parseResult[0];
+            String classRoom = parseResult[1];
+
+            LectureRepository.save(
+                    Lecture.builder()
+                            .department(department)
+                            .grade(grade)
+                            .category(category)
+                            .number(number)
+                            .lectureName(lectureName)
+                            .professor(professor)
+                            .classRoomRaw(classRoomRaw)
+                            .classTimeRaw(classTimeRaw)
+                            .classRoom(classRoom)
+                            .classTime(classTime)
+                            .how("-")
+                            .point(point)
+                            .build()
+            );
+        }
+
+        return LectureRepository.findAll();
+    }
+
+    @Log
+    public void resetTable() {
+        LectureRepository.deleteAll();
+        LectureRepository.deleteINCREMENT();
+    }
+
+    /**
+     * Parse raw time text<b>
+     * @param classTimeRaw
+     * @return {@code String[]{classTime, classRoom}}
+     */
+    public String[] parseTime(String classTimeRaw){
+        StringBuilder classTime = new StringBuilder();
+        StringBuilder classRoom = new StringBuilder();
+
+        if(classTimeRaw.charAt(0) == '-'){
+            classTime = new StringBuilder("-");
+            classRoom = new StringBuilder("-");
+        }
+        else {
+            StringTokenizer classTimeRawToken = new StringTokenizer(classTimeRaw);
+
+            int dayStartTime = 0;
+            int dayEndTime = 0;
+
+            while(classTimeRawToken.hasMoreTokens()) {
+
+                classTimeRawToken.nextToken("[");
+                if(!classTimeRawToken.hasMoreTokens())
+                    break;
+
+                String room = classTimeRawToken.nextToken(":");
+                if(room.length()<3)
+                    break;
+                room = room.substring(1) + ",";
+
+                if(!classTimeRawToken.hasMoreTokens())
+                    break;
+
+                String restToken = classTimeRawToken.nextToken("]");
+                if(restToken.charAt(0)==':')
+                    restToken = restToken.substring(1);
+                
+                int classStartTime = 0;
+                int classEndTime = 0;
+                int timeCnt = 0;
+
+                StringTokenizer timeRangeToken = new StringTokenizer(restToken);
+                while(timeRangeToken.hasMoreTokens()){
+                    String timeRange = timeRangeToken.nextToken(",");
+                    System.out.println("timeRange = " + timeRange);
+
+                    int idx = 0;
+                    if(timeRange.charAt(idx)=='('){
+                        classStartTime = dayStartTime;
+                        classEndTime = dayEndTime;
+                    }
+                    else{
+                        switch (timeRange.charAt(0)){
+                            case '월': classStartTime=16; classEndTime=16; break;
+                            case '화': classStartTime=64; classEndTime=64; break;
+                            case '수': classStartTime=112; classEndTime=112; break;
+                            case '목': classStartTime=160; classEndTime=160; break;
+                            case '금': classStartTime=208; classEndTime=208; break;
+                            case '토': classStartTime=256; classEndTime=256; break;
+                        }
+                        idx++;
+                    }
+
+                    if(timeRange.charAt(idx + 1) == '야'){
+                        classStartTime += 18;
+                        dayStartTime = classStartTime;
+                        int extraTime = timeRange.charAt(idx + 2) - '0';
+                        classStartTime += 2 * extraTime;
+
+                        classEndTime += 18;
+                        dayEndTime = classEndTime;
+                    }
+
+                    else{
+                        dayStartTime = classStartTime;
+                        int extraTime = timeRange.charAt(idx + 1) - '0';
+                        classStartTime += (2 * extraTime);
+                        if(timeRange.charAt(idx+2) == 'B')
+                            classStartTime += 1;
+
+                        dayEndTime = classEndTime;
+                        if(timeRange.contains("야"))
+                            classEndTime += 18;
+                    }
+
+                    int isHalfHour = timeRange.charAt(timeRange.length() - 2) == 'A' ? 1 : 0;
+                    int extraTime = timeRange.charAt(timeRange.length() - 2 - isHalfHour) - '0';
+                    classEndTime += 2 * extraTime + 1 - isHalfHour;
+
+                    classTime.append(classStartTime).append('-').append(classEndTime).append(',');
+                    timeCnt++;
+                }
+                
+                while(timeCnt-- > 0){
+                    classRoom.append(room);
+                }
+            }
+        }
+
+        return new String[]{classTime.toString(), classRoom.toString()};
+    }
+
+
 
     @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
     public class TimeTableInfo{
@@ -88,154 +283,6 @@ public class LectureService {
         retList.add(_TimeTableInfo);
         retInfo.put("response",retList);
         return retInfo;
-    }
-
-    public List<Lecture> findLectures(){
-        return LectureRepository.findAll();
-    }
-
-    public List<Lecture> updateLecture() {
-
-        // 기존 테이블 삭제 후 순번 초기화
-        LectureRepository.deleteAll();
-        LectureRepository.deleteINCREMENT();
-
-        List<Lecture> lectureList = new ArrayList<Lecture>();
-
-        // csv파일 읽어서 DB에 수업정보 업데이트
-        try {
-            // 배포용 경로
-            InputStream inputStream = new ClassPathResource("Lecture.txt").getInputStream();
-            File file =File.createTempFile("Lecture",".txt");
-            try {
-                FileUtils.copyInputStreamToFile(inputStream, file);
-            } finally {
-                IOUtils.closeQuietly(inputStream);
-            }
-            FileReader fileReader = new FileReader(file);
-            BufferedReader bufReader = new BufferedReader(fileReader);
-
-            String line = "";
-            line = bufReader.readLine();
-            while ((line = bufReader.readLine()) != null) {
-
-                // tsv로 읽은 행 데이터 List에 넣어서 통채로 생성자로
-                List<String> csv = new ArrayList<>();
-                StringTokenizer s = new StringTokenizer(line);
-
-                // 학과(부),학년,이수구분,학수번호,교과목명,교과목명(영문),담당교수,강의실,시간표,수업방법관리,수업방법관리(영어),학점
-                for (int i = 1; i <= 12 && s.hasMoreTokens(); i++) {
-                    String tmp = s.nextToken("\t");
-                    csv.add(tmp);
-                }
-
-                String _classroom = "", _classtime="";
-                String classroom_raw = csv.get(9), classtime_raw=csv.get(10);
-
-                String classname = csv.get(4);
-                if(classtime_raw.charAt(0) != '-'){
-                    StringTokenizer time = new StringTokenizer(classtime_raw);
-                    int init_start=0, init_end=0;
-                    while(time.hasMoreTokens()){
-                        time.nextToken("[");
-                        if(!time.hasMoreTokens()) break;
-                        String _room = time.nextToken(":");
-                        if(_room.length()<3) break;
-                        _room = _room.substring(1,_room.length()) + ",";
-                        if(!time.hasMoreTokens()) break;
-                        String tmp = time.nextToken("]");
-                        if(tmp.charAt(0)==':')
-                            tmp = tmp.substring(1,tmp.length());
-                        int start=0, end=0, time_cnt=0;
-
-                        // time_sep = 화(8B-9);
-                        StringTokenizer time_sep = new StringTokenizer(tmp);
-                        while(time_sep.hasMoreTokens()){
-                            String ttmp = time_sep.nextToken(",");
-                            int idx=0;
-                            if(ttmp.charAt(idx)=='('){
-                                start=init_start;
-                                end=init_end;
-                            }
-                            else{
-                                switch (ttmp.charAt(0)){
-                                    case '월': start=16; end=16; break;
-                                    case '화': start=64; end=64; break;
-                                    case '수': start=112; end=112; break;
-                                    case '목': start=160; end=160; break;
-                                    case '금': start=208; end=208; break;
-                                    case '토': start=256; end=256; break;
-                                }
-                                init_start=start; init_end=end;
-                                idx++;
-                            }
-
-                            // 야간
-                            if(ttmp.charAt(idx+1)=='야'){
-                                start+=18;
-                                init_start = start;
-                                int int2Str = ttmp.charAt(idx+2) - '0';
-                                start += 2*int2Str;
-
-                                end+=18;
-                                init_end = end;
-                                if(ttmp.charAt(ttmp.length()-2) == 'A'){
-                                    int2Str = ttmp.charAt(ttmp.length()-3) - '0';
-                                    end += 2*int2Str;
-                                }
-                                else {
-                                    int2Str = ttmp.charAt(ttmp.length() - 2) - '0';
-                                    end += 2 * int2Str + 1;
-                                }
-                                _classtime += Integer.toString(start) + '-' + Integer.toString(end) + ',';
-                                time_cnt++;
-                            }
-
-                            // 주간
-                            else{
-                                init_start = start;
-                                init_end = end;
-
-                                int int2Str = ttmp.charAt(idx+1) - '0';
-                                start += (2*int2Str);
-
-                                if(ttmp.charAt(idx+2) == 'B')
-                                    start += 1;
-                                if(ttmp.contains("야"))
-                                    end+=18;
-
-                                if(ttmp.charAt(ttmp.length()-2) == 'A') {
-                                    int2Str = ttmp.charAt(ttmp.length() - 3) - '0';
-                                    end += 2 * int2Str;
-                                }
-                                else {
-                                    int2Str = ttmp.charAt(ttmp.length()-2) - '0';
-                                    end += 2 * int2Str + 1;
-                                }
-
-
-                                _classtime += Integer.toString(start) + '-' + Integer.toString(end) + ',';
-                                time_cnt++;
-                            }
-                        }
-                        for(int i=0; i<time_cnt; i++){
-                            _classroom+=_room;
-                        }
-                    }
-                } else _classtime = classtime_raw;
-
-                Lecture lecture = new Lecture(csv, _classroom, _classtime);
-                lectureList.add(lecture);
-
-            }
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        LectureRepository.saveAll(lectureList);
-        return LectureRepository.findAll();
     }
 
     public List<Map<String, String>> selectLecture(String main_keyword, String keyword_option, String major_option, String cse_option, String sort_option, String grade_option, String category_option, String score_option) {
@@ -337,23 +384,23 @@ public class LectureService {
             retMap.put("number",now.getNumber());
             retMap.put("lecturename",now.getLectureName());
             retMap.put("professor",now.getProfessor());
-            retMap.put("classroom_raw",now.getClassroom_raw());
-            retMap.put("classtime_raw",now.getClasstime_raw());
-            String __CLASSROOM__ = now.getClassroom();
-            if(__CLASSROOM__.length()>2)
-                retMap.put("classroom",__CLASSROOM__.substring(0,__CLASSROOM__.length()-1));
-            else retMap.put("classroom",__CLASSROOM__);
-            retMap.put("classtime",now.getClasstime());
+            retMap.put("classRoomRaw",now.getClassRoomRaw());
+            retMap.put("classTimeRaw",now.getClassTimeRaw());
+            String _classRoom__ = now.getClassRoom();
+            if(_classRoom__.length()>2)
+                retMap.put("classroom",_classRoom__.substring(0,_classRoom__.length()-1));
+            else retMap.put("classroom",_classRoom__);
+            retMap.put("classTime",now.getClassTime());
             retMap.put("how",now.getHow());
             retMap.put("point",now.getPoint());
 
-            String __CLASSTIME__ = now.getClasstime();
-            String __RETCLASSTIME__ = "";
-            if(__CLASSTIME__.equals("-"))
+            String _classTime__ = now.getClassTime();
+            String __RETclassTime__ = "";
+            if(_classTime__.equals("-"))
                 retMap.put("realTime","-");
             else{
-                __CLASSTIME__ = __CLASSTIME__.replaceAll(",","-");
-                StringTokenizer st = new StringTokenizer(__CLASSTIME__);
+                _classTime__ = _classTime__.replaceAll(",","-");
+                StringTokenizer st = new StringTokenizer(_classTime__);
                 while(st.hasMoreTokens()){
                     int start = Integer.parseInt(st.nextToken("-"));
                     int end = Integer.parseInt(st.nextToken("-"));
@@ -365,24 +412,24 @@ public class LectureService {
                     int endHalf = ~(end%2);
 
                     switch(dayOfWeek){
-                        case 0: __RETCLASSTIME__+="월 "; break;
-                        case 1: __RETCLASSTIME__+="화 "; break;
-                        case 2: __RETCLASSTIME__+="수 "; break;
-                        case 3: __RETCLASSTIME__+="목 "; break;
-                        case 4: __RETCLASSTIME__+="금 "; break;
-                        case 5: __RETCLASSTIME__+="토 "; break;
-                        case 6: __RETCLASSTIME__+="일 "; break;
+                        case 0: __RETclassTime__+="월 "; break;
+                        case 1: __RETclassTime__+="화 "; break;
+                        case 2: __RETclassTime__+="수 "; break;
+                        case 3: __RETclassTime__+="목 "; break;
+                        case 4: __RETclassTime__+="금 "; break;
+                        case 5: __RETclassTime__+="토 "; break;
+                        case 6: __RETclassTime__+="일 "; break;
                     }
 
-                    __RETCLASSTIME__ += Integer.toString(startHour);
-                    __RETCLASSTIME__ += ":";
-                    __RETCLASSTIME__ += startHalf==1 ? "30 - " : "00 - ";
-                    __RETCLASSTIME__ += Integer.toString(endHour);
-                    __RETCLASSTIME__ += ":";
-                    __RETCLASSTIME__ += endHalf==1 ? "30, " : "00, ";
+                    __RETclassTime__ += Integer.toString(startHour);
+                    __RETclassTime__ += ":";
+                    __RETclassTime__ += startHalf==1 ? "30 - " : "00 - ";
+                    __RETclassTime__ += Integer.toString(endHour);
+                    __RETclassTime__ += ":";
+                    __RETclassTime__ += endHalf==1 ? "30, " : "00, ";
                 }
-                __RETCLASSTIME__ = __RETCLASSTIME__.substring(0,__RETCLASSTIME__.length()-2);
-                retMap.put("realTime",__RETCLASSTIME__);
+                __RETclassTime__ = __RETclassTime__.substring(0,__RETclassTime__.length()-2);
+                retMap.put("realTime",__RETclassTime__);
             }
             result.add(retMap);
         }

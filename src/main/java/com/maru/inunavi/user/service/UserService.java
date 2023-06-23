@@ -77,10 +77,10 @@ public class UserService {
         Map<String, String> json = new HashMap<>();
 
         // lectureId -> lectureIdx
-        int lectureIdx = LectureRepository.findById(lectureId).getId();
+        int lectureIdx = LectureRepository.findByNumber(lectureId).getId();
 
         json.put("email", email);
-        if(userLectureRepository.findByUserEmailAndLectureIdx(email,lectureIdx) == null){
+        if(userLectureRepository.findByEmailAndLectureIdx(email,lectureIdx) == null){
             userLectureRepository.save(new UserLecture(email, lectureIdx));
             json.put("success", "true");
             updateRecommendTable(email,lectureIdx,true);
@@ -93,10 +93,10 @@ public class UserService {
     public Map<String, String> deleteLecture(String email, String lectureID){
         Map<String, String> json = new HashMap<>();
 
-        int lectureIdx = LectureRepository.findById(lectureID).getId();
+        int lectureIdx = LectureRepository.findByNumber(lectureID).getId();
 
         json.put("email", email);
-        UserLecture userLecture = userLectureRepository.findByUserEmailAndLectureIdx(email, lectureIdx) ;
+        UserLecture userLecture = userLectureRepository.findByEmailAndLectureIdx(email, lectureIdx) ;
         if(userLecture != null){
             json.put("success", "true");
             updateRecommendTable(email,lectureIdx,false);
@@ -122,25 +122,25 @@ public class UserService {
             retMap.put("number", now.getNumber());
             retMap.put("lecturename", now.getLectureName());
             retMap.put("professor", now.getProfessor());
-            retMap.put("classroom_raw", now.getClassroom_raw());
-            retMap.put("classtime_raw", now.getClasstime_raw());
-            String __CLASSROOM__ = now.getClassroom();
-            if(__CLASSROOM__.length()>2)
-                retMap.put("classroom",__CLASSROOM__.substring(0,__CLASSROOM__.length()-1));
-            else retMap.put("classroom",__CLASSROOM__);
-            retMap.put("classtime", now.getClasstime());
+            retMap.put("ClassRoomRaw", now.getClassRoomRaw());
+            retMap.put("classTime_raw", now.getClassTimeRaw());
+            String __ClassRoom__ = now.getClassRoom();
+            if(__ClassRoom__.length()>2)
+                retMap.put("ClassRoom",__ClassRoom__.substring(0,__ClassRoom__.length()-1));
+            else retMap.put("ClassRoom",__ClassRoom__);
+            retMap.put("classTime", now.getClassTime());
             retMap.put("how", now.getHow());
             retMap.put("point", now.getPoint());
 
-            String __CLASSTIME__ = now.getClasstime();
-            String __RETCLASSTIME__ = "";
-            if (__CLASSTIME__.equals("-")) {
+            String __classTime__ = now.getClassTime();
+            String __RETclassTime__ = "";
+            if (__classTime__.equals("-")) {
                 retMap.put("realTime", "-");
                 _LAL.add(retMap);
             }
             else {
-                __CLASSTIME__ = __CLASSTIME__.replaceAll(",", "-");
-                StringTokenizer st = new StringTokenizer(__CLASSTIME__);
+                __classTime__ = __classTime__.replaceAll(",", "-");
+                StringTokenizer st = new StringTokenizer(__classTime__);
                 while (st.hasMoreTokens()) {
                     int start = Integer.parseInt(st.nextToken("-"));
                     int end = Integer.parseInt(st.nextToken("-"));
@@ -153,37 +153,37 @@ public class UserService {
 
                     switch (dayOfWeek) {
                         case 0:
-                            __RETCLASSTIME__ += "월 ";
+                            __RETclassTime__ += "월 ";
                             break;
                         case 1:
-                            __RETCLASSTIME__ += "화 ";
+                            __RETclassTime__ += "화 ";
                             break;
                         case 2:
-                            __RETCLASSTIME__ += "수 ";
+                            __RETclassTime__ += "수 ";
                             break;
                         case 3:
-                            __RETCLASSTIME__ += "목 ";
+                            __RETclassTime__ += "목 ";
                             break;
                         case 4:
-                            __RETCLASSTIME__ += "금 ";
+                            __RETclassTime__ += "금 ";
                             break;
                         case 5:
-                            __RETCLASSTIME__ += "토 ";
+                            __RETclassTime__ += "토 ";
                             break;
                         case 6:
-                            __RETCLASSTIME__ += "일 ";
+                            __RETclassTime__ += "일 ";
                             break;
                     }
 
-                    __RETCLASSTIME__ += Integer.toString(startHour);
-                    __RETCLASSTIME__ += ":";
-                    __RETCLASSTIME__ += startHalf == 1 ? "30 - " : "00 - ";
-                    __RETCLASSTIME__ += Integer.toString(endHour);
-                    __RETCLASSTIME__ += ":";
-                    __RETCLASSTIME__ += endHalf == 1 ? "30, " : "00, ";
+                    __RETclassTime__ += Integer.toString(startHour);
+                    __RETclassTime__ += ":";
+                    __RETclassTime__ += startHalf == 1 ? "30 - " : "00 - ";
+                    __RETclassTime__ += Integer.toString(endHour);
+                    __RETclassTime__ += ":";
+                    __RETclassTime__ += endHalf == 1 ? "30, " : "00, ";
                 }
-                __RETCLASSTIME__ = __RETCLASSTIME__.substring(0, __RETCLASSTIME__.length() - 2);
-                retMap.put("realTime", __RETCLASSTIME__);
+                __RETclassTime__ = __RETclassTime__.substring(0, __RETclassTime__.length() - 2);
+                retMap.put("realTime", __RETclassTime__);
                 _LAL.add(retMap);
             }
         }

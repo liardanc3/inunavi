@@ -16,10 +16,7 @@ public interface UserLectureRepository extends JpaRepository<UserLecture,Long> {
     @Query(value = "alter TABLE userlecture AUTO_INCREMENT = 1",nativeQuery = true)
     void deleteINCREMENT();
 
-    @Query("SELECT m FROM UserLecture AS m WHERE m.email= :email AND m.lectureIdx= :lectureIdx")
-    UserLecture findByUserEmailAndLectureIdx(
-            @Param("email") String email,
-            @Param("lectureIdx") int lectureIdx);
+    UserLecture findByEmailAndLectureIdx(String email, int lectureIdx);
 
     @Query("select m from UserLecture as m where m.email= :email")
     List<UserLecture> findAllByEmail(

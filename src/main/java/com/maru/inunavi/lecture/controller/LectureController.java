@@ -27,6 +27,7 @@ public class LectureController {
         return lectureService.findLectures();
     }
 
+    @Log
     @GetMapping("/admin/updateLecture")
     public List<Lecture> updateLecture(){
         return lectureService.updateLecture();
@@ -36,18 +37,18 @@ public class LectureController {
     @GetMapping("/admin/newSemester")
     public List<Lecture> newSemester(){
         lectureService.deleteAllUserLecture();
-        ArrayList<Lecture> ret = (ArrayList<Lecture>) updateLecture();
+        List<Lecture> ret = lectureService.updateLecture();
         recommendService.updateRecommend();
         return ret;
     }
 
-
-
+    @Log
     @GetMapping("/getTimeTableInfo")
     public HashMap<String,List<LectureService.TimeTableInfo>> getTimeTableInfo(){
         return lectureService.getTimeTableInfo();
     }
 
+    @Log
     @GetMapping("/selectLecture")
     public Map<String,List<Map<String, String>>> selectLecture(@RequestParam(value = "main_keyword") String main_keyword,
                                                        @RequestParam(value = "keyword_option") String keyword_option,

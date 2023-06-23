@@ -1012,7 +1012,7 @@ public class NaviService {
 
         for(int i=0; i<userLectureList.size(); i++){
             String lectureId = LectureRepository.getById(userLectureList.get(i).getLectureIdx()).getNumber();
-            String lectureTime = LectureRepository.findByNumber(lectureId).getClasstime();
+            String lectureTime = LectureRepository.findByNumber(lectureId).getClassTime();
             if(lectureTime.equals("-")) continue;
             StringTokenizer st = new StringTokenizer(lectureTime);
 
@@ -1041,7 +1041,7 @@ public class NaviService {
             retNextPlace.put("nextPlaceTitle","NONE");
         }
         else{
-            String classRoom = LectureRepository.findByNumber(retLectureId).getClassroom();
+            String classRoom = LectureRepository.findByNumber(retLectureId).getClassRoom();
             String[] tokenedClassRoom = classRoom.split(",");
             String nextPlaceCode = "";
             try{
@@ -1099,11 +1099,11 @@ public class NaviService {
         for(int i=0; i<userLectureList.size(); i++){
             int lectureIdx = userLectureList.get(i).getLectureIdx();
             Lecture lecture = LectureRepository.getById(lectureIdx);
-            String classTime = lecture.getClasstime();
-            if(classTime.equals("-") || lecture.getClassroom()==null) continue;
+            String classTime = lecture.getClassTime();
+            if(classTime.equals("-") || lecture.getClassRoom()==null) continue;
 
             // 가상건물 제외
-            String placeCode = lecture.getClassroom().substring(0,3);
+            String placeCode = lecture.getClassRoom().substring(0,3);
             if(!placeCode.equals("SY1") && !placeCode.equals("SY2") && !placeCode.equals("SY3"))
                 placeCode = placeCode.substring(0,2);
             if(placeCode.equals("ZZ")) continue;
@@ -1145,8 +1145,8 @@ public class NaviService {
 
             int idx = -1;
 
-            String classRoom = lecture.getClassroom();
-            String classTime = lecture.getClasstime();
+            String classRoom = lecture.getClassRoom();
+            String classTime = lecture.getClassTime();
 
             if(classTime.equals("-") || classRoom==null || classRoom.equals("")) continue;
 
