@@ -8,9 +8,9 @@ import com.maru.inunavi.navi.domain.entity.Place;
 import com.maru.inunavi.navi.repository.NaviRepository;
 import com.maru.inunavi.navi.repository.NodePathRepository;
 import com.maru.inunavi.navi.repository.PlaceRepository;
-import com.maru.inunavi.user.domain.entity.UserLecture;
-import com.maru.inunavi.user.repository.UserInfoRepository;
-import com.maru.inunavi.user.repository.UserLectureRepository;
+import com.maru.inunavi.user.domain.entity.UserLectureTable;
+import com.maru.inunavi.user.repository.UserRepository;
+import com.maru.inunavi.user.repository.UserLectureTableRepository;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.io.FileUtils;
 import org.apache.tomcat.util.http.fileupload.IOUtils;
@@ -26,8 +26,8 @@ import java.util.*;
 public class NaviService {
 
     private final NaviRepository naviRepository;
-    private final UserInfoRepository userInfoRepository;
-    private final UserLectureRepository userLectureRepository;
+    private final UserRepository userRepository;
+    private final UserLectureTableRepository userLectureTableRepository;
     private final LectureRepository LectureRepository;
     private final NodePathRepository _NodePathRepository;
     private final PlaceRepository _PlaceRepository;
@@ -343,89 +343,6 @@ public class NaviService {
         return _PlaceRepository.findAll();
     }
 
-    // 폐기
-//    public List<Navi> updateNavi() {
-//
-//        naviRepository.deleteAll();
-//        naviRepository.deleteINCREMENT();
-//        _NodePathRepository.deleteAll();
-//        _NodePathRepository.deleteINCREMENT();
-//
-//        int visited[][] = new int[550][550];
-//
-//        List<String> epsg3857 = new ArrayList<>();
-//        List<String> epsg4326 = new ArrayList<>();
-//        List<String> placeCode = new ArrayList<>();
-//
-//        try {
-//            InputStream inputStream = new ClassPathResource("_ALLNODE.txt").getInputStream();
-//            File file =File.createTempFile("_ALLNODE",".txt");
-//            try {
-//                FileUtils.copyInputStreamToFile(inputStream, file);
-//            } finally {
-//                IOUtils.closeQuietly(inputStream);
-//            }
-//            FileReader fileReader = new FileReader(file);
-//            BufferedReader bufReader = new BufferedReader(fileReader);
-//
-//            String line = "";
-//            line = bufReader.readLine();
-//            while ((line = bufReader.readLine()) != null) {
-//
-//                List<String> csv = new ArrayList<>();
-//                StringTokenizer s = new StringTokenizer(line);
-//
-//                // nodeNum, nearNode, placeCode
-//                for (int i = 0; i <= 3; i++) {
-//                    String tmp = s.nextToken("\t");
-//                    csv.add(tmp);
-//                }
-//
-//                // nearNode
-//                String _nearNode = csv.get(1);
-//                if(_nearNode.charAt(0)=='"')
-//                    _nearNode = _nearNode.substring(1,_nearNode.length()-1);
-//                StringTokenizer tmp = new StringTokenizer(_nearNode);
-//                while(tmp.hasMoreTokens()){
-//                    String _tmp = tmp.nextToken(",");
-//                    int next = Integer.parseInt(_tmp);
-//                    visited[placeCode.size()+1][next] = 1;
-//                    visited[next][placeCode.size()+1] = 1;
-//                }
-//
-//                // 좌표계 변환
-//                String _epsg3857 = csv.get(2).substring(1,csv.get(2).length()-1);
-//                String _epsg4326 = epsg3857_to_epsg4326(_epsg3857);
-//                epsg3857.add(_epsg3857);
-//                epsg4326.add(_epsg4326);
-//
-//                // placeCode
-//                String _placeCode = csv.get(3);
-//                if(_placeCode.charAt(0)=='"')
-//                    _placeCode = _placeCode.substring(1,_placeCode.length()-1);
-//                placeCode.add(_placeCode);
-//            }
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-//
-//        List<Navi> naviList = new ArrayList<>();
-//        int len = placeCode.size();
-//        for(int i=1; i<=len; i++){
-//            String _nearNode = "";
-//            for(int j=1; j<=len; j++){
-//                if(visited[i][j]==1)
-//                    _nearNode+=j+",";
-//            }
-//            if(_nearNode.charAt(_nearNode.length()-1)==',')
-//                _nearNode=_nearNode.substring(0,_nearNode.length()-1);
-//            Navi navi = new Navi(_nearNode,epsg3857.get(i-1),epsg4326.get(i-1),placeCode.get(i-1));
-//            naviList.add(navi);
-//        }
-//
-//        naviRepository.saveAll(naviList);
-//        return naviRepository.findAll();
-//    }
 
     public List<Navi> updateNavi2() {
 
@@ -982,7 +899,7 @@ public class NaviService {
     }
 
     public Map<String, String> getNextPlace(String email) {
-        List<UserLecture> userLectureList = userLectureRepository.findAllByEmail(email);
+        List<UserLectureTable> userLectureTableList = userLectureTableRepository.findAllByEmail(email);
 
         Date today = new Date();
         SimpleDateFormat dayOfWeek = new SimpleDateFormat("E");
@@ -1010,8 +927,8 @@ public class NaviService {
         int minTimeGap = 19999;
         int token = 0;
 
-        for(int i=0; i<userLectureList.size(); i++){
-            String lectureId = LectureRepository.getById(userLectureList.get(i).getLectureIdx()).getNumber();
+        for(int i = 0; i< userLectureTableList.size(); i++){
+            String lectureId = LectureRepository.getById(userLectureTableList.get(i).getLectureIdx()).getNumber();
             String lectureTime = LectureRepository.findByNumber(lectureId).getClassTime();
             if(lectureTime.equals("-")) continue;
             StringTokenizer st = new StringTokenizer(lectureTime);
@@ -1086,9 +1003,9 @@ public class NaviService {
         int tightnessPercentage = 0;
         int distancePercentage = (int)totalDistance/50;
         int[] timeArr = new int[336];
-        List<UserLecture> userLectureList = userLectureRepository.findAllByEmail(email);
+        List<UserLectureTable> userLectureTableList = userLectureTableRepository.findAllByEmail(email);
         Map<String, String> retMap = new HashMap<>();
-        if(userLectureList.isEmpty()){
+        if(userLectureTableList.isEmpty()){
             retMap.put("success","false");
             retMap.put("distancePercentage","0");
             retMap.put("tightnessPercentage","0");
@@ -1096,8 +1013,8 @@ public class NaviService {
             return retMap;
         }
         List<Lecture> lectureList = new ArrayList<>();
-        for(int i=0; i<userLectureList.size(); i++){
-            int lectureIdx = userLectureList.get(i).getLectureIdx();
+        for(int i = 0; i< userLectureTableList.size(); i++){
+            int lectureIdx = userLectureTableList.get(i).getLectureIdx();
             Lecture lecture = LectureRepository.getById(lectureIdx);
             String classTime = lecture.getClassTime();
             if(classTime.equals("-") || lecture.getClassRoom()==null) continue;
@@ -1133,14 +1050,14 @@ public class NaviService {
         Map<String, List<Map<String,String>>> retOverview = new HashMap<>();
         List<Map<String,String>> retList = new ArrayList<>();
         // 유저 수업정보 저장
-        List<UserLecture> userLectureList = userLectureRepository.findAllByEmail(email);
+        List<UserLectureTable> userLectureTableList = userLectureTableRepository.findAllByEmail(email);
         String[] placeCodeArrByTime = new String[336];
         String[] lectureNameArrByTime = new String[336];
         String[] lectureTimeArrByTime = new String[336];
 
         int[] dayCheck = new int[7];
-        for(int i=0; i<userLectureList.size(); i++){
-            int lectureIdx = userLectureList.get(i).getLectureIdx();
+        for(int i = 0; i< userLectureTableList.size(); i++){
+            int lectureIdx = userLectureTableList.get(i).getLectureIdx();
             Lecture lecture = LectureRepository.getById(lectureIdx);
 
             int idx = -1;

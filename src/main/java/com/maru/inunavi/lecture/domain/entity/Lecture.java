@@ -1,7 +1,10 @@
 package com.maru.inunavi.lecture.domain.entity;
 
+import com.maru.inunavi.user.domain.entity.User;
 import lombok.*;
 import javax.persistence.*;
+import java.util.HashSet;
+import java.util.Set;
 
 @Builder
 @AllArgsConstructor
@@ -10,60 +13,59 @@ import javax.persistence.*;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Lecture {
 
-    // A_ 순번
+    // 순번
     @Id
     @GeneratedValue
     @Column(name = "lecture_id")
     private Long id;
 
-    // C_학과(부)
+    // 학과(부)
     @Column(length = 45, nullable = false)
     private String department;
 
-    // D_학년
+    // 학년
     @Column(length = 45, nullable = false)
     private String grade;
 
-    // E_이수구분
+    // 이수구분
     @Column(length = 45, nullable = false)
     private String category;
 
-    // F_학수번호
+    // 학수번호
     @Column(length = 45)
     private String number;
 
-    // G_교과목명
+    // 교과목명
     @Column(length = 45)
     private String lectureName;
 
-    // H_담당교수
+    // 담당교수
     @Column(length = 100)
     private String professor;
 
-    // I_강의실(raw)
+    // 강의실(raw)
     @Column(length = 200)
     private String classRoomRaw;
 
-    // J_시간표(raw)
+    // 시간표(raw)
     @Column(length = 200)
     private String classTimeRaw;
 
-    // J_시간표
+    // 시간표
     @Column(length = 200)
     private String classRoom;
     @Column(length = 200)
     private String classTime;
 
-    // K_수업방법
+    // 수업방법
     @Column(length = 100)
     private String how;
 
-    // L_학점
+    // 학점
     @Column(length = 45)
     private String point;
 
+    @ManyToMany(mappedBy = "lectures", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    private Set<User> users = new HashSet<>();
 
 }
-
-
-

@@ -5,9 +5,9 @@ import com.maru.inunavi.lecture.repository.LectureRepository;
 import com.maru.inunavi.recommend.repository.RecommendRepository;
 import com.maru.inunavi.recommend.domain.entity.Recommend;
 import com.maru.inunavi.user.domain.entity.User;
-import com.maru.inunavi.user.domain.entity.UserLecture;
-import com.maru.inunavi.user.repository.UserInfoRepository;
-import com.maru.inunavi.user.repository.UserLectureRepository;
+import com.maru.inunavi.user.domain.entity.UserLectureTable;
+import com.maru.inunavi.user.repository.UserRepository;
+import com.maru.inunavi.user.repository.UserLectureTableRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -17,8 +17,8 @@ import java.util.*;
 @RequiredArgsConstructor
 public class RecommendService {
 
-    private final UserInfoRepository userInfoRepository;
-    private final UserLectureRepository userLectureRepository;
+    private final UserRepository userRepository;
+    private final UserLectureTableRepository userLectureTableRepository;
     private final LectureRepository LectureRepository;
     private final RecommendRepository recommendRepository;
 
@@ -28,7 +28,7 @@ public class RecommendService {
         recommendRepository.deleteINCREMENT();
 
         List<Lecture> lectureList = LectureRepository.findAll();
-        List<User> userList = userInfoRepository.findAll();
+        List<User> userList = userRepository.findAll();
 
         // 수업 개수 + 유사도행렬
         int len = lectureList.size();
@@ -40,12 +40,12 @@ public class RecommendService {
             String userEmail = user.getEmail();
 
             // 유저 수강정보 리스트
-            List<UserLecture> userLectureList = userLectureRepository.findAllByEmail(userEmail);
+            List<UserLectureTable> userLectureTableList = userLectureTableRepository.findAllByEmail(userEmail);
 
             // 유저 수강정보 리스트 벡터추출
             List<Integer> userLectureIdxList = new ArrayList<>();
-            for (UserLecture userLecture : userLectureList)
-                userLectureIdxList.add(userLecture.getLectureIdx());
+            for (UserLectureTable userLectureTable : userLectureTableList)
+                userLectureIdxList.add(userLectureTable.getLectureIdx());
 
             // 유사도행렬 추가
             for (int j = 0; j < userLectureIdxList.size() - 1; j++) {
@@ -95,14 +95,14 @@ public class RecommendService {
         List<Map<String, String>> recommendLectureList = new ArrayList<>();
 
         // 유저가 듣는 수업 확인
-        List<UserLecture> userLectureList = userLectureRepository.findAllByEmail(email);
-        if(userLectureList.size()==0){
+        List<UserLectureTable> userLectureTableList = userLectureTableRepository.findAllByEmail(email);
+        if(userLectureTableList.size()==0){
             retMap.put("response",recommendLectureList);
             return retMap;
         }
 
         // 유저 전공확인
-        String userMajor = userInfoRepository.findByEmail(email).getMajor();
+        String userMajor = userRepository.findByEmail(email).getMajor();
 
         // 유저 기존 수업시간 확인
         int[] userclassTime = new int[336];
@@ -110,11 +110,11 @@ public class RecommendService {
         // 유사도배열 할당
         int len = (int) LectureRepository.count();
         int[] similarityArr = new int[len+1];
-        for (UserLecture userLecture : userLectureList) {
+        for (UserLectureTable userLectureTable : userLectureTableList) {
 
             // 유사도배열 값 추가
             String similarityString = recommendRepository
-                    .getById(userLecture.getLectureIdx())
+                    .getById(userLectureTable.getLectureIdx())
                     .getSimilarityString();
             StringTokenizer st = new StringTokenizer(similarityString);
             for (int j = 1; j <= len; j++) {
@@ -123,7 +123,7 @@ public class RecommendService {
             }
 
             // 기존 수업시간 추가
-            Lecture lecture = LectureRepository.getById(userLecture.getLectureIdx());
+            Lecture lecture = LectureRepository.getById(userLectureTable.getLectureIdx());
             String classTime = lecture.getClassTime();
 
             classTime = classTime.replaceAll(",", "-");
@@ -166,11 +166,11 @@ public class RecommendService {
 
             // 이미 듣고있는수업 + 이미 듣고있는 수업명 동일한지 체크
             boolean flag = false;
-            for(int i=0; i<userLectureList.size() && !flag; i++){
-                if(userLectureList.get(i).getLectureIdx() == lectureIdx)
+            for(int i = 0; i< userLectureTableList.size() && !flag; i++){
+                if(userLectureTableList.get(i).getLectureIdx() == lectureIdx)
                     flag = true;
                 if(className.equals(LectureRepository
-                        .getById(userLectureList.get(i)
+                        .getById(userLectureTableList.get(i)
                                 .getLectureIdx()).getLectureName()))
                     flag = true;
             }

@@ -6,11 +6,10 @@ import com.maru.inunavi.lecture.repository.LectureRepository;
 import com.maru.inunavi.recommend.repository.RecommendRepository;
 import com.maru.inunavi.user.domain.dto.SignUpDto;
 import com.maru.inunavi.user.domain.entity.User;
-import com.maru.inunavi.user.domain.entity.UserLecture;
-import com.maru.inunavi.user.repository.UserInfoRepository;
-import com.maru.inunavi.user.repository.UserLectureRepository;
+import com.maru.inunavi.user.domain.entity.UserLectureTable;
+import com.maru.inunavi.user.repository.UserRepository;
+import com.maru.inunavi.user.repository.UserLectureTableRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -24,8 +23,8 @@ import java.util.*;
 @RequiredArgsConstructor
 public class UserService {
 
-    private final UserInfoRepository userInfoRepository;
-    private final UserLectureRepository userLectureRepository;
+    private final UserRepository userRepository;
+    private final UserLectureTableRepository userLectureTableRepository;
     private final LectureRepository LectureRepository;
     private final RecommendRepository recommendRepository;
 
@@ -33,8 +32,8 @@ public class UserService {
 
     @Log("[{}] singUp")
     public SignUpDto signUp(String email, String password, String major){
-        if (userInfoRepository.findByEmail(email) == null){
-            User savedUser = userInfoRepository.save(
+        if (userRepository.findByEmail(email) == null){
+            User savedUser = userRepository.save(
                     User.builder()
                             .email(email)
                             .password(new BCryptPasswordEncoder().encode(password))
@@ -50,7 +49,7 @@ public class UserService {
         PasswordEncoder passwordencoder = new BCryptPasswordEncoder();
         Map<String, String> json = new HashMap<>();
         json.put("email", email);
-        User user = userInfoRepository.findByEmail(email);
+        User user = userRepository.findByEmail(email);
         if (user ==null) {
             json.put("success", "false");
             json.put("message", "아이디가 틀림");
@@ -70,12 +69,13 @@ public class UserService {
     public Map<String, String> idCheck(String email){
         Map<String, String> json = new HashMap<>();
         json.put("email", email);
-        if(userInfoRepository.findByEmail(email) != null)
+        if(userRepository.findByEmail(email) != null)
             json.put("success", "true");
         else json.put("success", "false");
         return json;
     }
 
+    @Transactional
     public Map<String, String> AddLecture(String email, String lectureId) {
 
         Map<String, String> json = new HashMap<>();
@@ -84,13 +84,20 @@ public class UserService {
         Long lectureIdx = LectureRepository.findByNumber(lectureId).getId();
 
         json.put("email", email);
-        if(userLectureRepository.findByEmailAndLectureIdx(email, Math.toIntExact(lectureIdx)) == null){
-            userLectureRepository.save(new UserLecture(email, Math.toIntExact(lectureIdx)));
+        if(userLectureTableRepository.findByEmailAndLectureIdx(email, Math.toIntExact(lectureIdx)) == null){
+            userLectureTableRepository.save(new UserLectureTable(email, Math.toIntExact(lectureIdx)));
             json.put("success", "true");
             updateRecommendTable(email, Math.toIntExact(lectureIdx),true);
         }else{
             json.put("success", "false");
         }
+
+        User user = userRepository.findByEmail(email);
+        Lecture lecture = LectureRepository.findByNumber(lectureId);
+        System.out.println("user.getId() = " + user.getId());
+        System.out.println("lecture.getId() = " + lecture.getId());
+        lecture.getUsers().add(user);
+        user.getLectures().add(lecture);
         return json;
     }
 
@@ -100,11 +107,11 @@ public class UserService {
         Long lectureIdx = LectureRepository.findByNumber(lectureID).getId();
 
         json.put("email", email);
-        UserLecture userLecture = userLectureRepository.findByEmailAndLectureIdx(email, Math.toIntExact(lectureIdx)) ;
-        if(userLecture != null){
+        UserLectureTable userLectureTable = userLectureTableRepository.findByEmailAndLectureIdx(email, Math.toIntExact(lectureIdx)) ;
+        if(userLectureTable != null){
             json.put("success", "true");
             updateRecommendTable(email, Math.toIntExact(lectureIdx),false);
-            userLectureRepository.delete(userLecture);
+            userLectureTableRepository.delete(userLectureTable);
         }
         else {
             json.put("success", "false");
@@ -114,7 +121,7 @@ public class UserService {
 
     public Map<String, List<Map<String, String>>> showMyLecture(String email) {
         Map<String, List<Map<String, String>>> json = new HashMap<>();
-        List<UserLecture> _UL = userLectureRepository.findAllByEmail(email);
+        List<UserLectureTable> _UL = userLectureTableRepository.findAllByEmail(email);
         List<Map<String, String>> _LAL = new ArrayList<>();
         for (int i = 0; i < _UL.size(); i++) {
             Map<String, String> retMap = new HashMap<>();
@@ -224,9 +231,9 @@ public class UserService {
         PasswordEncoder passwordencoder = new BCryptPasswordEncoder();
         Map<String, String> json = new HashMap<>();
         json.put("email", email);
-        User user = userInfoRepository.findByEmail(email);
+        User user = userRepository.findByEmail(email);
         if (user != null){
-            userInfoRepository.save(
+            userRepository.save(
                     User.builder()
                             .email(email)
                             .password(passwordencoder.encode((password)))
@@ -243,9 +250,9 @@ public class UserService {
     public Map<String, String> updateMajor(String email, String major){
         Map<String, String> json = new HashMap<>();
         json.put("email", email);
-        User user = userInfoRepository.findByEmail(email);
+        User user = userRepository.findByEmail(email);
         if (user != null){
-            userInfoRepository.save(
+            userRepository.save(
                     User.builder()
                             .email(email)
                             .password(user.getPassword())
@@ -263,17 +270,17 @@ public class UserService {
         PasswordEncoder passwordencoder = new BCryptPasswordEncoder();
         Map<String, String> json = new HashMap<>();
         json.put("email", email);
-        User user = userInfoRepository.findByEmail(email);
+        User user = userRepository.findByEmail(email);
         if (user == null){
             json.put("success", "false");
         }else if (!passwordencoder.matches(password, user.getPassword())){
             json.put("success","false");
         }else{
-            userInfoRepository.delete(user);
-            List<UserLecture> userLectureList = userLectureRepository.findAllByEmail(email);
-            for(int i=0; i<userLectureList.size(); i++){
-                updateRecommendTable(email,userLectureList.get(i).getLectureIdx(),false);
-                userLectureRepository.delete(userLectureList.get(i));
+            userRepository.delete(user);
+            List<UserLectureTable> userLectureTableList = userLectureTableRepository.findAllByEmail(email);
+            for(int i = 0; i< userLectureTableList.size(); i++){
+                updateRecommendTable(email, userLectureTableList.get(i).getLectureIdx(),false);
+                userLectureTableRepository.delete(userLectureTableList.get(i));
             }
             json.put("success","true");
         }
@@ -281,12 +288,12 @@ public class UserService {
     }
 
     public void updateRecommendTable(String email, int lectureIdx, boolean add){
-        List<UserLecture> userLectureList = userLectureRepository.findAllByEmail(email);
+        List<UserLectureTable> userLectureTableList = userLectureTableRepository.findAllByEmail(email);
 
         // 유저가 듣는 수업의 인덱스 리스트
         List<Integer> userLectureIdxList = new ArrayList<>();
-        for(int i=0; i<userLectureList.size(); i++)
-            userLectureIdxList.add(userLectureList.get(i).getLectureIdx());
+        for(int i = 0; i< userLectureTableList.size(); i++)
+            userLectureIdxList.add(userLectureTableList.get(i).getLectureIdx());
 
         // 유사도행렬 업데이트
         int len = (int) LectureRepository.count();
@@ -318,6 +325,6 @@ public class UserService {
     }
 
     public List<User> memberList() {
-        return userInfoRepository.findAll();
+        return userRepository.findAll();
     }
 }

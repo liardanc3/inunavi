@@ -4,7 +4,9 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.maru.inunavi.aop.log.Log;
 import com.maru.inunavi.lecture.domain.entity.Lecture;
 import com.maru.inunavi.lecture.repository.LectureRepository;
-import com.maru.inunavi.user.repository.UserLectureRepository;
+import com.maru.inunavi.user.domain.entity.User;
+import com.maru.inunavi.user.repository.UserLectureTableRepository;
+import com.maru.inunavi.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.ObjectProvider;
@@ -22,8 +24,8 @@ import java.util.*;
 public class LectureService {
 
     private final ObjectProvider<LectureService> lectureServiceProvider;
-    private final UserLectureRepository userLectureRepository;
     private final LectureRepository lectureRepository;
+    private final UserRepository userRepository;
 
     private LectureService lectureService;
 
@@ -40,6 +42,11 @@ public class LectureService {
         return lectureRepository.findAll();
     }
 
+    public void newSemester(){
+        lectureService.deleteAllUserLecture();
+        lectureService.updateLecture();
+    }
+
     /**
      * Update lecture table<b>
      * @return {@code List<Lecture>}
@@ -47,7 +54,7 @@ public class LectureService {
     @Log
     @Transactional
     @SneakyThrows
-    public List<Lecture> updateLecture() {
+    public void updateLecture() {
 
         lectureService.resetTable();
 
@@ -96,8 +103,6 @@ public class LectureService {
                             .build()
             );
         }
-
-        return lectureRepository.findAll();
     }
 
 
@@ -231,8 +236,11 @@ public class LectureService {
         }
     }
 
+    @Log
+    @Transactional
     public void deleteAllUserLecture(){
-        userLectureRepository.deleteAll();
+        userRepository.findAll()
+                .forEach(User::removeLectures);
     }
 
     public HashMap<String, List<TimeTableInfo>> getTimeTableInfo(){

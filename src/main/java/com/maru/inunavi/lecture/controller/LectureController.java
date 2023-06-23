@@ -5,6 +5,7 @@ import com.maru.inunavi.lecture.domain.entity.Lecture;
 import com.maru.inunavi.lecture.service.LectureService;
 import com.maru.inunavi.recommend.service.RecommendService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -28,11 +29,10 @@ public class LectureController {
 
     @Log
     @GetMapping("/admin/newSemester")
-    public List<Lecture> newSemester(){
-        lectureService.deleteAllUserLecture();
-        List<Lecture> ret = lectureService.updateLecture();
+    public String newSemester(){
+        lectureService.newSemester();
         recommendService.updateRecommend();
-        return ret;
+        return "success";
     }
 
     @Log

@@ -3,18 +3,21 @@ package com.maru.inunavi.user.domain.entity;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
+
 import javax.persistence.*;
 
 @Builder
 @Entity
-@AllArgsConstructor
 @Getter
-public class UserLecture {
+@NoArgsConstructor
+@AllArgsConstructor
+public class UserLectureTable {
 
     // 아이디
     @Id
     @GeneratedValue
-    @Column(name = "user_lecture_id")
+    @Column(name = "user_lecture_table_id")
     private Long id;
 
     //이메일
@@ -25,8 +28,7 @@ public class UserLecture {
     @Column(length = 45, nullable=false)
     private int lectureIdx;
 
-    public UserLecture(){}
-    public UserLecture(String email, int lectureIdx) {
+    public UserLectureTable(String email, int lectureIdx) {
         this.email=email;
         this.lectureIdx=lectureIdx;
     }

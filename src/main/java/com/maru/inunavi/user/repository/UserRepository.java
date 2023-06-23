@@ -7,12 +7,10 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface UserInfoRepository extends JpaRepository<User, Long> {
+public interface UserRepository extends JpaRepository<User, Long> {
 
     @Query("select m from User as m where m.email= :email")
     User findByEmail(
             @Param("email") String email
     );
-
-
 }
