@@ -20,8 +20,6 @@ dependencies {
 	implementation 'mysql:mysql-connector-java'
 	implementation 'org.projectlombok:lombok:1.18.20'
 
-	runtimeOnly 'com.h2database:h2'
-
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 
 	implementation 'org.apache.directory.studio:org.apache.commons.io:2.4'
@@ -29,8 +27,8 @@ dependencies {
 	implementation group: 'org.springframework.boot', name: 'spring-boot-starter-security', version: '2.4.5'
 	implementation group: 'org.springframework.boot', name: 'spring-boot-starter-mail', version: '1.2.0.RELEASE'
 
-	implementation "com.querydsl:querydsl-jpa:5.0.0" // querydsl 라이브러리
-	annotationProcessor "com.querydsl:querydsl-apt:5.0.0" //  Querydsl 관련 코드 생성 기능 제공
+	implementation "com.querydsl:querydsl-jpa:5.0.0"
+	annotationProcessor "com.querydsl:querydsl-apt:5.0.0"
 
 	compileOnly 'org.projectlombok:lombok'
 	runtimeOnly 'com.h2database:h2'
@@ -60,6 +58,7 @@ bootWar{
 }
 
 def querydslDir = "$buildDir/generated/inunavi"
+
 querydsl {
 	jpa = true
 	querydslSourcesDir = querydslDir
