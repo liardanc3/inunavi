@@ -7,12 +7,12 @@ import com.maru.inunavi.lecture.repository.LectureRepository;
 import com.maru.inunavi.user.repository.UserLectureRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
-import org.apache.commons.io.FileUtils;
-import org.apache.tomcat.util.http.fileupload.IOUtils;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.PostConstruct;
 import java.io.*;
 import java.util.*;
 
@@ -22,17 +22,33 @@ import java.util.*;
 public class LectureService {
 
     private final UserLectureRepository userLectureRepository;
-    private final LectureRepository LectureRepository;
+    private final LectureRepository lectureRepository;
 
-    public List<Lecture> findLectures(){
-        return LectureRepository.findAll();
+    private LectureService lectureService;
+
+    @PostConstruct
+    void init(ObjectProvider<LectureService> lectureServiceProvider){
+        lectureService = lectureServiceProvider.getObject();
     }
 
+    /**
+     * Find all lecture
+     * @return {@code List<Lecture>}
+     */
+    public List<Lecture> findLectures(){
+        return lectureRepository.findAll();
+    }
+
+    /**
+     * Update lecture table<b>
+     * @return {@code List<Lecture>}
+     */
+    @Log
     @Transactional
     @SneakyThrows
     public List<Lecture> updateLecture() {
 
-        resetTable();
+        lectureService.resetTable();
 
         InputStream inputStream = new ClassPathResource("lecture.txt").getInputStream();
         BufferedReader buffer = new BufferedReader(new InputStreamReader(inputStream));
@@ -40,51 +56,29 @@ public class LectureService {
         String line = "";
         while ((line = buffer.readLine()) != null) {
 
-            // line
             StringTokenizer lineToken = new StringTokenizer(line);
 
-            // 1번 x
+            lineToken.nextToken("\t");
             lineToken.nextToken("\t");
 
-            // 2번 x
-            lineToken.nextToken("\t");
-
-            // 3번 department
             String department = lineToken.nextToken("\t");
-
-            // 4번 grade
             String grade = lineToken.nextToken("\t");
-
-            // 5번 category
             String category = lineToken.nextToken("\t");
-
-            // 6번 number
             String number = lineToken.nextToken("\t");
-
-            // 7번 lectureName
             String lectureName = lineToken.nextToken("\t");
 
-            // 8번 x
             lineToken.nextToken("\t");
 
-            // 9번 professor
             String professor = lineToken.nextToken("\t");
-
-            // 10번 classRoomRaw
             String classRoomRaw = lineToken.nextToken("\t");
-
-            // 11번 classTimeRaw
             String classTimeRaw = lineToken.nextToken("\t");
-
-            // 12번 point
             String point = lineToken.nextToken("\t");
 
-            // 시간, 장소 파싱
-            String[] parseResult = parseTime(classTimeRaw);
+            String[] parseResult = lectureService.parseTime(classTimeRaw);
             String classTime = parseResult[0];
             String classRoom = parseResult[1];
 
-            LectureRepository.save(
+            lectureRepository.save(
                     Lecture.builder()
                             .department(department)
                             .grade(grade)
@@ -102,14 +96,9 @@ public class LectureService {
             );
         }
 
-        return LectureRepository.findAll();
+        return lectureRepository.findAll();
     }
 
-    @Log
-    public void resetTable() {
-        LectureRepository.deleteAll();
-        LectureRepository.deleteINCREMENT();
-    }
 
     /**
      * Parse raw time text<b>
@@ -155,7 +144,6 @@ public class LectureService {
                 StringTokenizer timeRangeToken = new StringTokenizer(restToken);
                 while(timeRangeToken.hasMoreTokens()){
                     String timeRange = timeRangeToken.nextToken(",");
-                    System.out.println("timeRange = " + timeRange);
 
                     int idx = 0;
                     if(timeRange.charAt(idx)=='('){
@@ -176,24 +164,28 @@ public class LectureService {
 
                     if(timeRange.charAt(idx + 1) == '야'){
                         classStartTime += 18;
-                        dayStartTime = classStartTime;
-                        int extraTime = timeRange.charAt(idx + 2) - '0';
-                        classStartTime += 2 * extraTime;
 
+                        dayStartTime = classStartTime;
+
+                        classStartTime += 2 * (timeRange.charAt(idx + 2) - '0');
                         classEndTime += 18;
+
                         dayEndTime = classEndTime;
                     }
 
                     else{
                         dayStartTime = classStartTime;
-                        int extraTime = timeRange.charAt(idx + 1) - '0';
-                        classStartTime += (2 * extraTime);
-                        if(timeRange.charAt(idx+2) == 'B')
+
+                        classStartTime += (2 * (timeRange.charAt(idx + 1) - '0'));
+                        if(timeRange.charAt(idx+2) == 'B'){
                             classStartTime += 1;
+                        }
 
                         dayEndTime = classEndTime;
-                        if(timeRange.contains("야"))
+
+                        if(timeRange.contains("야")){
                             classEndTime += 18;
+                        }
                     }
 
                     int isHalfHour = timeRange.charAt(timeRange.length() - 2) == 'A' ? 1 : 0;
@@ -213,7 +205,11 @@ public class LectureService {
         return new String[]{classTime.toString(), classRoom.toString()};
     }
 
-
+    @Log
+    public void resetTable() {
+        lectureRepository.deleteAll();
+        lectureRepository.deleteINCREMENT();
+    }
 
     @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
     public class TimeTableInfo{
@@ -245,7 +241,7 @@ public class LectureService {
         _categorySet.add("전체");
 
         List<Lecture> lectureList = new ArrayList<>();
-        lectureList.addAll(LectureRepository.findAll());
+        lectureList.addAll(lectureRepository.findAll());
 
         for(int i=0; i<lectureList.size(); i++){
             Lecture lecture = lectureList.get(i);
@@ -299,11 +295,11 @@ public class LectureService {
         List<Lecture> tmp = new ArrayList<Lecture>();
         List<Map<String, String>> result = new ArrayList<>();
         if(sort_option.equals("과목코드"))
-            tmp = LectureRepository.findAllByOrderByNumberAsc();
+            tmp = lectureRepository.findAllByOrderByNumberAsc();
         else if(sort_option.equals("과목명"))
-            tmp = LectureRepository.findAllByOrderByLectureNameAsc();
+            tmp = lectureRepository.findAllByOrderByLectureNameAsc();
         else
-            tmp = LectureRepository.findAll();
+            tmp = lectureRepository.findAll();
 
         for(int i=0; i<tmp.size(); i++){
             Lecture now = tmp.get(i);

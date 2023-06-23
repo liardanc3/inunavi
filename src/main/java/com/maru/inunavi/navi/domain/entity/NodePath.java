@@ -7,9 +7,9 @@ import javax.persistence.*;
 @Builder
 @Entity(name="nodepath")
 @AllArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 public class NodePath {
-    public NodePath(){};
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

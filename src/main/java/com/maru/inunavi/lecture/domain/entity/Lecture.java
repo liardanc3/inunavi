@@ -7,7 +7,7 @@ import javax.persistence.*;
 @AllArgsConstructor
 @Entity
 @Getter
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Lecture {
 
     // A_ 순번
