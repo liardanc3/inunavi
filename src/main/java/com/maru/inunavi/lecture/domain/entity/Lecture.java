@@ -65,7 +65,7 @@ public class Lecture {
     @Column(length = 45)
     private String point;
 
-    @ManyToMany(mappedBy = "lectures", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @ManyToMany(mappedBy = "lectures")
     private Set<User> users = new HashSet<>();
 
 }

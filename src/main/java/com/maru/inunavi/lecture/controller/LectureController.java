@@ -1,6 +1,7 @@
 package com.maru.inunavi.lecture.controller;
 
 import com.maru.inunavi.aop.log.Log;
+import com.maru.inunavi.lecture.domain.dto.TimeTableInfoDto;
 import com.maru.inunavi.lecture.domain.entity.Lecture;
 import com.maru.inunavi.lecture.service.LectureService;
 import com.maru.inunavi.recommend.service.RecommendService;
@@ -21,24 +22,31 @@ public class LectureController {
     private final LectureService lectureService;
     private final RecommendService recommendService;
 
+    /**
+     * [ADMIN] find all lecture
+     * @return {@code List<Lecture>}
+     */
     @Log
     @GetMapping("/lecture")
     public List<Lecture> findLectures(){
         return lectureService.findLectures();
     }
 
+    /**
+     * [ADMIN] Update lecture table and reset recommend table<b>
+     */
     @Log
     @GetMapping("/admin/newSemester")
     public String newSemester(){
-        lectureService.newSemester();
-        recommendService.updateRecommend();
+        lectureService.updateLectures();
+        recommendService.resetRecommends();
         return "success";
     }
 
     @Log
     @GetMapping("/getTimeTableInfo")
-    public HashMap<String,List<LectureService.TimeTableInfo>> getTimeTableInfo(){
-        return lectureService.getTimeTableInfo();
+    public TimeTableInfoDto getTimeTableInfo(){
+        return new TimeTableInfoDto(lectureService.getTimeTableInfo());
     }
 
     @Log

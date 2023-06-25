@@ -11,7 +11,6 @@ import javax.transaction.Transactional;
 @Repository
 public interface NodePathRepository extends JpaRepository<NodePath, Long> {
 
-    @Transactional
     @Modifying
     @Query(value = "alter TABLE nodepath AUTO_INCREMENT = 1",nativeQuery = true)
     void deleteINCREMENT();

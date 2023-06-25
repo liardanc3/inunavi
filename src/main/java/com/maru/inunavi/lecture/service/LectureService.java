@@ -2,6 +2,8 @@ package com.maru.inunavi.lecture.service;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.maru.inunavi.aop.log.Log;
+import com.maru.inunavi.lecture.domain.dto.TimeTableInfo;
+import com.maru.inunavi.lecture.domain.dto.TimeTableInfoDto;
 import com.maru.inunavi.lecture.domain.entity.Lecture;
 import com.maru.inunavi.lecture.repository.LectureRepository;
 import com.maru.inunavi.user.domain.entity.User;
@@ -16,7 +18,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.PostConstruct;
 import java.io.*;
+import java.time.LocalDate;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -42,11 +46,6 @@ public class LectureService {
         return lectureRepository.findAll();
     }
 
-    public void newSemester(){
-        lectureService.deleteAllUserLecture();
-        lectureService.updateLecture();
-    }
-
     /**
      * Update lecture table<b>
      * @return {@code List<Lecture>}
@@ -54,9 +53,12 @@ public class LectureService {
     @Log
     @Transactional
     @SneakyThrows
-    public void updateLecture() {
+    public void updateLectures() {
 
-        lectureService.resetTable();
+        userRepository.findAll().forEach(User::removeLectures);
+
+        lectureRepository.deleteAll();
+        lectureRepository.deleteINCREMENT();
 
         InputStream inputStream = new ClassPathResource("lecture.txt").getInputStream();
         BufferedReader buffer = new BufferedReader(new InputStreamReader(inputStream));
@@ -212,85 +214,43 @@ public class LectureService {
     }
 
     /**
-     * Delete lecture and reset auto increment
+     * Provide semester info
+     * @return {@code TimeTableInfo}
      */
-    @Log
-    public void resetTable() {
-        lectureRepository.deleteAll();
-        lectureRepository.deleteINCREMENT();
-    }
+    public TimeTableInfo getTimeTableInfo(){
 
-    @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
-    public class TimeTableInfo{
-        String year;
-        String semester;
-        String majorArrayString;
-        String CSEArrayString;
-        String categoryListString;
-        public TimeTableInfo(String year,String semester,String majorArrayString,String CSEArrayString, String categoryListString){
-            this.year=year;
-            this.semester=semester;
-            this.majorArrayString=majorArrayString;
-            this.CSEArrayString=CSEArrayString;
-            this.categoryListString=categoryListString;
-        }
-    }
+        String majors = lectureRepository.findDistinctMajors("교양", "교직", "일선", "군사학")
+                .parallelStream()
+                .reduce((result, department) -> result + "," + department)
+                .map(result -> result + ",전체")
+                .orElseThrow(NoSuchElementException::new);
 
-    @Log
-    @Transactional
-    public void deleteAllUserLecture(){
-        userRepository.findAll()
-                .forEach(User::removeLectures);
-    }
+        String basicGenerals = lectureRepository.findDistinctBasicGenerals("교양필수", "전학년", "교양")
+               .parallelStream()
+               .reduce((result, department) -> result + "," + department)
+               .map(result -> result + ",전체")
+               .orElseThrow(NoSuchElementException::new);
 
-    public HashMap<String, List<TimeTableInfo>> getTimeTableInfo(){
-        HashMap<String, List<TimeTableInfo>> retInfo = new HashMap<>();
-        Set<String> _majorSet = new HashSet<>();
-        Set<String> _cseSet = new HashSet<>();
-        Set<String> _categorySet = new HashSet<>();
-        _majorSet.add("전체");
-        _cseSet.add("전체");
-        _categorySet.add("전체");
+        String categories = lectureRepository.findDistinctCategory()
+               .parallelStream()
+               .reduce((result, department) -> result + "," + department)
+               .map(result -> result + ",전체")
+               .orElseThrow(NoSuchElementException::new);
 
-        List<Lecture> lectureList = new ArrayList<>();
-        lectureList.addAll(lectureRepository.findAll());
+        LocalDate currentDate = LocalDate.now();
 
-        for(int i=0; i<lectureList.size(); i++){
-            Lecture lecture = lectureList.get(i);
-            String _majorTmp = lecture.getDepartment();
-            String _categoryTmp = lecture.getCategory();
+        String year = Integer.toString(currentDate.getYear());
 
-            if(!_majorTmp.equals("교양") && !_majorTmp.equals("교직") && !_majorTmp.equals("일선") && !_majorTmp.equals("군사학"))
-                _majorSet.add(_majorTmp);
-            _categorySet.add(_categoryTmp);
-            if(_categoryTmp.equals("교양필수") && !lecture.getGrade().equals("전학년") && lecture.getDepartment().equals("교양"))
-                _cseSet.add(lecture.getLectureName());
-        }
+        int month = currentDate.getMonthValue();
+        String semester = month <= 2 ? "겨울" : month <= 6 ? "1" : month <= 8 ? "여름" : "2";
 
-        String major = "";
-        String cse = "";
-        String category = "";
-
-        Iterator<String> it = _majorSet.iterator();
-        while(it.hasNext())
-            major+=it.next()+",";
-        major=major.substring(0,major.length()-1);
-
-        it = _cseSet.iterator();
-        while(it.hasNext())
-            cse+=it.next()+",";
-        cse=cse.substring(0,cse.length()-1);
-
-        it = _categorySet.iterator();
-        while(it.hasNext())
-            category+=it.next()+",";
-        category=category.substring(0,category.length()-1);
-
-        TimeTableInfo _TimeTableInfo = new TimeTableInfo("2022","2",major,cse,category);
-        List<TimeTableInfo> retList = new ArrayList<>();
-        retList.add(_TimeTableInfo);
-        retInfo.put("response",retList);
-        return retInfo;
+        return TimeTableInfo.builder()
+                .majors(majors)
+                .basicGenerals(basicGenerals)
+                .categories(categories)
+                .year(year)
+                .semester(semester)
+                .build();
     }
 
     public List<Map<String, String>> selectLecture(String main_keyword, String keyword_option, String major_option, String cse_option, String sort_option, String grade_option, String category_option, String score_option) {

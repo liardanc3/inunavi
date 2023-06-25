@@ -10,24 +10,50 @@ import com.maru.inunavi.user.repository.UserRepository;
 import com.maru.inunavi.user.repository.UserLectureTableRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class RecommendService {
 
     private final UserRepository userRepository;
     private final UserLectureTableRepository userLectureTableRepository;
-    private final LectureRepository LectureRepository;
+    private final LectureRepository lectureRepository;
     private final RecommendRepository recommendRepository;
 
-    public List<Recommend> updateRecommend(){
+    /**
+     * Reset recommend table
+     */
+    @Transactional
+    public void resetRecommends() {
+        recommendRepository.deleteAll();
+        recommendRepository.deleteINCREMENT();
+
+        StringBuilder similarity = new StringBuilder();
+        long count = lectureRepository.count();
+        while (count-- > 0) {
+            similarity.append("0,");
+        }
+
+        lectureRepository.findAll()
+                .forEach(lecture ->
+                        recommendRepository.save(
+                                Recommend.builder()
+                                        .similarity(similarity.toString())
+                                        .build()
+                        )
+                );
+    }
+
+    public List<Recommend> updateRecommend1(){
 
         recommendRepository.deleteAll();
         recommendRepository.deleteINCREMENT();
 
-        List<Lecture> lectureList = LectureRepository.findAll();
+        List<Lecture> lectureList = lectureRepository.findAll();
         List<User> userList = userRepository.findAll();
 
         // 수업 개수 + 유사도행렬
@@ -108,14 +134,14 @@ public class RecommendService {
         int[] userclassTime = new int[336];
 
         // 유사도배열 할당
-        int len = (int) LectureRepository.count();
+        int len = (int) lectureRepository.count();
         int[] similarityArr = new int[len+1];
         for (UserLectureTable userLectureTable : userLectureTableList) {
 
             // 유사도배열 값 추가
             String similarityString = recommendRepository
                     .getById(userLectureTable.getLectureIdx())
-                    .getSimilarityString();
+                    .getSimilarity();
             StringTokenizer st = new StringTokenizer(similarityString);
             for (int j = 1; j <= len; j++) {
                 String s = st.nextToken(",");
@@ -123,7 +149,7 @@ public class RecommendService {
             }
 
             // 기존 수업시간 추가
-            Lecture lecture = LectureRepository.getById(userLectureTable.getLectureIdx());
+            Lecture lecture = lectureRepository.getById(userLectureTable.getLectureIdx());
             String classTime = lecture.getClassTime();
 
             classTime = classTime.replaceAll(",", "-");
@@ -143,7 +169,7 @@ public class RecommendService {
         PriorityQueue<Pair> pq = new PriorityQueue<>();
         for(int i=1; i<=len; i++){
             if(similarityArr[i] < 1) continue;
-            Lecture lecture = LectureRepository.getById(i);
+            Lecture lecture = lectureRepository.getById(i);
             if(lecture.getDepartment().equals(userMajor))
                 pq.add(new Pair(i,similarityArr[i]/2));
             else pq.add(new Pair(i,similarityArr[i]));
@@ -157,7 +183,7 @@ public class RecommendService {
             pq.remove();
             if(similarityPoint==0) continue;
 
-            Lecture lecture = LectureRepository.getById(lectureIdx);
+            Lecture lecture = lectureRepository.getById(lectureIdx);
             String major = lecture.getDepartment();
 
             String classTime = lecture.getClassTime();
@@ -169,7 +195,7 @@ public class RecommendService {
             for(int i = 0; i< userLectureTableList.size() && !flag; i++){
                 if(userLectureTableList.get(i).getLectureIdx() == lectureIdx)
                     flag = true;
-                if(className.equals(LectureRepository
+                if(className.equals(lectureRepository
                         .getById(userLectureTableList.get(i)
                                 .getLectureIdx()).getLectureName()))
                     flag = true;

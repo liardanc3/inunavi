@@ -10,7 +10,7 @@ import javax.persistence.*;
 import java.sql.Blob;
 
 @Builder
-@Entity(name="recommend")
+@Entity
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
@@ -21,14 +21,10 @@ public class Recommend {
     @Column(name = "recommend_id")
     private Long id;
 
-    @Column
-    private String number;
-
     @Lob
     @Column(length = 50000, nullable = false)
-    private String similarityString;
+    private String similarity;
 
-    public Recommend(String similarityString){
-        this.similarityString=similarityString;
+    public Recommend(String similarityString) {
     }
 }

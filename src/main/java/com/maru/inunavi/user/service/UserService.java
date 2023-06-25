@@ -300,7 +300,7 @@ public class UserService {
         int[][] similarityArr = new int[len+1][len+1];
         for(int i=0; i<userLectureIdxList.size(); i++){
             int idx = userLectureIdxList.get(i);
-            String similarityString = recommendRepository.getById(idx).getSimilarityString();
+            String similarityString = recommendRepository.getById(idx).getSimilarity();
             StringTokenizer st = new StringTokenizer(similarityString);
             for(int j=1; j<=len; j++){
                 String s = st.nextToken(",");

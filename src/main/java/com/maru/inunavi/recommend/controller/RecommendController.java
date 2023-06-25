@@ -28,11 +28,11 @@ public class RecommendController {
 
     @GetMapping("/admin/updateRecommend")
     @ResponseBody
-    public List<Recommend> updateRecommend(){
+    public void updateRecommend(){
         HttpServletRequest req = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();
         String ip = req.getHeader("X-Forwarded-For");
         if(ip==null) ip=req.getRemoteAddr();
         log.info("updateRecommend("+ip+")");
-        return recommendService.updateRecommend();
+        recommendService.resetRecommends();
     }
 }

@@ -11,13 +11,11 @@ import javax.transaction.Transactional;
 @Repository
 public interface RecommendRepository extends JpaRepository<Recommend, Integer> {
 
-    @Transactional
-    @Modifying
+    @Modifying(clearAutomatically = true)
     @Query(value = "alter TABLE recommend AUTO_INCREMENT = 1",nativeQuery = true)
     void deleteINCREMENT();
 
-    @Transactional
     @Modifying
-    @Query("update recommend r set r.similarityString = :similarityString where r.id =:id")
+    @Query("update Recommend r set r.similarity = :similarityString where r.id =:id")
     void updateSimilarityString(int id, String similarityString);
 }
