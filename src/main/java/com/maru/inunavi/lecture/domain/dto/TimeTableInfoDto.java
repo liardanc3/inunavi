@@ -12,10 +12,11 @@ import java.util.List;
 @AllArgsConstructor
 public class TimeTableInfoDto {
 
-    private static final String response = "response";
+    private String response;
     private List<TimeTableInfo> timeTableInfoList;
 
     public TimeTableInfoDto(TimeTableInfo timeTableInfo) {
+        this.response = "response";
         this.timeTableInfoList = List.of(timeTableInfo);
     }
 }

@@ -160,12 +160,12 @@ public class LectureService {
                     }
                     else{
                         switch (timeRange.charAt(0)){
-                            case '월' -> { classStartTime=16; classEndTime=16; }
-                            case '화' -> { classStartTime=64; classEndTime=64; }
-                            case '수' -> { classStartTime=112; classEndTime=112; }
-                            case '목' -> { classStartTime=160; classEndTime=160; }
-                            case '금' -> { classStartTime=208; classEndTime=208; }
-                            case '토' -> { classStartTime=256; classEndTime=256; }
+                            case '월' : classStartTime=16; classEndTime=16; break;
+                            case '화' : classStartTime=64; classEndTime=64; break;
+                            case '수' : classStartTime=112; classEndTime=112; break;
+                            case '목' : classStartTime=160; classEndTime=160; break;
+                            case '금' : classStartTime=208; classEndTime=208; break;
+                            case '토' : classStartTime=256; classEndTime=256; break;
                         }
                         idx++;
                     }
