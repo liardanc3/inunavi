@@ -8,7 +8,7 @@ plugins {
 
 group = 'com.maru'
 version = '0.0.1-SNAPSHOT'
-sourceCompatibility = "14"
+sourceCompatibility = "11"
 
 repositories {
 	mavenCentral()
@@ -78,4 +78,3 @@ compileQuerydsl {
 	options.annotationProcessorPath = configurations.querydsl
 	dependsOn 'clean'
 }
-targetCompatibility = JavaVersion.VERSION_14
