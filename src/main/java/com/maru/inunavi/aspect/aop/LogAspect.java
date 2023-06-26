@@ -1,4 +1,4 @@
-package com.maru.inunavi.aspect.logic;
+package com.maru.inunavi.aspect.aop;
 
 import com.maru.inunavi.aspect.annotation.Log;
 import lombok.extern.slf4j.Slf4j;
