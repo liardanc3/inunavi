@@ -1,9 +1,8 @@
-package com.maru.inunavi.aop.log;
+package com.maru.inunavi.aspect.logic;
 
+import com.maru.inunavi.aspect.annotation.Log;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.JoinPoint;
-import org.aspectj.lang.ProceedingJoinPoint;
-import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.springframework.stereotype.Component;

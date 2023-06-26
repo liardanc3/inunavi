@@ -1,6 +1,6 @@
 package com.maru.inunavi.user.service;
 
-import com.maru.inunavi.aop.log.Log;
+import com.maru.inunavi.aspect.annotation.Log;
 import com.maru.inunavi.lecture.domain.entity.Lecture;
 import com.maru.inunavi.lecture.repository.LectureRepository;
 import com.maru.inunavi.recommend.repository.RecommendRepository;

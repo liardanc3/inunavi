@@ -1,14 +1,17 @@
 package com.maru.inunavi.lecture.domain.dto;
 
-import org.springframework.web.bind.annotation.RequestParam;
+import lombok.Data;
 
+@Data
 public class SearchFilter {
-    String main_keyword;
-    String keyword_option;
-    String major_option;
-    String cse_option;
-    String sort_option;
-    String grade_option;
-    String category_option;
-    String score_option;
+
+    private String mainKeyword;
+    private String keywordOption;
+    private String majorOption;
+    private String cseOption;
+    private String sortOption;
+    private String gradeOption;
+    private String categoryOption;
+    private String scoreOption;
+
 }

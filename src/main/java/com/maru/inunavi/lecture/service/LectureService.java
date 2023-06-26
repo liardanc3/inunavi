@@ -1,13 +1,10 @@
 package com.maru.inunavi.lecture.service;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.maru.inunavi.aop.log.Log;
+import com.maru.inunavi.aspect.annotation.Log;
 import com.maru.inunavi.lecture.domain.dto.TimeTableInfo;
-import com.maru.inunavi.lecture.domain.dto.TimeTableInfoDto;
 import com.maru.inunavi.lecture.domain.entity.Lecture;
 import com.maru.inunavi.lecture.repository.LectureRepository;
 import com.maru.inunavi.user.domain.entity.User;
-import com.maru.inunavi.user.repository.UserLectureTableRepository;
 import com.maru.inunavi.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
@@ -20,7 +17,6 @@ import javax.annotation.PostConstruct;
 import java.io.*;
 import java.time.LocalDate;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
