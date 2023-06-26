@@ -1,6 +1,6 @@
 package com.maru.inunavi.config;
 
-import com.maru.inunavi.aspect.logic.SnakeToCamelAspect;
+import com.maru.inunavi.aspect.filter.SnakeToCamelFilter;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -14,8 +14,7 @@ public class WebMvcConfig implements WebMvcConfigurer {
     @Bean
     public FilterRegistrationBean logFilter(){
         FilterRegistrationBean<Filter> filterFilterRegistrationBean = new FilterRegistrationBean<>();
-        filterFilterRegistrationBean.setFilter(new SnakeToCamelAspect());
-        filterFilterRegistrationBean.setOrder(1);
+        filterFilterRegistrationBean.setFilter(new SnakeToCamelFilter());
         filterFilterRegistrationBean.addUrlPatterns("/*");
 
         return filterFilterRegistrationBean;
