@@ -7,10 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
 
-public interface LectureRepository extends JpaRepository<Lecture, Integer> {
-
-    List<Lecture> findAllByOrderByNumberAsc();
-    List<Lecture> findAllByOrderByLectureNameAsc();
+public interface LectureRepository extends JpaRepository<Lecture, Integer>, LectureQueryRepository {
 
     Lecture findByNumber(String number);
 
@@ -22,6 +19,8 @@ public interface LectureRepository extends JpaRepository<Lecture, Integer> {
 
     @Query("select distinct l.category from Lecture l")
     List<String> findDistinctCategory();
+
+    // ------------------------- nativeQuery -------------------------- //
 
     @Modifying(clearAutomatically = true)
     @Query(value = "alter TABLE lecture AUTO_INCREMENT = 1", nativeQuery = true)

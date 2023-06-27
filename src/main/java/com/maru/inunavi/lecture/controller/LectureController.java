@@ -3,6 +3,7 @@ package com.maru.inunavi.lecture.controller;
 import com.maru.inunavi.aspect.annotation.Log;
 import com.maru.inunavi.aspect.annotation.SnakeToCamel;
 import com.maru.inunavi.lecture.domain.dto.SearchFilter;
+import com.maru.inunavi.lecture.domain.dto.SelectLectureDto;
 import com.maru.inunavi.lecture.domain.dto.TimeTableInfoDto;
 import com.maru.inunavi.lecture.domain.entity.Lecture;
 import com.maru.inunavi.lecture.service.LectureService;
@@ -24,7 +25,7 @@ public class LectureController {
     private final RecommendService recommendService;
 
     /**
-     * [ADMIN] find all lecture
+     * [ADMIN] Find all lecture
      * @return {@code List<Lecture>}
      */
     @Log
@@ -54,15 +55,12 @@ public class LectureController {
     }
 
     /**
-     * search lectures with condition
+     * Search lectures with condition
      */
     @Log
     @SnakeToCamel
     @GetMapping("/selectLecture")
-    public Map<String,List<Map<String, String>>> selectLecture(SearchFilter searchFilter){
-        System.out.println("searchFilter = " + searchFilter);
-
-        Map<String, List<Map<String, String>>> result = new HashMap<>();
-        return result;
+    public Map<String, List<SelectLectureDto>> selectLecture(SearchFilter searchFilter){
+        return Map.of("response", lectureService.selectLecture(searchFilter));
     }
 }

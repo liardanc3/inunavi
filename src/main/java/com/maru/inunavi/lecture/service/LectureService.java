@@ -1,6 +1,8 @@
 package com.maru.inunavi.lecture.service;
 
 import com.maru.inunavi.aspect.annotation.Log;
+import com.maru.inunavi.lecture.domain.dto.SearchFilter;
+import com.maru.inunavi.lecture.domain.dto.SelectLectureDto;
 import com.maru.inunavi.lecture.domain.dto.TimeTableInfo;
 import com.maru.inunavi.lecture.domain.entity.Lecture;
 import com.maru.inunavi.lecture.repository.LectureRepository;
@@ -102,7 +104,6 @@ public class LectureService {
             );
         }
     }
-
 
     /**
      * Parse raw time text<b>
@@ -249,154 +250,12 @@ public class LectureService {
                 .build();
     }
 
-    public List<Map<String, String>> selectLecture(String main_keyword, String keyword_option, String major_option, String cse_option, String sort_option, String grade_option, String category_option, String score_option) {
-        main_keyword = main_keyword.substring(1,main_keyword.length()-1);
-        keyword_option = keyword_option.substring(1,keyword_option.length()-1);
-        major_option = major_option.substring(1,major_option.length()-1);
-        cse_option = cse_option.substring(1,cse_option.length()-1);
-        sort_option = sort_option.substring(1,sort_option.length()-1);
-        grade_option = grade_option.substring(1,grade_option.length()-1);
-        category_option = category_option.substring(1,category_option.length()-1);
-        score_option = score_option.substring(1,score_option.length()-1);
-
-        // sort_option
-        List<Lecture> tmp = new ArrayList<Lecture>();
-        List<Map<String, String>> result = new ArrayList<>();
-        if(sort_option.equals("과목코드"))
-            tmp = lectureRepository.findAllByOrderByNumberAsc();
-        else if(sort_option.equals("과목명"))
-            tmp = lectureRepository.findAllByOrderByLectureNameAsc();
-        else
-            tmp = lectureRepository.findAll();
-
-        for(int i=0; i<tmp.size(); i++){
-            Lecture now = tmp.get(i);
-
-            if(!main_keyword.equals("")){
-                if(keyword_option.equals("전체")){
-                    if(!now.getLectureName().toUpperCase().contains(main_keyword.toUpperCase())
-                            && !now.getProfessor().contains(main_keyword) && !now.getNumber().contains(main_keyword)) continue;
-                }
-                if(keyword_option.equals("과목명") && !now.getLectureName().toUpperCase().contains(main_keyword.toUpperCase()))
-                    continue;
-                else if(keyword_option.equals("교수명") && !now.getProfessor().contains(main_keyword))
-                    continue;
-                else if(keyword_option.equals("과목코드") && !now.getNumber().contains(main_keyword))
-                    continue;
-            }
-
-            // major_option
-            if(!major_option.equals("전체") && !now.getDepartment().equals(major_option))
-                continue;
-
-            // cse_option
-            if(!cse_option.equals("전체")) {
-                if(!now.getCategory().equals("교양필수"))
-                    continue;
-                if (!cse_option.equals("기타") && !now.getLectureName().contains(cse_option))
-                    continue;
-                if (cse_option.equals("기타") && !major_option.equals("전체") && !now.getDepartment().equals(major_option))
-                    continue;
-            }
-
-            // grade_option
-            StringTokenizer gst = new StringTokenizer(grade_option);
-            int grade_check[] = new int[]{1,0,0,0,0};
-            while(!grade_option.equals("전체") && gst.hasMoreTokens()){
-                String tok = gst.nextToken(", ");
-                if(tok.charAt(0)=='1') grade_check[1]++;
-                else if(tok.charAt(0)=='2') grade_check[2]++;
-                else if(tok.charAt(0)=='3') grade_check[3]++;
-                else if(tok.charAt(0)=='4') grade_check[4]++;
-            }
-
-            if(!grade_option.equals("전체") && (!now.getGrade().equals("전학년")  && grade_check[now.getGrade().charAt(0)-'0'] != 1))
-                continue;
-
-            // category_option
-            StringTokenizer cst = new StringTokenizer(category_option);
-            // 교선, 교필, 교직, 군사, 기초과학, 일선, 전기, 전선, 전필
-            HashMap<String, Boolean> category_check = new HashMap<String, Boolean>();
-            while(cst.hasMoreTokens()){
-                String tok = cst.nextToken(", ");
-                if(tok.equals("교양선택")) category_check.put("교양선택",true);
-                else if(tok.equals("교양필수")) category_check.put("교양필수",true);
-                else if(tok.equals("교직")) category_check.put("교직",true);
-                else if(tok.equals("군사학")) category_check.put("군사학",true);
-                else if(tok.equals("기초과학")) category_check.put("기초과학",true);
-                else if(tok.equals("일반선택")) category_check.put("일반선택",true);
-                else if(tok.equals("전공기초")) category_check.put("전공기초",true);
-                else if(tok.equals("전공선택")) category_check.put("전공선택",true);
-                else if(tok.equals("전공필수")) category_check.put("전공필수",true);
-            }
-            if(!category_option.equals("전체") && !category_check.containsKey(now.getCategory()))
-                continue;
-
-            // score_option
-            StringTokenizer sst = new StringTokenizer(score_option);
-            int score_check[] = new int[]{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
-            while(!score_option.equals("전체") && sst.hasMoreTokens())
-                score_check[Integer.parseInt(sst.nextToken(", ").substring(0,1))]++;
-            if(!score_option.equals("전체") && score_check[Integer.parseInt(now.getPoint())] == 0)
-                continue;
-
-            Map<String, String> retMap = new HashMap<>();
-            retMap.put("id",Long.toString(now.getId()));
-            retMap.put("department",now.getDepartment());
-            retMap.put("grade",now.getGrade());
-            retMap.put("category",now.getCategory());
-            retMap.put("number",now.getNumber());
-            retMap.put("lecturename",now.getLectureName());
-            retMap.put("professor",now.getProfessor());
-            retMap.put("classRoomRaw",now.getClassRoomRaw());
-            retMap.put("classTimeRaw",now.getClassTimeRaw());
-            String _classRoom__ = now.getClassRoom();
-            if(_classRoom__.length()>2)
-                retMap.put("classroom",_classRoom__.substring(0,_classRoom__.length()-1));
-            else retMap.put("classroom",_classRoom__);
-            retMap.put("classTime",now.getClassTime());
-            retMap.put("how",now.getHow());
-            retMap.put("point",now.getPoint());
-
-            String _classTime__ = now.getClassTime();
-            String __RETclassTime__ = "";
-            if(_classTime__.equals("-"))
-                retMap.put("realTime","-");
-            else{
-                _classTime__ = _classTime__.replaceAll(",","-");
-                StringTokenizer st = new StringTokenizer(_classTime__);
-                while(st.hasMoreTokens()){
-                    int start = Integer.parseInt(st.nextToken("-"));
-                    int end = Integer.parseInt(st.nextToken("-"));
-
-                    int dayOfWeek = start/48;
-                    int startHour = (start%48)/2;
-                    int startHalf = (start%2);
-                    int endHour = (end%48)/2 + 1;
-                    int endHalf = ~(end%2);
-
-                    switch(dayOfWeek){
-                        case 0: __RETclassTime__+="월 "; break;
-                        case 1: __RETclassTime__+="화 "; break;
-                        case 2: __RETclassTime__+="수 "; break;
-                        case 3: __RETclassTime__+="목 "; break;
-                        case 4: __RETclassTime__+="금 "; break;
-                        case 5: __RETclassTime__+="토 "; break;
-                        case 6: __RETclassTime__+="일 "; break;
-                    }
-
-                    __RETclassTime__ += Integer.toString(startHour);
-                    __RETclassTime__ += ":";
-                    __RETclassTime__ += startHalf==1 ? "30 - " : "00 - ";
-                    __RETclassTime__ += Integer.toString(endHour);
-                    __RETclassTime__ += ":";
-                    __RETclassTime__ += endHalf==1 ? "30, " : "00, ";
-                }
-                __RETclassTime__ = __RETclassTime__.substring(0,__RETclassTime__.length()-2);
-                retMap.put("realTime",__RETclassTime__);
-            }
-            result.add(retMap);
-        }
-        return result;
+    /**
+     * Provide filtered lecture list
+     * @param searchFilter
+     * @return {@code List<SelectLectureDto>}
+     */
+    public List<SelectLectureDto> selectLecture(SearchFilter searchFilter) {
+        return lectureRepository.findBySearchFilter(searchFilter);
     }
 }
