@@ -11,7 +11,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
 import java.util.*;
 
-
 @Component
 public class SnakeToCamelFilter implements Filter {
 
@@ -23,22 +22,22 @@ public class SnakeToCamelFilter implements Filter {
 
     private static class RequestWrapper extends HttpServletRequestWrapper{
 
-        private Map<String, String> camelToSnake;
-        private boolean isSnakeToCamel;
+        private Map<String, String> camelToSnakeMap;
+        private boolean isSnakeToCamelPresent;
 
         public RequestWrapper(HttpServletRequest request) {
             super(request);
-            camelToSnake = new HashMap<>();
-            isSnakeToCamel = false;
+            camelToSnakeMap = new HashMap<>();
+            isSnakeToCamelPresent = false;
         }
 
         @Override
         public Enumeration<String> getParameterNames() {
-            isSnakeToCamel = ((HandlerMethod) super.getAttribute(HandlerMapping.BEST_MATCHING_HANDLER_ATTRIBUTE))
+            isSnakeToCamelPresent = ((HandlerMethod) super.getAttribute(HandlerMapping.BEST_MATCHING_HANDLER_ATTRIBUTE))
                     .getMethod()
                     .isAnnotationPresent(SnakeToCamel.class);
 
-            if(!isSnakeToCamel){
+            if(!isSnakeToCamelPresent){
                 return super.getParameterNames();
             }
 
@@ -52,7 +51,7 @@ public class SnakeToCamelFilter implements Filter {
 
                 camelParameters.add(camelCase);
 
-                camelToSnake.put(camelCase, snakeCase);
+                camelToSnakeMap.put(camelCase, snakeCase);
             }
 
             return Collections.enumeration(camelParameters);
@@ -60,7 +59,7 @@ public class SnakeToCamelFilter implements Filter {
 
         @Override
         public String[] getParameterValues(String name) {
-            return isSnakeToCamel ? super.getParameterValues(camelToSnake.get(name)) : super.getParameterValues(name);
+            return isSnakeToCamelPresent ? super.getParameterValues(camelToSnakeMap.get(name)) : super.getParameterValues(name);
         }
 
         public String convert(String snakeParam) {

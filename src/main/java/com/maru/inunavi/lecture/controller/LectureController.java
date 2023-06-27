@@ -44,16 +44,22 @@ public class LectureController {
         return "success";
     }
 
+    /**
+     * Provide semester info
+     */
     @Log
     @GetMapping("/getTimeTableInfo")
     public TimeTableInfoDto getTimeTableInfo(){
         return new TimeTableInfoDto(lectureService.getTimeTableInfo());
     }
 
+    /**
+     * search lectures with condition
+     */
     @Log
     @SnakeToCamel
     @GetMapping("/selectLecture")
-    public Map<String,List<Map<String, String>>> selectLecture(@ModelAttribute SearchFilter searchFilter){
+    public Map<String,List<Map<String, String>>> selectLecture(SearchFilter searchFilter){
         System.out.println("searchFilter = " + searchFilter);
 
         Map<String, List<Map<String, String>>> result = new HashMap<>();
