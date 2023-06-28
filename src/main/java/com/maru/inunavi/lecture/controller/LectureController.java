@@ -39,10 +39,10 @@ public class LectureController {
      */
     @Log
     @GetMapping("/admin/newSemester")
-    public String newSemester(){
+    public List<Lecture> newSemester(){
         lectureService.updateLectures();
         recommendService.resetRecommends();
-        return "success";
+        return lectureService.findLectures();
     }
 
     /**

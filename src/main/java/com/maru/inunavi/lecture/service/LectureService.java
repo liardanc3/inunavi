@@ -48,10 +48,9 @@ public class LectureService {
      * Update lecture table<b>
      * @return {@code List<Lecture>}
      */
-    @Log
     @Transactional
     @SneakyThrows
-    public void updateLectures() {
+    public List<Lecture> updateLectures() {
 
         userRepository.findAll().forEach(User::removeLectures);
 
@@ -103,6 +102,8 @@ public class LectureService {
                             .build()
             );
         }
+
+        return lectureRepository.findAll();
     }
 
     /**
