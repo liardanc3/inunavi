@@ -1,6 +1,7 @@
 package com.maru.inunavi.lecture.controller;
 
 import com.maru.inunavi.aspect.annotation.Log;
+import com.maru.inunavi.aspect.annotation.ParamReplace;
 import com.maru.inunavi.aspect.annotation.SnakeToCamel;
 import com.maru.inunavi.lecture.domain.dto.SearchFilter;
 import com.maru.inunavi.lecture.domain.dto.SelectLectureDto;
@@ -13,7 +14,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -50,8 +50,8 @@ public class LectureController {
      */
     @Log
     @GetMapping("/getTimeTableInfo")
-    public TimeTableInfoDto getTimeTableInfo(){
-        return new TimeTableInfoDto(lectureService.getTimeTableInfo());
+    public Map<String, TimeTableInfoDto> getTimeTableInfo(){
+        return Map.of("response", lectureService.getTimeTableInfo());
     }
 
     /**
@@ -59,8 +59,10 @@ public class LectureController {
      */
     @Log
     @SnakeToCamel
+    @ParamReplace(before = "\"", after = "")
     @GetMapping("/selectLecture")
-    public Map<String, List<SelectLectureDto>> selectLecture(SearchFilter searchFilter){
+    public Map<String, List<SelectLectureDto>> selectLecture(@ModelAttribute SearchFilter searchFilter){
+        System.out.println("searchFilter = " + searchFilter);
         return Map.of("response", lectureService.selectLecture(searchFilter));
     }
 }

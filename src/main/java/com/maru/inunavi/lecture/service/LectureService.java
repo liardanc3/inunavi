@@ -3,7 +3,7 @@ package com.maru.inunavi.lecture.service;
 import com.maru.inunavi.aspect.annotation.Log;
 import com.maru.inunavi.lecture.domain.dto.SearchFilter;
 import com.maru.inunavi.lecture.domain.dto.SelectLectureDto;
-import com.maru.inunavi.lecture.domain.dto.TimeTableInfo;
+import com.maru.inunavi.lecture.domain.dto.TimeTableInfoDto;
 import com.maru.inunavi.lecture.domain.entity.Lecture;
 import com.maru.inunavi.lecture.repository.LectureRepository;
 import com.maru.inunavi.user.domain.entity.User;
@@ -214,7 +214,7 @@ public class LectureService {
      * Provide semester info
      * @return {@code TimeTableInfo}
      */
-    public TimeTableInfo getTimeTableInfo(){
+    public TimeTableInfoDto getTimeTableInfo(){
 
         String majors = lectureRepository.findDistinctMajors("교양", "교직", "일선", "군사학")
                 .parallelStream()
@@ -241,7 +241,7 @@ public class LectureService {
         int month = currentDate.getMonthValue();
         String semester = month <= 2 ? "겨울" : month <= 6 ? "1" : month <= 8 ? "여름" : "2";
 
-        return TimeTableInfo.builder()
+        return TimeTableInfoDto.builder()
                 .majors(majors)
                 .basicGenerals(basicGenerals)
                 .categories(categories)

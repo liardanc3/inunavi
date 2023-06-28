@@ -15,7 +15,7 @@ public class SelectLectureDto {
     private String category;
     private String number;
 
-    @JsonProperty(namespace = "lecturename")
+    @JsonProperty("lecturename")
     private String lectureName;
 
     private String professor;
@@ -28,7 +28,6 @@ public class SelectLectureDto {
     
     private String realTime;
 
-    @QueryProjection
     public SelectLectureDto(String id, String department, String grade, String category, String number, String lectureName, String professor, String classRoomRaw, String classTimeRaw, String classRoom, String classTime, String how, String point) {
         this.id = id;
         this.department = department;

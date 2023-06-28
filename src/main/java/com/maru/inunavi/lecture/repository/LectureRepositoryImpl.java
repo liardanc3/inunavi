@@ -1,10 +1,10 @@
 package com.maru.inunavi.lecture.repository;
 
-import com.maru.inunavi.lecture.domain.dto.QSelectLectureDto;
 import com.maru.inunavi.lecture.domain.dto.SearchFilter;
 import com.maru.inunavi.lecture.domain.dto.SelectLectureDto;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Predicate;
+import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.StringPath;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -22,7 +22,7 @@ public class LectureRepositoryImpl implements LectureQueryRepository{
     @Override
     public List<SelectLectureDto> findBySearchFilter(SearchFilter searchFilter) {
         return queryFactory
-                .select(new QSelectLectureDto(
+                .select(Projections.constructor(SelectLectureDto.class,
                         lecture.id.stringValue(),
                         lecture.department,
                         lecture.grade,
@@ -67,7 +67,8 @@ public class LectureRepositoryImpl implements LectureQueryRepository{
             return null;
         }
 
-        List<String> targetGrade = List.of("전학년");
+        List<String> targetGrade = new ArrayList<>();
+        targetGrade.add("전학년");
 
         StringTokenizer gradeToken = new StringTokenizer(gradeOption);
         while(gradeToken.hasMoreTokens()){
