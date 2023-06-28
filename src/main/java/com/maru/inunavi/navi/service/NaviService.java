@@ -9,28 +9,137 @@ import com.maru.inunavi.navi.repository.NaviRepository;
 import com.maru.inunavi.navi.repository.NodePathRepository;
 import com.maru.inunavi.navi.repository.PlaceRepository;
 import com.maru.inunavi.user.domain.entity.UserLectureTable;
-import com.maru.inunavi.user.repository.UserRepository;
 import com.maru.inunavi.user.repository.UserLectureTableRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import org.apache.commons.io.FileUtils;
 import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.*;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.stream.IntStream;
 
 @Service
 @RequiredArgsConstructor
 public class NaviService {
 
     private final NaviRepository naviRepository;
-    private final UserRepository userRepository;
     private final UserLectureTableRepository userLectureTableRepository;
     private final LectureRepository LectureRepository;
-    private final NodePathRepository _NodePathRepository;
-    private final PlaceRepository _PlaceRepository;
+    private final NodePathRepository nodePathRepository;
+    private final PlaceRepository placeRepository;
+
+    /**
+     * Update navi info
+     */
+    @Transactional
+    @SneakyThrows
+    public void updateNavi() {
+
+        naviRepository.deleteAll();
+        naviRepository.deleteINCREMENT();
+
+        nodePathRepository.deleteAll();
+        nodePathRepository.deleteINCREMENT();
+
+        List<String> nearNodeList = new ArrayList<>();
+        List<String> epsg4326List = new ArrayList<>();
+        List<String> placeCodes = new ArrayList<>();
+
+        InputStream inputStream = new ClassPathResource("node.txt").getInputStream();
+        BufferedReader buffer = new BufferedReader(new InputStreamReader(inputStream));
+        
+        String line = "";
+        while ((line = buffer.readLine()) != null) {
+
+            int nodeId = placeCodes.size() + 1;
+
+            StringTokenizer lineToken = new StringTokenizer(line);
+
+            lineToken.nextToken("\t");
+            lineToken.nextToken("\t");
+            lineToken.nextToken("\t");
+
+            // Set nearNode
+            String nearNodes = lineToken.nextToken("\t").replaceAll("\"", "");
+            nearNodeList.add(nearNodes);
+
+            StringTokenizer nearNodeToken = new StringTokenizer(nearNodes);
+            while(nearNodeToken.hasMoreTokens()){
+                String nearNodeIdxToken = nearNodeToken.nextToken(",").replaceAll(" ", "");
+
+                if(nodeId > 1){
+                    int nearNodeIdx = Integer.parseInt(nearNodeIdxToken) - 1;
+
+                    String nearNode = nearNodeList.get(nearNodeIdx);
+                    nearNode += nodeId + ",";
+                }
+            }
+
+            lineToken.nextToken("\t");
+
+            // Set placeCode
+            String placeCode = lineToken.nextToken("\t").replaceAll("\"", "");
+            placeCodes.add(placeCode);
+
+            lineToken.nextToken("\t");
+
+            // Set position
+            String lng = lineToken.nextToken("\t");
+            String lat = lineToken.nextToken("\t");
+
+            epsg4326List.add(lat + ", " + lng);
+        }
+
+        // Save
+        IntStream.range(0, placeCodes.size())
+                .forEach(
+                        idx -> naviRepository.save(
+                                Navi.builder()
+                                        .epsg4326(epsg4326List.get(idx))
+                                        .nearNode(nearNodeList.get(idx))
+                                        .placeCode(placeCodes.get(idx))
+                                        .epsg3857("-")
+                                        .build()
+                ));
+    }
+
+    /**
+     * Update place info
+     */
+    @Transactional
+    @SneakyThrows
+    public void updatePlace(){
+
+        placeRepository.deleteAll();
+        placeRepository.deleteINCREMENT();
+
+        InputStream inputStream = new ClassPathResource("place.txt").getInputStream();
+        BufferedReader buffer = new BufferedReader(new InputStreamReader(inputStream));
+
+        String line = "";
+        while ((line = buffer.readLine()) != null) {
+
+            StringTokenizer lineToken = new StringTokenizer(line);
+
+            placeRepository.save(
+                    Place.builder()
+                            .placeCode(lineToken.nextToken("\t").replaceAll("\"", ""))
+                            .title(lineToken.nextToken("\t"))
+                            .sort(lineToken.nextToken("\t"))
+                            .distance(lineToken.nextToken("\t"))
+                            .epsg4326(lineToken.nextToken("\t").replaceAll("\"", ""))
+                            .time(lineToken.nextToken("\t").replaceAll("\"", ""))
+                            .callNum(lineToken.nextToken("\t"))
+                            .etc(lineToken.nextToken("\t"))
+                            .build()
+            );
+        }
+    }
 
     // 임시로 캐시대신 사용
     private ArrayList<String> epsg4326List = new ArrayList<>();
@@ -150,8 +259,8 @@ public class NaviService {
 
 
         String _isArrived = dist < 15 ? "true" : "false";
-        NodePath _NodePath = new NodePath("",_isArrived,dist,path);
-        return _NodePath;
+        NodePath NodePath = new NodePath("",_isArrived,dist,path);
+        return NodePath;
     }
 
     class pair implements Comparable<pair> {
@@ -248,8 +357,8 @@ public class NaviService {
         path = path.substring(0,path.length()-1);
 
         String _isArrived = dist < 15 ? "true" : "false";
-        NodePath _NodePath = new NodePath("",_isArrived,dist,path);
-        return _NodePath;
+        NodePath NodePath = new NodePath("",_isArrived,dist,path);
+        return NodePath;
     }
 
     private String epsg3857_to_epsg4326(String _epsg3857){
@@ -300,141 +409,15 @@ public class NaviService {
             return -1;
         }
     }
-    public List<Place> updatePlace(){
 
-        _PlaceRepository.deleteAll();
-        _PlaceRepository.deleteINCREMENT();
+    
 
-        List<Place> PL = new ArrayList<Place>();
-
-        try {
-            InputStream inputStream = new ClassPathResource("_PLACE2.txt").getInputStream();
-            File file =File.createTempFile("_PLACE2",".txt");
-            try {
-                FileUtils.copyInputStreamToFile(inputStream, file);
-            } finally {
-                IOUtils.closeQuietly(inputStream);
-            }
-            FileReader fileReader = new FileReader(file);
-            BufferedReader bufReader = new BufferedReader(fileReader);
-
-            String line = "";
-            line = bufReader.readLine();
-            while ((line = bufReader.readLine()) != null) {
-
-                List<String> csv = new ArrayList<>();
-                StringTokenizer s = new StringTokenizer(line);
-
-                // placeCode title sort distance location time callNum 비고
-                for (int i = 0; i <= 7; i++) {
-                    String tmp = s.nextToken("\t");
-                    if(tmp.charAt(0)=='"')
-                        tmp = tmp.substring(1,tmp.length()-1);
-                    csv.add(tmp);
-                }
-
-                Place _Place = new Place(csv);
-                PL.add(_Place);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        _PlaceRepository.saveAll(PL);
-        return _PlaceRepository.findAll();
-    }
-
-
-    public List<Navi> updateNavi2() {
-
-        naviRepository.deleteAll();
-        naviRepository.deleteINCREMENT();
-        _NodePathRepository.deleteAll();
-        _NodePathRepository.deleteINCREMENT();
-
-        int visited[][] = new int[1000][1000];
-
-        List<String> epsg3857 = new ArrayList<>();
-        List<String> epsg4326 = new ArrayList<>();
-        List<String> placeCode = new ArrayList<>();
-
-        try {
-            InputStream inputStream = new ClassPathResource("_ALLNODE2.txt").getInputStream();
-            File file =File.createTempFile("_ALLNODE2",".txt");
-            try {
-                FileUtils.copyInputStreamToFile(inputStream, file);
-            } finally {
-                IOUtils.closeQuietly(inputStream);
-            }
-            FileReader fileReader = new FileReader(file);
-            BufferedReader bufReader = new BufferedReader(fileReader);
-
-            String line = "";
-            while ((line = bufReader.readLine()) != null) {
-
-                int idx = placeCode.size() + 1;
-                List<String> csv = new ArrayList<>();
-                StringTokenizer s = new StringTokenizer(line);
-
-                // NULL, NULL, NULL, nearNode, NULL, placeCode, NULL, Lo, La, NULL
-                for (int i = 0; i <=9; i++) {
-                    String tmp = s.nextToken("\t");
-                    if(i==3 || i==5 || i==7 || i==8)
-                        csv.add(tmp);
-                }
-
-                // nearNode
-                String _nearNode = csv.get(0);
-                if(_nearNode.charAt(0)=='"')
-                    _nearNode=_nearNode.substring(1,_nearNode.length()-1);
-                StringTokenizer st = new StringTokenizer(_nearNode);
-                while(st.hasMoreTokens()){
-                    String token = st.nextToken(",");
-                    token = token.replaceAll(" ","");
-                    int nearNodeNum = Integer.parseInt(token);
-                    visited[idx][nearNodeNum]=1;
-                    visited[nearNodeNum][idx]=1;
-                }
-
-                // placeCode
-                String _placeCode = csv.get(1);
-                if(_placeCode.charAt(0)=='"')
-                    _placeCode = _placeCode.substring(1,_placeCode.length()-1);
-                placeCode.add(_placeCode);
-
-                // La Lo
-                String Lo = csv.get(2);
-                String La = csv.get(3);
-                String _epsg4326 = La + ", " + Lo;
-                epsg4326.add(_epsg4326);
-                epsg3857.add("-");
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        List<Navi> retNaviList = new ArrayList<>();
-
-        for(int i=1; i<=placeCode.size(); i++){
-            // nearNode
-            String _nearNode = "";
-            for(int j=1; j<=placeCode.size(); j++) {
-                if(visited[i][j]==1)
-                    _nearNode += Integer.toString(j) + ",";
-            }
-            _nearNode = _nearNode.substring(0,_nearNode.length()-1);
-            Navi navi = new Navi(_nearNode,"-",epsg4326.get(i-1),placeCode.get(i-1));
-            retNaviList.add(navi);
-        }
-
-        naviRepository.saveAll(retNaviList);
-        return naviRepository.findAll();
-    }
 
     public Map<String, List<Map<String,String>>> placeSearchList(String searchKeyword,  String myLocation) {
         searchKeyword = searchKeyword.substring(1,searchKeyword.length()-1);
         myLocation = myLocation.substring(1,myLocation.length()-1);
         searchKeyword = searchKeyword.replaceAll(" ","");
-        List<Place> placeList = _PlaceRepository.findAll();
+        List<Place> placeList = placeRepository.findAll();
         List<Navi> naviList = naviRepository.findAll();
         int nowNode = 0;
         double minDist = 1e9;
@@ -553,14 +536,14 @@ public class NaviService {
             }
             ArrayList<Integer> dst = new ArrayList<>();
             dst.add(minNodeFromEnd);
-            NodePath _NodePath = dijkstraPartial(minNodeFromStart,dst);
+            NodePath NodePath = dijkstraPartial(minNodeFromStart,dst);
 
-            Double _Dist = _NodePath.getDist();
+            Double _Dist = NodePath.getDist();
             _Dist += distanceNode(startLocation, epsg4326List.get(minNodeFromStart-1));
             _Dist += distanceNode(endLocation, epsg4326List.get(minNodeFromEnd-1));
 
             String _Path = startLocation+',';
-            _Path += _NodePath.getRoute();
+            _Path += NodePath.getRoute();
             _Path += ','+endLocation;
 
             String _isArrived = _Dist < 15 ? "true" : "false";
@@ -594,12 +577,12 @@ public class NaviService {
                 }
             }
 
-            NodePath _NodePath = dijkstraPartial(minNodeFromStart,targetNodeList);
-            Double _Dist = _NodePath.getDist();
+            NodePath NodePath = dijkstraPartial(minNodeFromStart,targetNodeList);
+            Double _Dist = NodePath.getDist();
             _Dist += distanceNode(startLocation, epsg4326List.get(minNodeFromStart-1));
 
             String _Path = startLocation+',';
-            _Path += _NodePath.getRoute();
+            _Path += NodePath.getRoute();
 
             String _isArrived = _Dist < 15 ? "true" : "false";
             NodePath _retNodePath = new NodePath(Query,_isArrived,_Dist,_Path);
@@ -632,11 +615,11 @@ public class NaviService {
                 }
             }
 
-            NodePath _NodePath = dijkstraPartial(minNodeFromEnd,targetNodeList);
-            Double _Dist = _NodePath.getDist();
+            NodePath NodePath = dijkstraPartial(minNodeFromEnd,targetNodeList);
+            Double _Dist = NodePath.getDist();
             _Dist += distanceNode(endLocation, epsg4326List.get(minNodeFromEnd-1));
 
-            String _Path = _NodePath.getRoute();
+            String _Path = NodePath.getRoute();
             _Path += ","+startLocation;
             Stack<String> _Stack = new Stack<>();
             StringTokenizer st = new StringTokenizer(_Path);
@@ -661,7 +644,7 @@ public class NaviService {
 
         // placeCode to placeCode
         if(!startWithLocation && !endWithLocation){
-            NodePath _alreadyDone = _NodePathRepository.findByQuery(Query);
+            NodePath _alreadyDone = nodePathRepository.findByQuery(Query);
             if(_alreadyDone!=null){
                 _retList.add(_alreadyDone);
                 retGetPath.put("response",_retList);
@@ -683,19 +666,19 @@ public class NaviService {
             }
 
             Double minDist = 1e9;
-            NodePath _NodePath = null;
+            NodePath NodePath = null;
             for(int i=0; i<startNodeList.size(); i++){
                 NodePath targetNodePath = dijkstraPartial(startNodeList.get(i),endNodeList);
                 Double targetDist = targetNodePath.getDist();
                 if(targetDist < minDist){
                     minDist = targetDist;
-                    _NodePath = targetNodePath;
+                    NodePath = targetNodePath;
                 }
             }
 
-            String _isArrived = _NodePath.getDist() < 15 ? "true" : "false";
-            NodePath _retNodePath = new NodePath(Query,_isArrived,_NodePath.getDist(),_NodePath.getRoute());
-            _NodePathRepository.save(_retNodePath);
+            String _isArrived = NodePath.getDist() < 15 ? "true" : "false";
+            NodePath _retNodePath = new NodePath(Query,_isArrived,NodePath.getDist(),NodePath.getRoute());
+            nodePathRepository.save(_retNodePath);
             _retList.add(_retNodePath);
             retGetPath.put("response",_retList);
         }
@@ -749,14 +732,14 @@ public class NaviService {
             }
             ArrayList<Integer> dst = new ArrayList<>();
             dst.add(minNodeFromEnd);
-            NodePath _NodePath = Astar(minNodeFromStart,dst);
+            NodePath NodePath = Astar(minNodeFromStart,dst);
 
-            Double _Dist = _NodePath.getDist();
+            Double _Dist = NodePath.getDist();
             _Dist += distanceNode(startLocation, epsg4326List.get(minNodeFromStart-1));
             _Dist += distanceNode(endLocation, epsg4326List.get(minNodeFromEnd-1));
 
             String _Path = startLocation+',';
-            _Path += _NodePath.getRoute();
+            _Path += NodePath.getRoute();
             _Path += ','+endLocation;
 
             String _isArrived = _Dist < 15 ? "true" : "false";
@@ -790,12 +773,12 @@ public class NaviService {
                 }
             }
 
-            NodePath _NodePath = Astar(minNodeFromStart,targetNodeList);
-            Double _Dist = _NodePath.getDist();
+            NodePath NodePath = Astar(minNodeFromStart,targetNodeList);
+            Double _Dist = NodePath.getDist();
             _Dist += distanceNode(startLocation, epsg4326List.get(minNodeFromStart-1));
 
             String _Path = startLocation+',';
-            _Path += _NodePath.getRoute();
+            _Path += NodePath.getRoute();
 
             String _isArrived = _Dist < 15 ? "true" : "false";
             NodePath _retNodePath = new NodePath(Query,_isArrived,_Dist,_Path);
@@ -828,11 +811,11 @@ public class NaviService {
                 }
             }
 
-            NodePath _NodePath = Astar(minNodeFromEnd,targetNodeList);
-            Double _Dist = _NodePath.getDist();
+            NodePath NodePath = Astar(minNodeFromEnd,targetNodeList);
+            Double _Dist = NodePath.getDist();
             _Dist += distanceNode(endLocation, epsg4326List.get(minNodeFromEnd-1));
 
-            String _Path = _NodePath.getRoute();
+            String _Path = NodePath.getRoute();
             _Path += ","+startLocation;
             Stack<String> _Stack = new Stack<>();
             StringTokenizer st = new StringTokenizer(_Path);
@@ -857,7 +840,7 @@ public class NaviService {
 
         // placeCode to placeCode
         if(!startWithLocation && !endWithLocation){
-            NodePath _alreadyDone = _NodePathRepository.findByQuery(Query);
+            NodePath _alreadyDone = nodePathRepository.findByQuery(Query);
             if(_alreadyDone!=null){
                 _retList.add(_alreadyDone);
                 retGetPath.put("response",_retList);
@@ -879,19 +862,19 @@ public class NaviService {
             }
 
             Double minDist = 1e9;
-            NodePath _NodePath = null;
+            NodePath NodePath = null;
             for(int i=0; i<startNodeList.size(); i++){
                 NodePath targetNodePath = Astar(startNodeList.get(i),endNodeList);
                 Double targetDist = targetNodePath.getDist();
                 if(targetDist < minDist){
                     minDist = targetDist;
-                    _NodePath = targetNodePath;
+                    NodePath = targetNodePath;
                 }
             }
 
-            String _isArrived = _NodePath.getDist() < 15 ? "true" : "false";
-            NodePath _retNodePath = new NodePath(Query,_isArrived,_NodePath.getDist(),_NodePath.getRoute());
-            _NodePathRepository.save(_retNodePath);
+            String _isArrived = NodePath.getDist() < 15 ? "true" : "false";
+            NodePath _retNodePath = new NodePath(Query,_isArrived,NodePath.getDist(),NodePath.getRoute());
+            nodePathRepository.save(_retNodePath);
             _retList.add(_retNodePath);
             retGetPath.put("response",_retList);
         }
@@ -971,7 +954,7 @@ public class NaviService {
             retNextPlace.put("success","true");
             retNextPlace.put("nextPlaceCode",nextPlaceCode);
 
-            Place nextPlace = _PlaceRepository.findByPlaceCode(nextPlaceCode);
+            Place nextPlace = placeRepository.findByPlaceCode(nextPlaceCode);
             if(nextPlace==null){
                 retNextPlace.put("nextPlaceLocationString","NONE");
                 retNextPlace.put("nextPlaceTitle","NONE");
@@ -1161,7 +1144,7 @@ public class NaviService {
                     while(st.hasMoreTokens()){
                         String tmp = st.nextToken(",");
                         if(tmp.equals(nextPlaceCode)){
-                            dstNodeNumList.add(navi.getId());
+                            dstNodeNumList.add(Math.toIntExact(navi.getId()));
                             break;
                         }
                     }
@@ -1170,23 +1153,23 @@ public class NaviService {
                 Double minDist = 1e9;
                 int minNodeNum = -1;
 
-                NodePath _NodePath = dijkstraPartial(67,dstNodeNumList);
-                if(_NodePath.getDist() < minDist){
-                    minDist = _NodePath.getDist();
+                NodePath NodePath = dijkstraPartial(67,dstNodeNumList);
+                if(NodePath.getDist() < minDist){
+                    minDist = NodePath.getDist();
                     minNodeNum = 67;
                 }
-                _NodePath = dijkstraPartial(60,dstNodeNumList);
-                if(_NodePath.getDist() < minDist){
-                    minDist = _NodePath.getDist();
+                NodePath = dijkstraPartial(60,dstNodeNumList);
+                if(NodePath.getDist() < minDist){
+                    minDist = NodePath.getDist();
                     minNodeNum = 60;
                 }
-                _NodePath = dijkstraPartial(22,dstNodeNumList);
-                if(_NodePath.getDist() < minDist){
-                    minDist = _NodePath.getDist();
+                NodePath = dijkstraPartial(22,dstNodeNumList);
+                if(NodePath.getDist() < minDist){
+                    minDist = NodePath.getDist();
                     minNodeNum = 22;
                 }
 
-                _NodePath = dijkstraPartial(minNodeNum, dstNodeNumList);
+                NodePath = dijkstraPartial(minNodeNum, dstNodeNumList);
                 String startLectureName="";
                 String endLectureName = lectureNameArrByTime[nextTime];
 
@@ -1198,9 +1181,9 @@ public class NaviService {
                     startLectureName = "정문(버스정류장)";
 
                 String endLectureTime = lectureTimeArrByTime[nextTime];
-                int totalTime = _NodePath.getTime();
-                double distance = _NodePath.getDist();
-                String directionString = _NodePath.getRoute();
+                int totalTime = NodePath.getTime();
+                double distance = NodePath.getDist();
+                String directionString = NodePath.getRoute();
 
                 retMap.put("startLectureName",startLectureName);
                 retMap.put("endLectureName",endLectureName);
@@ -1235,16 +1218,16 @@ public class NaviService {
                 ArrayList<Integer> srcNodeNumList = new ArrayList<>();
                 ArrayList<Integer> dstNodeNumList = new ArrayList<>();
                 for(int j=0; j<nowNaviList.size(); j++)
-                    srcNodeNumList.add(nowNaviList.get(j).getId());
+                    srcNodeNumList.add(Math.toIntExact(nowNaviList.get(j).getId()));
                 for(int j=0; j<nextNaviList.size(); j++)
-                    dstNodeNumList.add(nextNaviList.get(j).getId());
+                    dstNodeNumList.add(Math.toIntExact(nextNaviList.get(j).getId()));
 
                 Double minDist = 1e9;
                 int minNodeNum = -1;
 
                 for(int j=0; j<srcNodeNumList.size(); j++){
-                    NodePath _NodePath = dijkstraPartial(srcNodeNumList.get(j),dstNodeNumList);
-                    double dist = _NodePath.getDist();
+                    NodePath NodePath = dijkstraPartial(srcNodeNumList.get(j),dstNodeNumList);
+                    double dist = NodePath.getDist();
                     if(dist < minDist){
                         minDist = dist;
                         minNodeNum = srcNodeNumList.get(j);

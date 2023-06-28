@@ -11,11 +11,12 @@ import javax.transaction.Transactional;
 @Repository
 public interface NaviRepository extends JpaRepository<Navi, Integer> {
 
-    @Transactional
+
+
+
+
     @Modifying
     @Query(value = "alter TABLE navi AUTO_INCREMENT = 1",nativeQuery = true)
     void deleteINCREMENT();
-
-
 }
 

@@ -3,16 +3,17 @@ package com.maru.inunavi.navi.domain.entity;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import java.util.List;
 
 @Builder
-@Entity(name="place")
+@Entity
+@NoArgsConstructor
 @AllArgsConstructor
 @Getter
 public class Place implements Comparable<Place>{
-    public Place(){};
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -50,17 +51,6 @@ public class Place implements Comparable<Place>{
     @Column(length = 50, nullable = false)
     private String etc;
 
-    //creator
-    public Place(List<String> csv) {
-        this.placeCode = csv.get(0);
-        this.title = csv.get(1);
-        this.sort = csv.get(2);
-        this.distance = csv.get(3);
-        this.epsg4326 = csv.get(4);
-        this.time = csv.get(5);
-        this.callNum = csv.get(6);
-        this.etc = csv.get(7);
-    }
 
     //setter
     public void setDistance(String distance){
