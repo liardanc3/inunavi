@@ -1,22 +1,21 @@
 package com.maru.inunavi.lecture.domain.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Builder;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-
-import java.util.List;
-
-@Getter
-@NoArgsConstructor
-@AllArgsConstructor
+@Builder
 public class TimeTableInfoDto {
 
-    private String response;
-    private List<TimeTableInfo> timeTableInfoList;
+    private String year;
+    private String semester;
 
-    public TimeTableInfoDto(TimeTableInfo timeTableInfo) {
-        this.response = "response";
-        this.timeTableInfoList = List.of(timeTableInfo);
-    }
+    @JsonProperty("majorArrayString")
+    private String majors;
+
+    @JsonProperty("CSEArrayString")
+    private String basicGenerals;
+
+    @JsonProperty("categoryListString")
+    private String categories;
+
 }
