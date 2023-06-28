@@ -7,7 +7,7 @@ import java.lang.annotation.Target;
 
 /**
  * Convert snake_case to camelCase on controller method
- * @see com.maru.inunavi.aspect.filter.SnakeToCamelFilter.RequestWrapper
+ * @see com.maru.inunavi.aspect.filter.SnakeToCamelFilter.SnakeToCamelRequestWrapper
  * @see org.springframework.web.util.WebUtils getParametersStartingWith()
  */
 @Retention(RetentionPolicy.RUNTIME)

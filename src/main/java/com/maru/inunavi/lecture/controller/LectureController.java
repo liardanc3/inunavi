@@ -62,7 +62,6 @@ public class LectureController {
     @ParamReplace(before = "\"", after = "")
     @GetMapping("/selectLecture")
     public Map<String, List<SelectLectureDto>> selectLecture(@ModelAttribute SearchFilter searchFilter){
-        System.out.println("searchFilter = " + searchFilter);
         return Map.of("response", lectureService.selectLecture(searchFilter));
     }
 }
