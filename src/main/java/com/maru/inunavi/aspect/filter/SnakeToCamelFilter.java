@@ -17,18 +17,17 @@ public class SnakeToCamelFilter implements Filter {
     @Override
     @SneakyThrows
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) {
-        chain.doFilter(new RequestWrapper((HttpServletRequest) request), response);
+        chain.doFilter(new SnakeToCamelRequestWrapper((HttpServletRequest) request), response);
     }
 
-    private static class RequestWrapper extends HttpServletRequestWrapper{
+    private static class SnakeToCamelRequestWrapper extends HttpServletRequestWrapper{
 
         private Map<String, String> camelToSnakeMap;
         private boolean isSnakeToCamelPresent;
 
-        public RequestWrapper(HttpServletRequest request) {
+        public SnakeToCamelRequestWrapper(HttpServletRequest request) {
             super(request);
             camelToSnakeMap = new HashMap<>();
-            isSnakeToCamelPresent = false;
         }
 
         @Override
