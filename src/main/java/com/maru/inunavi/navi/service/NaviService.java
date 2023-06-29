@@ -2,18 +2,20 @@ package com.maru.inunavi.navi.service;
 
 import com.maru.inunavi.lecture.domain.entity.Lecture;
 import com.maru.inunavi.lecture.repository.LectureRepository;
-import com.maru.inunavi.navi.domain.entity.Navi;
-import com.maru.inunavi.navi.domain.entity.NodePath;
+import com.maru.inunavi.navi.domain.dto.PathDto;
+import com.maru.inunavi.navi.domain.dto.RouteInfo;
+import com.maru.inunavi.navi.domain.entity.Node;
+import com.maru.inunavi.navi.domain.entity.Path;
 import com.maru.inunavi.navi.domain.entity.Place;
-import com.maru.inunavi.navi.repository.NaviRepository;
-import com.maru.inunavi.navi.repository.NodePathRepository;
+import com.maru.inunavi.navi.repository.NodeRepository;
+import com.maru.inunavi.navi.repository.PathRepository;
 import com.maru.inunavi.navi.repository.PlaceRepository;
 import com.maru.inunavi.user.domain.entity.UserLectureTable;
 import com.maru.inunavi.user.repository.UserLectureTableRepository;
+import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
-import org.apache.commons.io.FileUtils;
-import org.apache.tomcat.util.http.fileupload.IOUtils;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,33 +23,37 @@ import org.springframework.transaction.annotation.Transactional;
 import java.io.*;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
 public class NaviService {
 
-    private final NaviRepository naviRepository;
+    private final NodeRepository nodeRepository;
     private final UserLectureTableRepository userLectureTableRepository;
     private final LectureRepository LectureRepository;
-    private final NodePathRepository nodePathRepository;
+    private final PathRepository pathRepository;
     private final PlaceRepository placeRepository;
 
     /**
      * Update navi info
      */
+    @CacheEvict({"lngList", "latList"})
     @Transactional
     @SneakyThrows
     public void updateNavi() {
 
-        naviRepository.deleteAll();
-        naviRepository.deleteINCREMENT();
+        nodeRepository.deleteAll();
+        nodeRepository.deleteINCREMENT();
 
-        nodePathRepository.deleteAll();
-        nodePathRepository.deleteINCREMENT();
+        pathRepository.deleteAll();
+        pathRepository.deleteINCREMENT();
 
         List<String> nearNodeList = new ArrayList<>();
-        List<String> epsg4326List = new ArrayList<>();
+        List<String> lng4326List = new ArrayList<>();
+        List<String> lat4326List = new ArrayList<>();
         List<String> placeCodes = new ArrayList<>();
 
         InputStream inputStream = new ClassPathResource("node.txt").getInputStream();
@@ -89,21 +95,24 @@ public class NaviService {
             lineToken.nextToken("\t");
 
             // Set position
-            String lng = lineToken.nextToken("\t");
-            String lat = lineToken.nextToken("\t");
+            StringTokenizer lngToken = new StringTokenizer(lineToken.nextToken("\t"));
+            String lng4326 = lngToken.nextToken(".") + lngToken.nextToken(",").substring(0, 4);
+            lng4326List.add(lng4326);
 
-            epsg4326List.add(lat + ", " + lng);
+            StringTokenizer latToken = new StringTokenizer(lineToken.nextToken("\t"));
+            String lat4326 = latToken.nextToken(".") + latToken.nextToken(",").substring(0, 4);
+            lat4326List.add(lat4326);
         }
 
         // Save
         IntStream.range(0, placeCodes.size())
                 .forEach(
-                        idx -> naviRepository.save(
-                                Navi.builder()
-                                        .epsg4326(epsg4326List.get(idx))
+                        idx -> nodeRepository.save(
+                                Node.builder()
+                                        .lng4326(lng4326List.get(idx))
+                                        .lat4326(lat4326List.get(idx))
                                         .nearNode(nearNodeList.get(idx))
                                         .placeCode(placeCodes.get(idx))
-                                        .epsg3857("-")
                                         .build()
                 ));
     }
@@ -141,273 +150,159 @@ public class NaviService {
         }
     }
 
-    // 임시로 캐시대신 사용
-    private ArrayList<String> epsg4326List = new ArrayList<>();
-    private ArrayList<String> placeCodeList = new ArrayList<>();
+    /**
+     * Provide route in real time
+     * @param routeInfo
+     * @return {@code List<Path>}
+     */
+    @Transactional
+    public PathDto getRouteLive(RouteInfo routeInfo){
+        return pathRepository.findByRouteInfo(routeInfo.getQuery())
+                .orElseGet(() -> {
+                    Integer srcId = nodeRepository.findSrcNodeIdByRouteInfo(routeInfo);
+                    List<Integer> dstIdList = nodeRepository.findDstNodeIdByRouteInfo(routeInfo);
 
-    class _pair implements Comparable<_pair>{
-        private double dist;
-        private int node;
-        private ArrayList<Integer> dst;
-        private double heuristics;
-        _pair(double dist, int node, ArrayList<Integer> dst){
-            this.dist=dist; this.node=node;
-            this.dst =dst;
-
-            /// 맨해튼거리 * 1.2
-            String epsg4326src = epsg4326List.get(node);
-            String epsg4326dst = epsg4326List.get(dst.get(0));
-
-            String AA = epsg4326src;
-            StringTokenizer st1 = new StringTokenizer(AA);
-            String Axx = st1.nextToken(", ");
-
-            StringTokenizer st = new StringTokenizer(epsg4326dst);
-            String Cyy = st.nextToken(", ");
-
-            String BB = Axx+", "+Cyy;
-            String CC = epsg4326dst;
-
-            double _heuristics = 1.2*(distanceNode(AA,BB)+distanceNode(BB,CC));
-
-            this.heuristics = dist + _heuristics;
-        }
-        public double getDist(){ return dist; }
-        public int getNode(){ return node; }
-
-        @Override
-        public int compareTo(final _pair p){
-            return Double.compare(heuristics, p.heuristics);
-        }
+                    return new PathDto(aStarWithManhattan(srcId, dstIdList, routeInfo));
+                });
     }
-    private NodePath Astar(int src, ArrayList<Integer> dst){
-        List<Navi> tmp = new ArrayList<>();
-        if(epsg4326List.isEmpty()){
-            if(tmp.isEmpty()) tmp.addAll(naviRepository.findAll());
-            for (Navi navi : tmp) epsg4326List.add(navi.getEpsg4326());
-        }
-        if(placeCodeList.isEmpty()){
-            if(tmp.isEmpty()) tmp.addAll(naviRepository.findAll());
-            for (Navi navi : tmp) placeCodeList.add(navi.getPlaceCode());
-        }
-        int len = (int) naviRepository.count();
-        int idx = 0;
-        int[] pathTrace = new int[len+2];
-        int[] visited = new int[len+2];
-        double[] distArray = new double[len+2];
-        ArrayList<Navi> naviList = new ArrayList<>();
-        naviList.addAll(naviRepository.findAll());
-        for(int i=1; i<distArray.length; i++)
-            distArray[i] = 1e9;
-        distArray[src]=0.f;
 
-        PriorityQueue<_pair> pq = new PriorityQueue<>();
-        Stack<String> st = new Stack<>();
+    /**
+     * Find approximately the shortest path
+     * @param srcId
+     * @param dstIdList
+     * @param routeInfo
+     * @return {@code Path}
+     */
+    private Path aStarWithManhattan(Integer srcId, List<Integer> dstIdList, RouteInfo routeInfo){
 
-        pq.add(new _pair(0, src, dst));
-        visited[src]=1;
-        while(!pq.isEmpty()){
-            double dist = pq.peek().getDist();
-            int now = pq.peek().getNode();
-            pq.remove();
+        List<Double> latList = nodeRepository.findAllOfLat();
+        List<Double> lngList = nodeRepository.findAllOfLng();
 
-            for(int i=0; i<dst.size(); i++){
-                if(now==dst.get(i)){
-                    idx = now;
-                    pq.clear();
-                    break;
-                }
+        @Data
+        class NodeInfo implements Comparable<NodeInfo>{
+
+            private double dist;
+            private int id;
+            private int dstId;
+            private double heuristics;
+
+            NodeInfo(double dist, int id, int dstId){
+
+                this.dist = dist;
+                this.id = id;
+                this.dstId = dstId;
+
+                Double srcLat = latList.get(id -1);
+                Double srcLng = lngList.get(id -1);
+
+                Double dstLat = latList.get(dstId-1);
+                Double dstLng = lngList.get(dstId-1);
+
+                Double manhattanDist = 1.2 * (distanceBetween(srcLat, srcLng, srcLat, dstLng) + distanceBetween(srcLat, dstLng, dstLat, dstLng));
+
+                this.heuristics = dist + manhattanDist;
             }
 
-            if(idx!=0) break;
-            if(dist < distArray[now]) continue;
-
-            String now_Epsg4326 = epsg4326List.get(now-1);
-            now_Epsg4326 = now_Epsg4326.substring(1,now_Epsg4326.length()-1);
-
-            String nearNode = naviList.get(now-1).getNearNode();
-            StringTokenizer s = new StringTokenizer(nearNode);
-            while(s.hasMoreTokens()){
-                int next = Integer.parseInt(s.nextToken(","));
-                if(next==0) continue;
-
-                String next_Epsg4326 = epsg4326List.get(next-1);
-                next_Epsg4326 = next_Epsg4326.substring(1,next_Epsg4326.length()-1);
-                double _dist = distanceNode(now_Epsg4326,next_Epsg4326);
-                if(dist+_dist < distArray[next] && visited[next]==0){
-                    pathTrace[next]=now;
-                    visited[next]=1;
-                    distArray[next]=dist+_dist;
-                    pq.add(new _pair(dist + _dist, next, dst));
-                }
+            @Override
+            public int compareTo(NodeInfo p){
+                return Double.compare(heuristics, p.heuristics);
             }
         }
 
-        Double dist = distArray[idx];
-        String path = "";
+        // ---- Set basic info to find approximately the shortest path ---- //
+        int len = (int) nodeRepository.count();
+        int[] pathTrace = new int[len + 2];
+        double[] distArray = new double[len + 2];
 
-        while(idx!=0){
-            String epsg4326 = epsg4326List.get(idx-1);
-            st.push(epsg4326);
-            idx = pathTrace[idx];
-        }
-        while(!st.isEmpty()){
-            path += st.peek()+",";
-            st.pop();
-        }
-        path = path.substring(0,path.length()-1);
+        Arrays.fill(distArray, 1e9);
+        distArray[srcId] = 0;
 
+        PriorityQueue<NodeInfo> priorityQueue = new PriorityQueue<>();
+        priorityQueue.add(new NodeInfo(0.0, srcId, dstIdList.get(0)));
 
-        String _isArrived = dist < 15 ? "true" : "false";
-        NodePath NodePath = new NodePath("",_isArrived,dist,path);
-        return NodePath;
-    }
+        // ---- Find path ---- //
+        while (!priorityQueue.isEmpty()) {
+            NodeInfo nodeInfo = priorityQueue.poll();
+            
+            double dist = nodeInfo.getDist();
+            int now = nodeInfo.getId();
 
-    class pair implements Comparable<pair> {
-        private double dist;
-        private int node;
-        pair(double dist, int node){ this.dist=dist; this.node=node;}
-        public double getDist(){ return dist; }
-        public int getNode(){ return node; }
-
-        @Override
-        public int compareTo(final pair p){
-            if(dist == p.dist) return 1;
-            return Double.compare(dist, p.dist);
-        }
-    }
-    private NodePath dijkstraPartial(int src, ArrayList<Integer> dst){
-        List<Navi> tmp = new ArrayList<>();
-        if(epsg4326List.isEmpty()){
-            if(tmp.isEmpty())
-                tmp.addAll(naviRepository.findAll());
-            for(int i=0; i<tmp.size(); i++)
-                epsg4326List.add(tmp.get(i).getEpsg4326());
-        }
-        if(placeCodeList.isEmpty()){
-            if(tmp.isEmpty())
-                tmp.addAll(naviRepository.findAll());
-            for(int i=0; i<tmp.size(); i++)
-                placeCodeList.add(tmp.get(i).getPlaceCode());
-        }
-        int len = (int) naviRepository.count();
-        int idx = 0;
-        int[] pathTrace = new int[len+2];
-        double[] distArray = new double[len+2];
-        int[] visited = new int[len+2];
-        visited[src]=1;
-        ArrayList<Navi> naviList = new ArrayList<>();
-        naviList.addAll(naviRepository.findAll());
-        for(int i=1; i<distArray.length; i++)
-            distArray[i] = 1e9;
-        distArray[src]=0.f;
-
-        PriorityQueue<pair> pq = new PriorityQueue<>();
-        Stack<String> st = new Stack<>();
-        pq.add(new pair(0, src));
-        while(!pq.isEmpty()){
-            double dist = pq.peek().getDist();
-            int now = pq.peek().getNode();
-
-            pq.remove();
-
-            for(int i=0; i<dst.size(); i++){
-                if(now==dst.get(i)){
-                    idx = now;
-                    pq.clear();
-                    break;
-                }
+            if (dstIdList.contains(now)) {
+                break;
             }
 
-            if(idx!=0) break;
-            if(dist < distArray[now]) continue;
+            if (dist < distArray[now]) {
+                continue;
+            }
 
-            String now_Epsg4326 = epsg4326List.get(now-1);
+            Double nowLat = latList.get(now - 1);
+            Double nowLng = lngList.get(now - 1);
 
-            String nearNode = naviList.get(now-1).getNearNode();
-            StringTokenizer s = new StringTokenizer(nearNode);
-            while(s.hasMoreTokens()){
-                int next = Integer.parseInt(s.nextToken(","));
-                if(next==0) continue;
-                if(visited[next]==1) continue;
+            String nearNodes = nodeRepository.findById(now - 1).get().getNearNode();
+            StringTokenizer nearNodesToken = new StringTokenizer(nearNodes);
+            while (nearNodesToken.hasMoreTokens()) {
+                int next = Integer.parseInt(nearNodesToken.nextToken(","));
 
-                String next_Epsg4326 = epsg4326List.get(next-1);
-                double _dist = distanceNode(now_Epsg4326,next_Epsg4326);
-                if(dist+_dist < distArray[next]){
-                    visited[next]=1;
-                    pathTrace[next]=now;
-                    distArray[next]=dist+_dist;
-                    pq.add(new pair(dist + _dist, next));
+                if (next == 0) {
+                    continue;
+                }
+
+                Double nextLat = latList.get(next - 1);
+                Double nextLng = lngList.get(next - 1);
+
+                double deltaDist = distanceBetween(nowLat, nowLng, nextLat, nextLng);
+                if (dist + deltaDist < distArray[next]) {
+                    pathTrace[next] = now;
+                    distArray[next] = dist + deltaDist;
+                    priorityQueue.add(new NodeInfo(dist + deltaDist, next, dstIdList.get(0)));
                 }
             }
         }
 
-        Double dist = distArray[idx];
-        String path = "";
+        // ---- Find idx that saving dist ---- //
+        int dstIdx = dstIdList.stream()
+                .filter(dstId -> distArray[dstId] != 1e9)
+                .findFirst()
+                .orElse(0);
 
-        while(idx!=0){
-            String epsg4326 = epsg4326List.get(idx-1);
-            st.push(epsg4326);
-            idx = pathTrace[idx];
-        }
-        while(!st.isEmpty()){
-            path += st.peek()+",";
-            st.pop();
-        }
-        path = path.substring(0,path.length()-1);
+        // ---- Trace back and set the route ---- //
+        String route = Stream
+                .iterate(dstIdx, i -> i != 0, i -> pathTrace[i])
+                .map(i -> latList.get(i - 1) + "," + lngList.get(i - 1))
+                .collect(Collectors.joining(","));
 
-        String _isArrived = dist < 15 ? "true" : "false";
-        NodePath NodePath = new NodePath("",_isArrived,dist,path);
-        return NodePath;
+        // ---- Set other info ---- //
+        String query = routeInfo.getQuery();
+        String isArrived = distArray[dstIdx] < 15 ? "true" : "false";
+        Double dist = distArray[dstIdx];
+
+        return pathRepository.save(
+                Path.builder()
+                        .query(query)
+                        .isArrived(isArrived)
+                        .dist(dist)
+                        .route(route)
+                        .build()
+        );
     }
 
-    private String epsg3857_to_epsg4326(String _epsg3857){
-        StringTokenizer s = new StringTokenizer(_epsg3857);
+    /**
+     * Provide distance between src and dst
+     * @return distance
+     */
+    private double distanceBetween(Double lat1, Double lng1, Double lat2, Double lng2){
+        double radius = 6371;
+        double toRadian = Math.PI / 180;
 
-        String sX = s.nextToken(",");
-        String sY = s.nextToken(",");
+        double dLat = Math.abs(lat2 - lat1) * toRadian;
+        double dLng = Math.abs(lng2 - lng1) * toRadian;
 
-        double X = Double.parseDouble(sX);
-        double Y = Double.parseDouble(sY);
+        double sinDLat = Math.sin(dLat / 2);
+        double sinDLng = Math.sin(dLng / 2);
 
-        double E = 2.7182818284;
-        double PARAM = 20037508.34;
+        double squareRoot = Math.sqrt(sinDLat * sinDLat + Math.cos(lat1 * toRadian) * Math.cos(lat2 * toRadian) * sinDLng * sinDLng);
 
-        double LO = (X * 180) / PARAM;
-        double LA = Y / (PARAM / 180);
-
-        double EXPONENT = (Math.PI / 180) * LA;
-
-        LA = Math.atan(Math.pow(E,EXPONENT));
-        LA = LA / (Math.PI / 360);
-        LA = LA - 90;
-
-        String sLA = Double.toString(LA);
-        String SLO = Double.toString(LO);
-
-        return sLA+", "+SLO;
-    }
-    private double distanceNode(String _src, String _dst){
-        try{
-            StringTokenizer s = new StringTokenizer(_src);
-            StringTokenizer d = new StringTokenizer(_dst);
-            double lat1 = Double.parseDouble(s.nextToken(", "));
-            double lng1 = Double.parseDouble(s.nextToken(", "));
-            double lat2 = Double.parseDouble(d.nextToken(", "));
-            double lng2 = Double.parseDouble(d.nextToken(", "));
-            double radius = 6371;
-            double toRadian = Math.PI / 180;
-            double DLa = Math.abs(lat2 - lat1) * toRadian;
-            double DLo = Math.abs(lng2 - lng1) * toRadian;
-            double sinDLa = Math.sin(DLa/2);
-            double sinDLo = Math.sin(DLo/2);
-            double squareRoot = Math.sqrt(sinDLa * sinDLa +
-                    Math.cos(lat1 * toRadian) * Math.cos(lat2 * toRadian) * sinDLo * sinDLo);
-
-            return 2000 * radius * Math.asin(squareRoot);
-        }catch (Exception e){
-            return -1;
-        }
+        return 2000 * radius * Math.asin(squareRoot);
     }
 
     
@@ -418,11 +313,11 @@ public class NaviService {
         myLocation = myLocation.substring(1,myLocation.length()-1);
         searchKeyword = searchKeyword.replaceAll(" ","");
         List<Place> placeList = placeRepository.findAll();
-        List<Navi> naviList = naviRepository.findAll();
+        List<Node> nodeList = nodeRepository.findAll();
         int nowNode = 0;
         double minDist = 1e9;
-        for(int i=0; i<naviList.size(); i++){
-            double _dist = distanceNode(myLocation,naviList.get(i).getEpsg4326());
+        for(int i = 0; i< nodeList.size(); i++){
+            double _dist = distanceBetween(myLocation, nodeList.get(i).getEpsg4326());
             if(_dist<minDist){
                 nowNode = i+1;
                 minDist = _dist;
@@ -441,8 +336,8 @@ public class NaviService {
                 String _dstPlaceCode = place.getPlaceCode();
                 ArrayList<Integer> _dstNodeNumList = new ArrayList<>();
 
-                for (int j = 0; j < naviList.size(); j++) {
-                    String _placeCode = naviList.get(j).getPlaceCode();
+                for (int j = 0; j < nodeList.size(); j++) {
+                    String _placeCode = nodeList.get(j).getPlaceCode();
                     StringTokenizer st = new StringTokenizer(_placeCode);
                     while (st.hasMoreTokens()) {
                         String s = st.nextToken(",");
@@ -455,7 +350,7 @@ public class NaviService {
 
                 double dist = dijkstraPartial(nowNode, _dstNodeNumList).getDist();
 
-                double distFromStart = distanceNode(myLocation, naviRepository.getById(nowNode).getEpsg4326());
+                double distFromStart = distanceBetween(myLocation, nodeRepository.getById(nowNode).getEpsg4326());
                 Place _Place = place;
                 _Place.setDistance(Double.toString(dist + distFromStart));
                 requestPlaceList.add(_Place);
@@ -486,399 +381,6 @@ public class NaviService {
 
         retMap.put("response",retList);
         return retMap;
-    }
-
-    public Map<String, List<NodePath>> getRootLive(String startPlaceCode, String endPlaceCode, String startLocation, String endLocation){
-
-        Map<String, List<NodePath>> retGetPath = new HashMap<>();
-        List<NodePath> _retList = new ArrayList<>();
-        startPlaceCode = startPlaceCode.substring(1,startPlaceCode.length()-1);
-        endPlaceCode = endPlaceCode.substring(1,endPlaceCode.length()-1);
-        startLocation = startLocation.substring(1,startLocation.length()-1);
-        endLocation = endLocation.substring(1,endLocation.length()-1);
-        String Query = startPlaceCode+","+startLocation+","+endPlaceCode+","+endLocation;
-
-        boolean startWithLocation = startPlaceCode.equals("LOCATION");
-        boolean endWithLocation = endPlaceCode.equals("LOCATION");
-
-        int len = (int)naviRepository.count();
-        List<Navi> tmp = new ArrayList<>();
-        if(epsg4326List.isEmpty()){
-            if(tmp.isEmpty())
-                tmp.addAll(naviRepository.findAll());
-            for(int i=0; i<tmp.size(); i++)
-                epsg4326List.add(tmp.get(i).getEpsg4326());
-        }
-        if(placeCodeList.isEmpty()){
-            if(tmp.isEmpty())
-                tmp.addAll(naviRepository.findAll());
-            for(int i=0; i<tmp.size(); i++)
-                placeCodeList.add(tmp.get(i).getPlaceCode());
-        }
-
-        // Location to Location
-        if(startWithLocation && endWithLocation){
-            Double minDistFromStart = 1e9;
-            Double minDistFromEnd = 1e9;
-            int minNodeFromStart = -1;
-            int minNodeFromEnd = -1;
-            for(int i=0; i<len; i++){
-                Double distFromStart = distanceNode(startLocation, epsg4326List.get(i));
-                Double distFromEnd = distanceNode(endLocation, epsg4326List.get(i));
-                if(distFromStart < minDistFromStart){
-                    minDistFromStart = distFromStart;
-                    minNodeFromStart = i+1;
-                }
-                if(distFromEnd < minDistFromEnd){
-                    minDistFromEnd = distFromEnd;
-                    minNodeFromEnd = i+1;
-                }
-            }
-            ArrayList<Integer> dst = new ArrayList<>();
-            dst.add(minNodeFromEnd);
-            NodePath NodePath = dijkstraPartial(minNodeFromStart,dst);
-
-            Double _Dist = NodePath.getDist();
-            _Dist += distanceNode(startLocation, epsg4326List.get(minNodeFromStart-1));
-            _Dist += distanceNode(endLocation, epsg4326List.get(minNodeFromEnd-1));
-
-            String _Path = startLocation+',';
-            _Path += NodePath.getRoute();
-            _Path += ','+endLocation;
-
-            String _isArrived = _Dist < 15 ? "true" : "false";
-            NodePath _retNodePath = new NodePath(Query,_isArrived,_Dist,_Path);
-            _retList.add(_retNodePath);
-            retGetPath.put("response",_retList);
-        }
-
-        // Location to placeCode
-        if(startWithLocation && !endWithLocation){
-            Double minDistFromStart = 1e9;
-            int minNodeFromStart = -1;
-
-            for(int i=0; i<len; i++){
-                Double distFromStart = distanceNode(startLocation, epsg4326List.get(i));
-
-                if(distFromStart < minDistFromStart){
-                    minDistFromStart = distFromStart;
-                    minNodeFromStart = i+1;
-                }
-            }
-
-            ArrayList<Integer> targetNodeList = new ArrayList<>();
-            for(int i=0; i<placeCodeList.size(); i++){
-                StringTokenizer st = new StringTokenizer(placeCodeList.get(i));
-                while(st.hasMoreTokens()){
-                    if(st.nextToken(",").equals(endPlaceCode)) {
-                        targetNodeList.add(i + 1);
-                        break;
-                    }
-                }
-            }
-
-            NodePath NodePath = dijkstraPartial(minNodeFromStart,targetNodeList);
-            Double _Dist = NodePath.getDist();
-            _Dist += distanceNode(startLocation, epsg4326List.get(minNodeFromStart-1));
-
-            String _Path = startLocation+',';
-            _Path += NodePath.getRoute();
-
-            String _isArrived = _Dist < 15 ? "true" : "false";
-            NodePath _retNodePath = new NodePath(Query,_isArrived,_Dist,_Path);
-            _retList.add(_retNodePath);
-            retGetPath.put("response",_retList);
-        }
-
-        // placeCode to Location
-        if(!startWithLocation && endWithLocation){
-            Double minDistFromEnd = 1e9;
-            int minNodeFromEnd = -1;
-
-            for(int i=0; i<len; i++){
-                Double distFromEnd = distanceNode(endLocation, epsg4326List.get(i));
-
-                if(distFromEnd < minDistFromEnd){
-                    minDistFromEnd = distFromEnd;
-                    minNodeFromEnd = i+1;
-                }
-            }
-
-            ArrayList<Integer> targetNodeList = new ArrayList<>();
-            for(int i=0; i<placeCodeList.size(); i++){
-                StringTokenizer st = new StringTokenizer(placeCodeList.get(i));
-                while(st.hasMoreTokens()){
-                    if(st.nextToken(",").equals(startPlaceCode)) {
-                        targetNodeList.add(i + 1);
-                        break;
-                    }
-                }
-            }
-
-            NodePath NodePath = dijkstraPartial(minNodeFromEnd,targetNodeList);
-            Double _Dist = NodePath.getDist();
-            _Dist += distanceNode(endLocation, epsg4326List.get(minNodeFromEnd-1));
-
-            String _Path = NodePath.getRoute();
-            _Path += ","+startLocation;
-            Stack<String> _Stack = new Stack<>();
-            StringTokenizer st = new StringTokenizer(_Path);
-            while(st.hasMoreTokens()){
-                String locationTmp = st.nextToken(",");
-                _Stack.push(locationTmp);
-            }
-            _Path = "";
-            while(!_Stack.isEmpty()){
-                String _126 = _Stack.peek();
-                _Stack.pop();
-                String _37 = _Stack.peek();
-                _Stack.pop();
-                _Path+=_37+","+_126+",";
-            }
-            _Path = _Path.substring(0,_Path.length()-1);
-            String _isArrived = _Dist < 15 ? "true" : "false";
-            NodePath _retNodePath = new NodePath(Query,_isArrived,_Dist,_Path);
-            _retList.add(_retNodePath);
-            retGetPath.put("response",_retList);
-        }
-
-        // placeCode to placeCode
-        if(!startWithLocation && !endWithLocation){
-            NodePath _alreadyDone = nodePathRepository.findByQuery(Query);
-            if(_alreadyDone!=null){
-                _retList.add(_alreadyDone);
-                retGetPath.put("response",_retList);
-                return retGetPath;
-            }
-
-            ArrayList<Integer> startNodeList = new ArrayList<>();
-            ArrayList<Integer> endNodeList = new ArrayList<>();
-
-            for(int i=0; i<placeCodeList.size(); i++){
-                StringTokenizer st = new StringTokenizer(placeCodeList.get(i));
-                while(st.hasMoreTokens()){
-                    String now = st.nextToken(",");
-                    if(now.equals(startPlaceCode))
-                        startNodeList.add(i+1);
-                    if(now.equals(endPlaceCode))
-                        endNodeList.add(i + 1);
-                }
-            }
-
-            Double minDist = 1e9;
-            NodePath NodePath = null;
-            for(int i=0; i<startNodeList.size(); i++){
-                NodePath targetNodePath = dijkstraPartial(startNodeList.get(i),endNodeList);
-                Double targetDist = targetNodePath.getDist();
-                if(targetDist < minDist){
-                    minDist = targetDist;
-                    NodePath = targetNodePath;
-                }
-            }
-
-            String _isArrived = NodePath.getDist() < 15 ? "true" : "false";
-            NodePath _retNodePath = new NodePath(Query,_isArrived,NodePath.getDist(),NodePath.getRoute());
-            nodePathRepository.save(_retNodePath);
-            _retList.add(_retNodePath);
-            retGetPath.put("response",_retList);
-        }
-        return retGetPath;
-    }
-
-    public Map<String, List<NodePath>> AstarGetRootLive(String startPlaceCode, String endPlaceCode, String startLocation, String endLocation){
-        Map<String, List<NodePath>> retGetPath = new HashMap<>();
-        List<NodePath> _retList = new ArrayList<>();
-        startPlaceCode = startPlaceCode.substring(1,startPlaceCode.length()-1);
-        endPlaceCode = endPlaceCode.substring(1,endPlaceCode.length()-1);
-        startLocation = startLocation.substring(1,startLocation.length()-1);
-        endLocation = endLocation.substring(1,endLocation.length()-1);
-        String Query = startPlaceCode+","+startLocation+","+endPlaceCode+","+endLocation;
-
-        boolean startWithLocation = startPlaceCode.equals("LOCATION");
-        boolean endWithLocation = endPlaceCode.equals("LOCATION");
-
-        int len = (int)naviRepository.count();
-        List<Navi> tmp = new ArrayList<>();
-        if(epsg4326List.isEmpty()){
-            if(tmp.isEmpty())
-                tmp.addAll(naviRepository.findAll());
-            for(int i=0; i<tmp.size(); i++)
-                epsg4326List.add(tmp.get(i).getEpsg4326());
-        }
-        if(placeCodeList.isEmpty()){
-            if(tmp.isEmpty())
-                tmp.addAll(naviRepository.findAll());
-            for(int i=0; i<tmp.size(); i++)
-                placeCodeList.add(tmp.get(i).getPlaceCode());
-        }
-
-        // Location to Location
-        if(startWithLocation && endWithLocation){
-            Double minDistFromStart = 1e9;
-            Double minDistFromEnd = 1e9;
-            int minNodeFromStart = -1;
-            int minNodeFromEnd = -1;
-            for(int i=0; i<len; i++){
-                Double distFromStart = distanceNode(startLocation, epsg4326List.get(i));
-                Double distFromEnd = distanceNode(endLocation, epsg4326List.get(i));
-                if(distFromStart < minDistFromStart){
-                    minDistFromStart = distFromStart;
-                    minNodeFromStart = i+1;
-                }
-                if(distFromEnd < minDistFromEnd){
-                    minDistFromEnd = distFromEnd;
-                    minNodeFromEnd = i+1;
-                }
-            }
-            ArrayList<Integer> dst = new ArrayList<>();
-            dst.add(minNodeFromEnd);
-            NodePath NodePath = Astar(minNodeFromStart,dst);
-
-            Double _Dist = NodePath.getDist();
-            _Dist += distanceNode(startLocation, epsg4326List.get(minNodeFromStart-1));
-            _Dist += distanceNode(endLocation, epsg4326List.get(minNodeFromEnd-1));
-
-            String _Path = startLocation+',';
-            _Path += NodePath.getRoute();
-            _Path += ','+endLocation;
-
-            String _isArrived = _Dist < 15 ? "true" : "false";
-            NodePath _retNodePath = new NodePath(Query,_isArrived,_Dist,_Path);
-            _retList.add(_retNodePath);
-            retGetPath.put("response",_retList);
-        }
-
-        // Location to placeCode
-        if(startWithLocation && !endWithLocation){
-            Double minDistFromStart = 1e9;
-            int minNodeFromStart = -1;
-
-            for(int i=0; i<len; i++){
-                Double distFromStart = distanceNode(startLocation, epsg4326List.get(i));
-
-                if(distFromStart < minDistFromStart){
-                    minDistFromStart = distFromStart;
-                    minNodeFromStart = i+1;
-                }
-            }
-
-            ArrayList<Integer> targetNodeList = new ArrayList<>();
-            for(int i=0; i<placeCodeList.size(); i++){
-                StringTokenizer st = new StringTokenizer(placeCodeList.get(i));
-                while(st.hasMoreTokens()){
-                    if(st.nextToken(",").equals(endPlaceCode)) {
-                        targetNodeList.add(i + 1);
-                        break;
-                    }
-                }
-            }
-
-            NodePath NodePath = Astar(minNodeFromStart,targetNodeList);
-            Double _Dist = NodePath.getDist();
-            _Dist += distanceNode(startLocation, epsg4326List.get(minNodeFromStart-1));
-
-            String _Path = startLocation+',';
-            _Path += NodePath.getRoute();
-
-            String _isArrived = _Dist < 15 ? "true" : "false";
-            NodePath _retNodePath = new NodePath(Query,_isArrived,_Dist,_Path);
-            _retList.add(_retNodePath);
-            retGetPath.put("response",_retList);
-        }
-
-        // placeCode to Location
-        if(!startWithLocation && endWithLocation){
-            Double minDistFromEnd = 1e9;
-            int minNodeFromEnd = -1;
-
-            for(int i=0; i<len; i++){
-                Double distFromEnd = distanceNode(endLocation, epsg4326List.get(i));
-
-                if(distFromEnd < minDistFromEnd){
-                    minDistFromEnd = distFromEnd;
-                    minNodeFromEnd = i+1;
-                }
-            }
-
-            ArrayList<Integer> targetNodeList = new ArrayList<>();
-            for(int i=0; i<placeCodeList.size(); i++){
-                StringTokenizer st = new StringTokenizer(placeCodeList.get(i));
-                while(st.hasMoreTokens()){
-                    if(st.nextToken(",").equals(startPlaceCode)) {
-                        targetNodeList.add(i + 1);
-                        break;
-                    }
-                }
-            }
-
-            NodePath NodePath = Astar(minNodeFromEnd,targetNodeList);
-            Double _Dist = NodePath.getDist();
-            _Dist += distanceNode(endLocation, epsg4326List.get(minNodeFromEnd-1));
-
-            String _Path = NodePath.getRoute();
-            _Path += ","+startLocation;
-            Stack<String> _Stack = new Stack<>();
-            StringTokenizer st = new StringTokenizer(_Path);
-            while(st.hasMoreTokens()){
-                String locationTmp = st.nextToken(",");
-                _Stack.push(locationTmp);
-            }
-            _Path = "";
-            while(!_Stack.isEmpty()){
-                String _126 = _Stack.peek();
-                _Stack.pop();
-                String _37 = _Stack.peek();
-                _Stack.pop();
-                _Path+=_37+","+_126+",";
-            }
-            _Path = _Path.substring(0,_Path.length()-1);
-            String _isArrived = _Dist < 15 ? "true" : "false";
-            NodePath _retNodePath = new NodePath(Query,_isArrived,_Dist,_Path);
-            _retList.add(_retNodePath);
-            retGetPath.put("response",_retList);
-        }
-
-        // placeCode to placeCode
-        if(!startWithLocation && !endWithLocation){
-            NodePath _alreadyDone = nodePathRepository.findByQuery(Query);
-            if(_alreadyDone!=null){
-                _retList.add(_alreadyDone);
-                retGetPath.put("response",_retList);
-                return retGetPath;
-            }
-
-            ArrayList<Integer> startNodeList = new ArrayList<>();
-            ArrayList<Integer> endNodeList = new ArrayList<>();
-
-            for(int i=0; i<placeCodeList.size(); i++){
-                StringTokenizer st = new StringTokenizer(placeCodeList.get(i));
-                while(st.hasMoreTokens()){
-                    String now = st.nextToken(",");
-                    if(now.equals(startPlaceCode))
-                        startNodeList.add(i+1);
-                    if(now.equals(endPlaceCode))
-                        endNodeList.add(i + 1);
-                }
-            }
-
-            Double minDist = 1e9;
-            NodePath NodePath = null;
-            for(int i=0; i<startNodeList.size(); i++){
-                NodePath targetNodePath = Astar(startNodeList.get(i),endNodeList);
-                Double targetDist = targetNodePath.getDist();
-                if(targetDist < minDist){
-                    minDist = targetDist;
-                    NodePath = targetNodePath;
-                }
-            }
-
-            String _isArrived = NodePath.getDist() < 15 ? "true" : "false";
-            NodePath _retNodePath = new NodePath(Query,_isArrived,NodePath.getDist(),NodePath.getRoute());
-            nodePathRepository.save(_retNodePath);
-            _retList.add(_retNodePath);
-            retGetPath.put("response",_retList);
-        }
-        return retGetPath;
     }
 
     public Map<String, String> getNextPlace(String email) {
@@ -1134,17 +636,17 @@ public class NaviService {
 
                 String nextPlaceCode = placeCodeArrByTime[nextTime];
 
-                List<Navi> naviOfPlaceCode = naviRepository.findAll();
+                List<Node> nodeOfPlaceCode = nodeRepository.findAll();
                 ArrayList<Integer> dstNodeNumList = new ArrayList<>();
-                for(int j=0; j<naviOfPlaceCode.size(); j++){
-                    Navi navi = naviOfPlaceCode.get(j);
-                    String naviPlaceCode = navi.getPlaceCode();
+                for(int j = 0; j< nodeOfPlaceCode.size(); j++){
+                    Node node = nodeOfPlaceCode.get(j);
+                    String naviPlaceCode = node.getPlaceCode();
                     if(naviPlaceCode.equals("-")) continue;
                     StringTokenizer st = new StringTokenizer(naviPlaceCode);
                     while(st.hasMoreTokens()){
                         String tmp = st.nextToken(",");
                         if(tmp.equals(nextPlaceCode)){
-                            dstNodeNumList.add(Math.toIntExact(navi.getId()));
+                            dstNodeNumList.add(Math.toIntExact(node.getId()));
                             break;
                         }
                     }
@@ -1153,23 +655,23 @@ public class NaviService {
                 Double minDist = 1e9;
                 int minNodeNum = -1;
 
-                NodePath NodePath = dijkstraPartial(67,dstNodeNumList);
-                if(NodePath.getDist() < minDist){
-                    minDist = NodePath.getDist();
+                Path Path = dijkstraPartial(67,dstNodeNumList);
+                if(Path.getDist() < minDist){
+                    minDist = Path.getDist();
                     minNodeNum = 67;
                 }
-                NodePath = dijkstraPartial(60,dstNodeNumList);
-                if(NodePath.getDist() < minDist){
-                    minDist = NodePath.getDist();
+                Path = dijkstraPartial(60,dstNodeNumList);
+                if(Path.getDist() < minDist){
+                    minDist = Path.getDist();
                     minNodeNum = 60;
                 }
-                NodePath = dijkstraPartial(22,dstNodeNumList);
-                if(NodePath.getDist() < minDist){
-                    minDist = NodePath.getDist();
+                Path = dijkstraPartial(22,dstNodeNumList);
+                if(Path.getDist() < minDist){
+                    minDist = Path.getDist();
                     minNodeNum = 22;
                 }
 
-                NodePath = dijkstraPartial(minNodeNum, dstNodeNumList);
+                Path = dijkstraPartial(minNodeNum, dstNodeNumList);
                 String startLectureName="";
                 String endLectureName = lectureNameArrByTime[nextTime];
 
@@ -1181,9 +683,9 @@ public class NaviService {
                     startLectureName = "정문(버스정류장)";
 
                 String endLectureTime = lectureTimeArrByTime[nextTime];
-                int totalTime = NodePath.getTime();
-                double distance = NodePath.getDist();
-                String directionString = NodePath.getRoute();
+                int totalTime = Path.getTime();
+                double distance = Path.getDist();
+                String directionString = Path.getRoute();
 
                 retMap.put("startLectureName",startLectureName);
                 retMap.put("endLectureName",endLectureName);
@@ -1198,50 +700,50 @@ public class NaviService {
                 String nowPlaceCode = placeCodeArrByTime[nowTime];
                 String nextPlaceCode = placeCodeArrByTime[nextTime];
 
-                List<Navi> nowNaviList = new ArrayList<>();
-                List<Navi> nextNaviList = new ArrayList<>();
-                List<Navi> naviList = naviRepository.findAll();
-                for(int idx=0; idx<naviList.size(); idx++){
-                    Navi now = naviList.get(idx);
+                List<Node> nowNodeList = new ArrayList<>();
+                List<Node> nextNodeList = new ArrayList<>();
+                List<Node> nodeList = nodeRepository.findAll();
+                for(int idx = 0; idx< nodeList.size(); idx++){
+                    Node now = nodeList.get(idx);
                     String _placeCode = now.getPlaceCode();
                     if(_placeCode.equals("-")) continue;
                     StringTokenizer st = new StringTokenizer(_placeCode);
                     while(st.hasMoreTokens()){
                         String tmp = st.nextToken(",");
                         if(tmp.equals(nowPlaceCode))
-                            nowNaviList.add(now);
+                            nowNodeList.add(now);
                         if(tmp.equals(nextPlaceCode))
-                            nextNaviList.add(now);
+                            nextNodeList.add(now);
                     }
                 }
 
                 ArrayList<Integer> srcNodeNumList = new ArrayList<>();
                 ArrayList<Integer> dstNodeNumList = new ArrayList<>();
-                for(int j=0; j<nowNaviList.size(); j++)
-                    srcNodeNumList.add(Math.toIntExact(nowNaviList.get(j).getId()));
-                for(int j=0; j<nextNaviList.size(); j++)
-                    dstNodeNumList.add(Math.toIntExact(nextNaviList.get(j).getId()));
+                for(int j = 0; j< nowNodeList.size(); j++)
+                    srcNodeNumList.add(Math.toIntExact(nowNodeList.get(j).getId()));
+                for(int j = 0; j< nextNodeList.size(); j++)
+                    dstNodeNumList.add(Math.toIntExact(nextNodeList.get(j).getId()));
 
                 Double minDist = 1e9;
                 int minNodeNum = -1;
 
                 for(int j=0; j<srcNodeNumList.size(); j++){
-                    NodePath NodePath = dijkstraPartial(srcNodeNumList.get(j),dstNodeNumList);
-                    double dist = NodePath.getDist();
+                    Path Path = dijkstraPartial(srcNodeNumList.get(j),dstNodeNumList);
+                    double dist = Path.getDist();
                     if(dist < minDist){
                         minDist = dist;
                         minNodeNum = srcNodeNumList.get(j);
                     }
                 }
 
-                NodePath minNodePath = dijkstraPartial(minNodeNum, dstNodeNumList);
+                Path minPath = dijkstraPartial(minNodeNum, dstNodeNumList);
 
                 String startLectureName=lectureNameArrByTime[nowTime];
                 String endLectureName = lectureNameArrByTime[nextTime];
                 String endLectureTime = lectureTimeArrByTime[nextTime];
-                int totalTime = minNodePath.getTime();
-                double distance = minNodePath.getDist();
-                String directionString = minNodePath.getRoute();
+                int totalTime = minPath.getTime();
+                double distance = minPath.getDist();
+                String directionString = minPath.getRoute();
 
                 retMap.put("startLectureName",startLectureName);
                 retMap.put("endLectureName",endLectureName);

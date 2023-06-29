@@ -16,8 +16,9 @@ import java.util.List;
 public class Place implements Comparable<Place>{
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue
+    @Column(name = "place_id")
+    private Integer id;
 
     //placeCode
     @Column(length = 15, nullable=false)

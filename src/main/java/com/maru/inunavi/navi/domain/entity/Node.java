@@ -3,36 +3,36 @@ package com.maru.inunavi.navi.domain.entity;
 import lombok.*;
 
 import javax.persistence.*;
-import java.util.List;
 
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@Entity
 @Getter
-public class Navi {
+public class Node {
 
     @Id
     @GeneratedValue
     @Column(name = "navi_id")
-    private Long id;
+    private Integer id;
 
     // 주변노드
     @Column(length = 100, nullable = false)
     private String nearNode;
 
-    // epsg3847
+    // epsg4326 lng
     @Column(length = 70, nullable = false)
-    private String epsg3857;
+    private String lng4326;
 
-    // epsg4326
+    // epsg4326 lat
     @Column(length = 70, nullable = false)
-    private String epsg4326;
+    private String lat4326;
 
     // placeCode
     @Column(length = 250, nullable = false)
     private String placeCode;
 
-    public Navi(String nearNode, String s, String s1, String s2) {
+    public Node(String nearNode, String s, String s1, String s2) {
     }
 
     public void addNearNode(int nearNode){

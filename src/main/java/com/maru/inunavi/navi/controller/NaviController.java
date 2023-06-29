@@ -1,9 +1,10 @@
 package com.maru.inunavi.navi.controller;
 
 import com.maru.inunavi.aspect.annotation.Log;
-import com.maru.inunavi.navi.domain.entity.Navi;
-import com.maru.inunavi.navi.domain.entity.NodePath;
-import com.maru.inunavi.navi.domain.entity.Place;
+import com.maru.inunavi.aspect.annotation.ParamReplace;
+import com.maru.inunavi.navi.domain.dto.PathDto;
+import com.maru.inunavi.navi.domain.dto.RouteInfo;
+import com.maru.inunavi.navi.domain.entity.Path;
 import com.maru.inunavi.navi.service.NaviService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -25,23 +26,11 @@ public class NaviController {
         return "ok";
     }
 
-
     @Log
+    @ParamReplace(before = "\"", after = "")
     @GetMapping("/getRootLive")
-    public Map<String, List<NodePath>> getRootLive(@RequestParam(value = "startPlaceCode") String startPlaceCode,
-                                              @RequestParam(value = "endPlaceCode") String endPlaceCode,
-                                              @RequestParam(value = "startLocation") String startLocation,
-                                              @RequestParam(value = "endLocation") String endLocation){
-        return naviService.getRootLive(startPlaceCode,endPlaceCode,startLocation,endLocation);
-    }
-
-    @GetMapping("/AstargetRootLive")
-    public Map<String, List<NodePath>> AstargetRootLive(@RequestParam(value = "startPlaceCode") String startPlaceCode,
-                                                   @RequestParam(value = "endPlaceCode") String endPlaceCode,
-                                                   @RequestParam(value = "startLocation") String startLocation,
-                                                   @RequestParam(value = "endLocation") String endLocation){
-
-        return naviService.AstarGetRootLive(startPlaceCode,endPlaceCode,startLocation,endLocation);
+    public Map<String, List<PathDto>> getRouteLive(@ModelAttribute RouteInfo routeInfo){
+        return Map.of("response", List.of(naviService.getRouteLive(routeInfo)));
     }
 
     @PostMapping("/getNextPlace")
