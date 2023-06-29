@@ -20,6 +20,9 @@ dependencies {
 	implementation 'mysql:mysql-connector-java'
 	implementation 'org.projectlombok:lombok:1.18.20'
 
+	implementation 'org.springframework.boot:spring-boot-starter-cache'
+	implementation 'org.hibernate:hibernate-ehcache:5.6.5.Final'
+
 	implementation 'com.github.gavlyukovskiy:p6spy-spring-boot-starter:1.5.8'
 
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
