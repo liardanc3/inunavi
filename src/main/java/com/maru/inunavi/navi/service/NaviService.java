@@ -165,7 +165,6 @@ public class NaviService {
     }
 
     // TODO - 시작이 location일경우 location -> 근처node 로 잇는 구간 추가필요
-    // TODO - 도착지 node정보 리턴 필요
     /**
      * Find approximately the shortest path
      * @param srcId
@@ -346,8 +345,6 @@ public class NaviService {
                 );
     }
 
-
-    // TODO - placecode 넣어야함
     /**
      * Provide place based on filter
      * @param placeSearchFilter
@@ -369,13 +366,16 @@ public class NaviService {
                                     Integer srcId = nodeRepository.findSrcNodeIdByRouteInfo(routeInfo);
                                     List<Integer> dstIdList = nodeRepository.findDstNodeIdByRouteInfo(routeInfo);
 
-                                    Double dist = aStarWithManhattan(srcId, dstIdList, routeInfo).getDist();
+                                    Path path = aStarWithManhattan(srcId, dstIdList, routeInfo);
+
+                                    // NotNull
+                                    String dstPlaceCode = nodeRepository.findById(path.getDstId()).get().getPlaceCode();
 
                                     return PlaceDto.builder()
-                                            .placeCode("A")
+                                            .placeCode(dstPlaceCode)
                                             .title(place.getTitle())
                                             .sort(place.getSort())
-                                            .distance(dist)
+                                            .distance(path.getDist())
                                             .location(place.getLocation())
                                             .time(place.getTime())
                                             .callNum(place.getCallNum())
