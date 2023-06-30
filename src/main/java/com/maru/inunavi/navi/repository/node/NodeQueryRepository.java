@@ -1,4 +1,4 @@
-package com.maru.inunavi.navi.repository;
+package com.maru.inunavi.navi.repository.node;
 
 import com.maru.inunavi.navi.domain.dto.RouteInfo;
 

@@ -12,7 +12,7 @@ import javax.persistence.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
-public class Place implements Comparable<Place>{
+public class Place {
 
     @Id
     @GeneratedValue
@@ -37,7 +37,7 @@ public class Place implements Comparable<Place>{
 
     //Location
     @Column(length = 100, nullable=false)
-    private String epsg4326;
+    private String location;
 
     //time
     @Column(length = 500, nullable = false)
@@ -51,14 +51,4 @@ public class Place implements Comparable<Place>{
     @Column(length = 50, nullable = false)
     private String etc;
 
-
-    //setter
-    public void setDistance(String distance){
-        this.distance=distance;
-    }
-
-    @Override
-    public int compareTo(Place target){
-        return (int)(Double.parseDouble(this.distance) - Double.parseDouble(target.distance));
-    }
 }

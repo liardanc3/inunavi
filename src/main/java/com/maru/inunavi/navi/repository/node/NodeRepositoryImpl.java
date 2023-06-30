@@ -1,7 +1,8 @@
-package com.maru.inunavi.navi.repository;
+package com.maru.inunavi.navi.repository.node;
 
 import com.maru.inunavi.navi.domain.dto.RouteInfo;
 import com.maru.inunavi.navi.domain.entity.Node;
+import com.maru.inunavi.navi.repository.node.NodeQueryRepository;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
@@ -16,7 +17,7 @@ import java.util.stream.Collectors;
 import static com.maru.inunavi.navi.domain.entity.QNode.node;
 
 @RequiredArgsConstructor
-public class NodeRepositoryImpl implements NodeQueryRepository{
+public class NodeRepositoryImpl implements NodeQueryRepository {
 
     private final JPAQueryFactory queryFactory;
 

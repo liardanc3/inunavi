@@ -1,7 +1,7 @@
-package com.maru.inunavi.navi.repository;
+package com.maru.inunavi.navi.repository.node;
 
 import com.maru.inunavi.navi.domain.entity.Node;
-import com.maru.inunavi.navi.domain.entity.Path;
+import com.maru.inunavi.navi.repository.node.NodeQueryRepository;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -11,7 +11,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface NodeRepository extends JpaRepository<Node, Integer>, NodeQueryRepository{
+public interface NodeRepository extends JpaRepository<Node, Integer>, NodeQueryRepository {
 
     @Cacheable("latList")
     @Query("select n.lat4326 from Node n")

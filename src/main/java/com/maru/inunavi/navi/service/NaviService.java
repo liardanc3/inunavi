@@ -2,15 +2,13 @@ package com.maru.inunavi.navi.service;
 
 import com.maru.inunavi.lecture.domain.entity.Lecture;
 import com.maru.inunavi.lecture.repository.LectureRepository;
-import com.maru.inunavi.navi.domain.dto.NextPlaceDto;
-import com.maru.inunavi.navi.domain.dto.PathDto;
-import com.maru.inunavi.navi.domain.dto.RouteInfo;
+import com.maru.inunavi.navi.domain.dto.*;
 import com.maru.inunavi.navi.domain.entity.Node;
 import com.maru.inunavi.navi.domain.entity.Path;
 import com.maru.inunavi.navi.domain.entity.Place;
-import com.maru.inunavi.navi.repository.NodeRepository;
+import com.maru.inunavi.navi.repository.node.NodeRepository;
 import com.maru.inunavi.navi.repository.PathRepository;
-import com.maru.inunavi.navi.repository.PlaceRepository;
+import com.maru.inunavi.navi.repository.place.PlaceRepository;
 import com.maru.inunavi.user.domain.entity.UserLectureTable;
 import com.maru.inunavi.user.repository.UserRepository;
 import lombok.Data;
@@ -143,7 +141,7 @@ public class NaviService {
                             .title(lineToken.nextToken("\t"))
                             .sort(lineToken.nextToken("\t"))
                             .distance(lineToken.nextToken("\t"))
-                            .epsg4326(lineToken.nextToken("\t").replaceAll("\"", ""))
+                            .location(lineToken.nextToken("\t").replaceAll("\"", ""))
                             .time(lineToken.nextToken("\t").replaceAll("\"", ""))
                             .callNum(lineToken.nextToken("\t"))
                             .etc(lineToken.nextToken("\t"))
@@ -168,6 +166,8 @@ public class NaviService {
                 });
     }
 
+    // TODO - 시작이 location일경우 location -> 근처node 로 잇는 구간 추가필요
+    // TODO - 도착지 node정보 리턴 필요
     /**
      * Find approximately the shortest path
      * @param srcId
@@ -307,25 +307,17 @@ public class NaviService {
         return 2000 * radius * Math.asin(squareRoot);
     }
 
+    /**
+     * Provide the next class location based on the user's timetable
+     * @param email
+     * @return NextPlaceDto
+     */
     @SneakyThrows
     public NextPlaceDto getNextPlace(String email) {
         return userRepository.findNextLecture(email, convertTimeToInt())
                 .map(lecture -> {
 
-                    // NotNull
-                    List<Integer> startTimeList = lecture.getStartTimeList();
-
-                    int nowTime = convertTimeToInt();
-                    int idx = -1;
-                    for (int i = 0; i < startTimeList.size() && idx == -1; i++) {
-                        if(startTimeList.get(i) / 48 == nowTime / 48){
-                            idx = i;
-                        }
-                    }
-
-                    String classRoomRaw = lecture.getClassRoomRaw().split(",")[idx];
-                    String detailClassRoom = classRoomRaw.split("-")[1].split(" ")[0];
-                    String nextPlaceCode = lecture.getClassRoom().split(detailClassRoom)[0];
+                    String nextPlaceCode = getNextPlaceCode(lecture);
 
                     return placeRepository.findByPlaceCode(nextPlaceCode)
                             .map(nextPlace ->
@@ -333,7 +325,7 @@ public class NaviService {
                                             .success("true")
                                             .nextPlaceCode(nextPlace.getPlaceCode())
                                             .nextPlaceTitle(nextPlace.getTitle())
-                                            .nextPlaceLocationString(nextPlace.getEpsg4326())
+                                            .nextPlaceLocationString(nextPlace.getLocation())
                                             .build()
                             )
                             .orElseGet(() ->
@@ -356,82 +348,45 @@ public class NaviService {
     }
 
 
+    // TODO - placecode 넣어야함
+    /**
+     * Provide place based on filter
+     * @param placeSearchFilter
+     * @return List<PlaceDto>
+     */
+    public List<PlaceDto> searchPlace(PlaceSearchFilter placeSearchFilter) {
+        return placeRepository.findByTitleOrSort(placeSearchFilter.getSearchKeyword())
+                .map(placeList ->
+                        placeList.stream()
+                                .map(place -> {
 
+                                    RouteInfo routeInfo = RouteInfo.builder()
+                                            .startPlaceCode("LOCATION")
+                                            .startLocation(placeSearchFilter.getMyLocation())
+                                            .endPlaceCode(place.getPlaceCode())
+                                            .endLocation("LOCATION")
+                                            .build();
 
-    public Map<String, List<Map<String,String>>> placeSearchList(String searchKeyword,  String myLocation) {
-        searchKeyword = searchKeyword.substring(1,searchKeyword.length()-1);
-        myLocation = myLocation.substring(1,myLocation.length()-1);
-        searchKeyword = searchKeyword.replaceAll(" ","");
-        List<Place> placeList = placeRepository.findAll();
-        List<Node> nodeList = nodeRepository.findAll();
-        int nowNode = 0;
-        double minDist = 1e9;
-        for(int i = 0; i< nodeList.size(); i++){
-            double _dist = distanceBetween(myLocation, nodeList.get(i).getEpsg4326());
-            if(_dist<minDist){
-                nowNode = i+1;
-                minDist = _dist;
-            }
-        }
+                                    Integer srcId = nodeRepository.findSrcNodeIdByRouteInfo(routeInfo);
+                                    List<Integer> dstIdList = nodeRepository.findDstNodeIdByRouteInfo(routeInfo);
 
-        List<Place> requestPlaceList = new ArrayList<>();
+                                    Double dist = aStarWithManhattan(srcId, dstIdList, routeInfo).getDist();
 
-        for (Place place : placeList) {
-            String _title = place.getTitle();
-            _title = _title.replaceAll(" ", "");
-            String _sort = place.getSort();
-            _sort = _sort.replaceAll(" ", "");
-
-            if (_title.toUpperCase().contains(searchKeyword.toUpperCase()) || _sort.toUpperCase().contains(searchKeyword.toUpperCase())) {
-                String _dstPlaceCode = place.getPlaceCode();
-                ArrayList<Integer> _dstNodeNumList = new ArrayList<>();
-
-                for (int j = 0; j < nodeList.size(); j++) {
-                    String _placeCode = nodeList.get(j).getPlaceCode();
-                    StringTokenizer st = new StringTokenizer(_placeCode);
-                    while (st.hasMoreTokens()) {
-                        String s = st.nextToken(",");
-                        if (s.equals(_dstPlaceCode)) {
-                            _dstNodeNumList.add(j + 1);
-                            break;
-                        }
-                    }
-                }
-
-                double dist = dijkstraPartial(nowNode, _dstNodeNumList).getDist();
-
-                double distFromStart = distanceBetween(myLocation, nodeRepository.getById(nowNode).getEpsg4326());
-                Place _Place = place;
-                _Place.setDistance(Double.toString(dist + distFromStart));
-                requestPlaceList.add(_Place);
-            }
-        }
-
-        requestPlaceList.sort(Place::compareTo);
-
-        Map<String, List<Map<String, String>>> retMap = new HashMap<>();
-        List<Map<String,String>> retList = new ArrayList<>();
-        for(int i=0; i<requestPlaceList.size(); i++){
-            Map<String, String> retMapPartial = new HashMap<>();
-            Place retPlacePartial = requestPlaceList.get(i);
-            retMapPartial.put("placeCode",retPlacePartial.getPlaceCode());
-            retMapPartial.put("title",retPlacePartial.getTitle());
-            retMapPartial.put("sort",retPlacePartial.getSort());
-
-            String _Distance = retPlacePartial.getDistance();
-            StringTokenizer st = new StringTokenizer(_Distance);
-            String s = st.nextToken(".");
-            retMapPartial.put("distance",s);
-
-            retMapPartial.put("location",retPlacePartial.getEpsg4326());
-            retMapPartial.put("time",retPlacePartial.getTime());
-            retMapPartial.put("callNum",retPlacePartial.getCallNum());
-            retList.add(retMapPartial);
-        }
-
-        retMap.put("response",retList);
-        return retMap;
+                                    return PlaceDto.builder()
+                                            .placeCode("A")
+                                            .title(place.getTitle())
+                                            .sort(place.getSort())
+                                            .distance(dist)
+                                            .location(place.getLocation())
+                                            .time(place.getTime())
+                                            .callNum(place.getCallNum())
+                                            .build();
+                                })
+                )
+                .orElseGet(Stream::empty)
+                .collect(Collectors.toList());
     }
+
 
     public Map<String, String> getAnalysisResult(String email) {
         Map<String, List<Map<String, String>>> userOverviewRoot = getOverviewRoot(email);
@@ -719,6 +674,7 @@ public class NaviService {
         return retOverview;
     }
 
+
     private int convertTimeToInt() {
         Date today = new Date();
 
@@ -741,5 +697,24 @@ public class NaviService {
         }
 
         return nowTime;
+    }
+
+    private String getNextPlaceCode(Lecture lecture) {
+
+        // NotNull
+        List<Integer> startTimeList = lecture.getStartTimeList();
+
+        int nowTime = convertTimeToInt();
+        int idx = -1;
+        for (int i = 0; i < startTimeList.size() && idx == -1; i++) {
+            if(startTimeList.get(i) / 48 == nowTime / 48){
+                idx = i;
+            }
+        }
+
+        String classRoomRaw = lecture.getClassRoomRaw().split(",")[idx];
+        String detailClassRoom = classRoomRaw.split("-")[1].split(" ")[0];
+
+        return lecture.getClassRoom().split(detailClassRoom)[0];
     }
 }
