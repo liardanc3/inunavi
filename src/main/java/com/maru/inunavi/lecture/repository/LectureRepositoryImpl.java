@@ -1,12 +1,10 @@
 package com.maru.inunavi.lecture.repository;
 
-import com.maru.inunavi.lecture.domain.dto.SearchFilter;
+import com.maru.inunavi.lecture.domain.dto.LectureSearchFilter;
 import com.maru.inunavi.lecture.domain.dto.SelectLectureDto;
 import com.querydsl.core.types.OrderSpecifier;
-import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
-import com.querydsl.core.types.dsl.StringPath;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 
@@ -20,7 +18,7 @@ public class LectureRepositoryImpl implements LectureQueryRepository{
     private final JPAQueryFactory queryFactory;
 
     @Override
-    public List<SelectLectureDto> findBySearchFilter(SearchFilter searchFilter) {
+    public List<SelectLectureDto> findBySearchFilter(LectureSearchFilter lectureSearchFilter) {
         return queryFactory
                 .select(Projections.constructor(SelectLectureDto.class,
                         lecture.id.stringValue(),
@@ -39,14 +37,14 @@ public class LectureRepositoryImpl implements LectureQueryRepository{
                 ))
                 .from(lecture)
                 .where(
-                        gradeCondition(searchFilter.getGradeOption()),
-                        cseCondition(searchFilter.getCseOption(), searchFilter.getMajorOption()),
-                        majorCondition(searchFilter.getMajorOption()),
-                        scoreCondition(searchFilter.getScoreOption()),
-                        categoryCondition(searchFilter.getCategoryOption()),
-                        keywordCondition(searchFilter.getMainKeyword(), searchFilter.getKeywordOption())
+                        gradeCondition(lectureSearchFilter.getGradeOption()),
+                        cseCondition(lectureSearchFilter.getCseOption(), lectureSearchFilter.getMajorOption()),
+                        majorCondition(lectureSearchFilter.getMajorOption()),
+                        scoreCondition(lectureSearchFilter.getScoreOption()),
+                        categoryCondition(lectureSearchFilter.getCategoryOption()),
+                        keywordCondition(lectureSearchFilter.getMainKeyword(), lectureSearchFilter.getKeywordOption())
                 )
-                .orderBy(orderCondition(searchFilter.getSortOption()))
+                .orderBy(orderCondition(lectureSearchFilter.getSortOption()))
                 .fetch();
     }
 

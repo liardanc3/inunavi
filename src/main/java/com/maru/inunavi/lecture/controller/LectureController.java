@@ -3,7 +3,7 @@ package com.maru.inunavi.lecture.controller;
 import com.maru.inunavi.aspect.annotation.Log;
 import com.maru.inunavi.aspect.annotation.ParamReplace;
 import com.maru.inunavi.aspect.annotation.SnakeToCamel;
-import com.maru.inunavi.lecture.domain.dto.SearchFilter;
+import com.maru.inunavi.lecture.domain.dto.LectureSearchFilter;
 import com.maru.inunavi.lecture.domain.dto.SelectLectureDto;
 import com.maru.inunavi.lecture.domain.dto.TimeTableInfoDto;
 import com.maru.inunavi.lecture.domain.entity.Lecture;
@@ -61,7 +61,7 @@ public class LectureController {
     @SnakeToCamel
     @ParamReplace(before = "\"", after = "")
     @GetMapping("/selectLecture")
-    public Map<String, List<SelectLectureDto>> selectLecture(@ModelAttribute SearchFilter searchFilter){
-        return Map.of("response", lectureService.selectLecture(searchFilter));
+    public Map<String, List<SelectLectureDto>> selectLecture(@ModelAttribute LectureSearchFilter lectureSearchFilter){
+        return Map.of("response", lectureService.selectLecture(lectureSearchFilter));
     }
 }

@@ -1,7 +1,6 @@
 package com.maru.inunavi.lecture.service;
 
-import com.maru.inunavi.aspect.annotation.Log;
-import com.maru.inunavi.lecture.domain.dto.SearchFilter;
+import com.maru.inunavi.lecture.domain.dto.LectureSearchFilter;
 import com.maru.inunavi.lecture.domain.dto.SelectLectureDto;
 import com.maru.inunavi.lecture.domain.dto.TimeTableInfoDto;
 import com.maru.inunavi.lecture.domain.entity.Lecture;
@@ -253,10 +252,10 @@ public class LectureService {
 
     /**
      * Provide filtered lecture list
-     * @param searchFilter
+     * @param lectureSearchFilter
      * @return {@code List<SelectLectureDto>}
      */
-    public List<SelectLectureDto> selectLecture(SearchFilter searchFilter) {
-        return lectureRepository.findBySearchFilter(searchFilter);
+    public List<SelectLectureDto> selectLecture(LectureSearchFilter lectureSearchFilter) {
+        return lectureRepository.findBySearchFilter(lectureSearchFilter);
     }
 }

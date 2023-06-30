@@ -3,7 +3,7 @@ package com.maru.inunavi.lecture.domain.dto;
 import lombok.Data;
 
 @Data
-public class SearchFilter {
+public class LectureSearchFilter {
 
     private String mainKeyword;
     private String keywordOption;
