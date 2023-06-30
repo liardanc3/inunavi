@@ -282,6 +282,7 @@ public class NaviService {
                         .isArrived(isArrived)
                         .dist(dist)
                         .route(route)
+                        .dstId(dstIdx)
                         .build()
         );
     }
