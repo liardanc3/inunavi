@@ -2,6 +2,7 @@ package com.maru.inunavi.navi.service;
 
 import com.maru.inunavi.lecture.domain.entity.Lecture;
 import com.maru.inunavi.lecture.repository.LectureRepository;
+import com.maru.inunavi.navi.domain.dto.NextPlaceDto;
 import com.maru.inunavi.navi.domain.dto.PathDto;
 import com.maru.inunavi.navi.domain.dto.RouteInfo;
 import com.maru.inunavi.navi.domain.entity.Node;
@@ -11,7 +12,7 @@ import com.maru.inunavi.navi.repository.NodeRepository;
 import com.maru.inunavi.navi.repository.PathRepository;
 import com.maru.inunavi.navi.repository.PlaceRepository;
 import com.maru.inunavi.user.domain.entity.UserLectureTable;
-import com.maru.inunavi.user.repository.UserLectureTableRepository;
+import com.maru.inunavi.user.repository.UserRepository;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
@@ -32,8 +33,8 @@ import java.util.stream.Stream;
 public class NaviService {
 
     private final NodeRepository nodeRepository;
-    private final UserLectureTableRepository userLectureTableRepository;
-    private final LectureRepository LectureRepository;
+    private final UserRepository userRepository;
+    private final LectureRepository lectureRepository;
     private final PathRepository pathRepository;
     private final PlaceRepository placeRepository;
 
@@ -305,7 +306,110 @@ public class NaviService {
         return 2000 * radius * Math.asin(squareRoot);
     }
 
-    
+    // TODO -
+    @SneakyThrows
+    public NextPlaceDto getNextPlace(String email) {
+
+        int nowTime = convertTimeToInt();
+
+        List<Lecture> lectureList = userRepository.findLecturesByEmail(email);
+
+        String nextLectureNumber = "";
+        int minTimeGap = 19999;
+        int token = 0;
+
+        for(int i = 0; i < lectureList.size(); i++){
+
+            String lectureNumber = lectureList.get(i).getNumber();
+            String lectureTime = lectureList.get(i).getClassTime();
+
+            if(lectureTime.equals("-"))
+                continue;
+
+            StringTokenizer st = new StringTokenizer(lectureTime);
+
+            int idx = -1;
+            while(st.hasMoreTokens()){
+                idx++;
+                String s = st.nextToken(",");
+                String[] timeRange = s.split("-");
+
+                int start = Integer.parseInt(timeRange[0]);
+
+                if(nowTime <= start && start-nowTime < minTimeGap && start/48 == nowTime/48){
+                    minTimeGap = start-nowTime;
+                    nextLectureNumber = lectureNumber;
+                    token = idx;
+                }
+            }
+        }
+
+        if(nextLectureNumber.equals("")) {
+            return NextPlaceDto.builder()
+                    .success("false")
+                    .nextPlaceCode("NONE")
+                    .nextPlaceTitle("NONE")
+                    .nextPlaceLocationString("0.0")
+                    .build();
+        }
+        else {
+            String classRoom = lectureRepository.findByNumber(nextLectureNumber).getClassRoom();
+            String[] classRoomToken = classRoom.split(",");
+
+            String nextPlaceCode = "";
+            try {
+                nextPlaceCode = classRoomToken[token].substring(0,classRoomToken[token].length()-3);
+            } catch (Exception e){
+                nextPlaceCode = "ZZ";
+            }
+
+            if(nextPlaceCode.equals("SXB"))
+                nextPlaceCode = "SX";
+
+
+            return placeRepository.findByPlaceCode(nextPlaceCode)
+                    .map(nextPlace ->
+                            NextPlaceDto.builder()
+                                .success("true")
+                                .nextPlaceCode(nextPlace.getPlaceCode())
+                                .nextPlaceTitle(nextPlace.getTitle())
+                                .nextPlaceLocationString(nextPlace.getEpsg4326())
+                                .build()
+                    )
+                    .orElseGet(() ->
+                            NextPlaceDto.builder()
+                                    .success("true")
+                                    .nextPlaceCode(nextPlaceCode)
+                                    .nextPlaceTitle("NONE")
+                                    .nextPlaceLocationString("NONE")
+                                    .build()
+                    );
+        }
+    }
+
+    private int convertTimeToInt() {
+        Date today = new Date();
+
+        SimpleDateFormat dayOfWeek = new SimpleDateFormat("E");
+        SimpleDateFormat hourOfToday = new SimpleDateFormat("HH");
+        SimpleDateFormat minOfToday = new SimpleDateFormat("mm");
+
+        int intHourOfToday = Integer.parseInt(hourOfToday.format(today));
+        int intMinOfToday = Integer.parseInt(minOfToday.format(today));
+
+        int nowTime = intHourOfToday * 2 + intMinOfToday / 30;
+
+        switch(dayOfWeek.format(today).charAt(0)){
+            case '화': nowTime += 48; break;
+            case '수': nowTime += 96; break;
+            case '목': nowTime += 144; break;
+            case '금': nowTime += 192; break;
+            case '토': nowTime += 240; break;
+            default : break;
+        }
+
+        return nowTime;
+    }
 
 
     public Map<String, List<Map<String,String>>> placeSearchList(String searchKeyword,  String myLocation) {
@@ -383,96 +487,6 @@ public class NaviService {
         return retMap;
     }
 
-    public Map<String, String> getNextPlace(String email) {
-        List<UserLectureTable> userLectureTableList = userLectureTableRepository.findAllByEmail(email);
-
-        Date today = new Date();
-        SimpleDateFormat dayOfWeek = new SimpleDateFormat("E");
-        SimpleDateFormat hourOfToday = new SimpleDateFormat("HH");
-        SimpleDateFormat minOfToday = new SimpleDateFormat("mm");
-
-        char charDayOfWeek = dayOfWeek.format(today).charAt(0);
-        int intHourOfToday = Integer.parseInt(hourOfToday.format(today));
-        int intMinOfToday = Integer.parseInt(minOfToday.format(today));
-
-        int nowTime = 0;
-        switch(charDayOfWeek){
-            case '화': nowTime+=48; break;
-            case '수': nowTime+=96; break;
-            case '목': nowTime+=144; break;
-            case '금': nowTime+=192; break;
-            case '토': nowTime+=240; break;
-            default: break;
-        }
-
-        nowTime+=intHourOfToday*2;
-        nowTime+=intMinOfToday/30;
-
-        String retLectureId = "";
-        int minTimeGap = 19999;
-        int token = 0;
-
-        for(int i = 0; i< userLectureTableList.size(); i++){
-            String lectureId = LectureRepository.getById(userLectureTableList.get(i).getLectureIdx()).getNumber();
-            String lectureTime = LectureRepository.findByNumber(lectureId).getClassTime();
-            if(lectureTime.equals("-")) continue;
-            StringTokenizer st = new StringTokenizer(lectureTime);
-
-            int idx = -1;
-            while(st.hasMoreTokens()){
-                idx++;
-                String s = st.nextToken(",");
-                String[] timeRange = s.split("-");
-
-                int start = Integer.parseInt(timeRange[0]);
-
-                if(nowTime <= start && start-nowTime < minTimeGap && start/48 == nowTime/48){
-                    minTimeGap = start-nowTime;
-                    retLectureId = lectureId;
-                    token = idx;
-                }
-            }
-        }
-
-        Map<String, String> retNextPlace = new HashMap<>();
-
-        if(retLectureId.equals("")){
-            retNextPlace.put("success","false");
-            retNextPlace.put("nextPlaceCode","NONE");
-            retNextPlace.put("nextPlaceLocationString","0.0");
-            retNextPlace.put("nextPlaceTitle","NONE");
-        }
-        else{
-            String classRoom = LectureRepository.findByNumber(retLectureId).getClassRoom();
-            String[] tokenedClassRoom = classRoom.split(",");
-            String nextPlaceCode = "";
-            try{
-                nextPlaceCode = tokenedClassRoom[token].substring(0,tokenedClassRoom[token].length()-3);
-            }catch (Exception e){
-                nextPlaceCode = "ZZ";
-            }
-            if(nextPlaceCode.equals("SXB"))
-                nextPlaceCode = "SX";
-            retNextPlace.put("success","true");
-            retNextPlace.put("nextPlaceCode",nextPlaceCode);
-
-            Place nextPlace = placeRepository.findByPlaceCode(nextPlaceCode);
-            if(nextPlace==null){
-                retNextPlace.put("nextPlaceLocationString","NONE");
-                retNextPlace.put("nextPlaceTitle","NONE");
-
-                return retNextPlace;
-            }
-
-            String nextPlaceLocation = nextPlace.getEpsg4326();
-            String nextPlaceTitle = nextPlace.getTitle();
-
-            retNextPlace.put("nextPlaceLocationString",nextPlaceLocation);
-            retNextPlace.put("nextPlaceTitle",nextPlaceTitle);
-        }
-        return retNextPlace;
-    }
-
     public Map<String, String> getAnalysisResult(String email) {
         Map<String, List<Map<String, String>>> userOverviewRoot = getOverviewRoot(email);
         double totalDistance = 0.0;
@@ -500,7 +514,7 @@ public class NaviService {
         List<Lecture> lectureList = new ArrayList<>();
         for(int i = 0; i< userLectureTableList.size(); i++){
             int lectureIdx = userLectureTableList.get(i).getLectureIdx();
-            Lecture lecture = LectureRepository.getById(lectureIdx);
+            Lecture lecture = lectureRepository.getById(lectureIdx);
             String classTime = lecture.getClassTime();
             if(classTime.equals("-") || lecture.getClassRoom()==null) continue;
 
@@ -543,7 +557,7 @@ public class NaviService {
         int[] dayCheck = new int[7];
         for(int i = 0; i< userLectureTableList.size(); i++){
             int lectureIdx = userLectureTableList.get(i).getLectureIdx();
-            Lecture lecture = LectureRepository.getById(lectureIdx);
+            Lecture lecture = lectureRepository.getById(lectureIdx);
 
             int idx = -1;
 

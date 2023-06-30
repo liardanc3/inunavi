@@ -51,7 +51,7 @@ public class NodeRepositoryImpl implements NodeQueryRepository{
 
     // ----------------- EXPRESSIONS AND CONDITIONS ---------------------------- //
 
-    private static OrderSpecifier<Double> distanceAsc(String location) {
+    private OrderSpecifier<Double> distanceAsc(String location) {
         StringTokenizer locationToken = new StringTokenizer(location);
 
         Double lat = Double.parseDouble(locationToken.nextToken(", "));

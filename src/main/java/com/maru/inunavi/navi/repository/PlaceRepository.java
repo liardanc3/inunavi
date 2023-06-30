@@ -6,14 +6,15 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import java.util.Optional;
+
 @Repository
 public interface PlaceRepository extends JpaRepository<Place, Long> {
+
+    @Query("select p from Place p where p.placeCode= :placeCode")
+    Optional<Place> findByPlaceCode(String placeCode);
 
     @Modifying
     @Query(value = "alter TABLE place AUTO_INCREMENT = 1",nativeQuery = true)
     void deleteINCREMENT();
-
-    @Query("select m from place as m where m.placeCode= :nextPlaceCode")
-    Place findByPlaceCode(String nextPlaceCode);
-
 }

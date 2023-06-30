@@ -7,7 +7,6 @@ import com.maru.inunavi.recommend.domain.entity.Recommend;
 import com.maru.inunavi.user.domain.entity.User;
 import com.maru.inunavi.user.domain.entity.UserLectureTable;
 import com.maru.inunavi.user.repository.UserRepository;
-import com.maru.inunavi.user.repository.UserLectureTableRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

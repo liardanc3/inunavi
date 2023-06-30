@@ -8,7 +8,6 @@ import com.maru.inunavi.user.domain.dto.SignUpDto;
 import com.maru.inunavi.user.domain.entity.User;
 import com.maru.inunavi.user.domain.entity.UserLectureTable;
 import com.maru.inunavi.user.repository.UserRepository;
-import com.maru.inunavi.user.repository.UserLectureTableRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -24,7 +23,6 @@ import java.util.*;
 public class UserService {
 
     private final UserRepository userRepository;
-    private final UserLectureTableRepository userLectureTableRepository;
     private final LectureRepository LectureRepository;
     private final RecommendRepository recommendRepository;
 

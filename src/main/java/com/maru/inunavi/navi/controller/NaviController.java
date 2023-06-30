@@ -2,6 +2,7 @@ package com.maru.inunavi.navi.controller;
 
 import com.maru.inunavi.aspect.annotation.Log;
 import com.maru.inunavi.aspect.annotation.ParamReplace;
+import com.maru.inunavi.navi.domain.dto.NextPlaceDto;
 import com.maru.inunavi.navi.domain.dto.PathDto;
 import com.maru.inunavi.navi.domain.dto.RouteInfo;
 import com.maru.inunavi.navi.domain.entity.Path;
@@ -34,7 +35,7 @@ public class NaviController {
     }
 
     @PostMapping("/getNextPlace")
-    public Map<String,String> getNextPlace(@RequestParam(value = "email") String email){
+    public NextPlaceDto getNextPlace(String email){
         return naviService.getNextPlace(email);
     }
 
