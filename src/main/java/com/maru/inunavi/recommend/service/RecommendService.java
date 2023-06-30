@@ -19,7 +19,6 @@ import java.util.*;
 public class RecommendService {
 
     private final UserRepository userRepository;
-    private final UserLectureTableRepository userLectureTableRepository;
     private final LectureRepository lectureRepository;
     private final RecommendRepository recommendRepository;
 
