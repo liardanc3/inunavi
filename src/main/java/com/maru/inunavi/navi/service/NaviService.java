@@ -38,6 +38,7 @@ public class NaviService {
     private final PathRepository pathRepository;
     private final PlaceRepository placeRepository;
 
+    // TODO - check nearnode
     /**
      * Update navi info
      */
@@ -306,110 +307,55 @@ public class NaviService {
         return 2000 * radius * Math.asin(squareRoot);
     }
 
-    // TODO -
     @SneakyThrows
     public NextPlaceDto getNextPlace(String email) {
+        return userRepository.findNextLecture(email, convertTimeToInt())
+                .map(lecture -> {
 
-        int nowTime = convertTimeToInt();
+                    // NotNull
+                    List<Integer> startTimeList = lecture.getStartTimeList();
 
-        List<Lecture> lectureList = userRepository.findLecturesByEmail(email);
+                    int nowTime = convertTimeToInt();
+                    int idx = -1;
+                    for (int i = 0; i < startTimeList.size() && idx == -1; i++) {
+                        if(startTimeList.get(i) / 48 == nowTime / 48){
+                            idx = i;
+                        }
+                    }
 
-        String nextLectureNumber = "";
-        int minTimeGap = 19999;
-        int token = 0;
+                    String classRoomRaw = lecture.getClassRoomRaw().split(",")[idx];
+                    String detailClassRoom = classRoomRaw.split("-")[1].split(" ")[0];
+                    String nextPlaceCode = lecture.getClassRoom().split(detailClassRoom)[0];
 
-        for(int i = 0; i < lectureList.size(); i++){
-
-            String lectureNumber = lectureList.get(i).getNumber();
-            String lectureTime = lectureList.get(i).getClassTime();
-
-            if(lectureTime.equals("-"))
-                continue;
-
-            StringTokenizer st = new StringTokenizer(lectureTime);
-
-            int idx = -1;
-            while(st.hasMoreTokens()){
-                idx++;
-                String s = st.nextToken(",");
-                String[] timeRange = s.split("-");
-
-                int start = Integer.parseInt(timeRange[0]);
-
-                if(nowTime <= start && start-nowTime < minTimeGap && start/48 == nowTime/48){
-                    minTimeGap = start-nowTime;
-                    nextLectureNumber = lectureNumber;
-                    token = idx;
-                }
-            }
-        }
-
-        if(nextLectureNumber.equals("")) {
-            return NextPlaceDto.builder()
-                    .success("false")
-                    .nextPlaceCode("NONE")
-                    .nextPlaceTitle("NONE")
-                    .nextPlaceLocationString("0.0")
-                    .build();
-        }
-        else {
-            String classRoom = lectureRepository.findByNumber(nextLectureNumber).getClassRoom();
-            String[] classRoomToken = classRoom.split(",");
-
-            String nextPlaceCode = "";
-            try {
-                nextPlaceCode = classRoomToken[token].substring(0,classRoomToken[token].length()-3);
-            } catch (Exception e){
-                nextPlaceCode = "ZZ";
-            }
-
-            if(nextPlaceCode.equals("SXB"))
-                nextPlaceCode = "SX";
-
-
-            return placeRepository.findByPlaceCode(nextPlaceCode)
-                    .map(nextPlace ->
-                            NextPlaceDto.builder()
-                                .success("true")
-                                .nextPlaceCode(nextPlace.getPlaceCode())
-                                .nextPlaceTitle(nextPlace.getTitle())
-                                .nextPlaceLocationString(nextPlace.getEpsg4326())
+                    return placeRepository.findByPlaceCode(nextPlaceCode)
+                            .map(nextPlace ->
+                                    NextPlaceDto.builder()
+                                            .success("true")
+                                            .nextPlaceCode(nextPlace.getPlaceCode())
+                                            .nextPlaceTitle(nextPlace.getTitle())
+                                            .nextPlaceLocationString(nextPlace.getEpsg4326())
+                                            .build()
+                            )
+                            .orElseGet(() ->
+                                    NextPlaceDto.builder()
+                                            .success("true")
+                                            .nextPlaceCode(nextPlaceCode)
+                                            .nextPlaceTitle("NONE")
+                                            .nextPlaceLocationString("NONE")
+                                            .build()
+                            );
+                })
+                .orElseGet(() ->
+                        NextPlaceDto.builder()
+                                .success("false")
+                                .nextPlaceCode("NONE")
+                                .nextPlaceTitle("NONE")
+                                .nextPlaceLocationString("0.0")
                                 .build()
-                    )
-                    .orElseGet(() ->
-                            NextPlaceDto.builder()
-                                    .success("true")
-                                    .nextPlaceCode(nextPlaceCode)
-                                    .nextPlaceTitle("NONE")
-                                    .nextPlaceLocationString("NONE")
-                                    .build()
-                    );
-        }
+                );
     }
 
-    private int convertTimeToInt() {
-        Date today = new Date();
 
-        SimpleDateFormat dayOfWeek = new SimpleDateFormat("E");
-        SimpleDateFormat hourOfToday = new SimpleDateFormat("HH");
-        SimpleDateFormat minOfToday = new SimpleDateFormat("mm");
-
-        int intHourOfToday = Integer.parseInt(hourOfToday.format(today));
-        int intMinOfToday = Integer.parseInt(minOfToday.format(today));
-
-        int nowTime = intHourOfToday * 2 + intMinOfToday / 30;
-
-        switch(dayOfWeek.format(today).charAt(0)){
-            case '화': nowTime += 48; break;
-            case '수': nowTime += 96; break;
-            case '목': nowTime += 144; break;
-            case '금': nowTime += 192; break;
-            case '토': nowTime += 240; break;
-            default : break;
-        }
-
-        return nowTime;
-    }
 
 
     public Map<String, List<Map<String,String>>> placeSearchList(String searchKeyword,  String myLocation) {
@@ -771,5 +717,29 @@ public class NaviService {
         }
         retOverview.put("response",retList);
         return retOverview;
+    }
+
+    private int convertTimeToInt() {
+        Date today = new Date();
+
+        SimpleDateFormat dayOfWeek = new SimpleDateFormat("E");
+        SimpleDateFormat hourOfToday = new SimpleDateFormat("HH");
+        SimpleDateFormat minOfToday = new SimpleDateFormat("mm");
+
+        int intHourOfToday = Integer.parseInt(hourOfToday.format(today));
+        int intMinOfToday = Integer.parseInt(minOfToday.format(today));
+
+        int nowTime = intHourOfToday * 2 + intMinOfToday / 30;
+
+        switch(dayOfWeek.format(today).charAt(0)){
+            case '화': nowTime += 48; break;
+            case '수': nowTime += 96; break;
+            case '목': nowTime += 144; break;
+            case '금': nowTime += 192; break;
+            case '토': nowTime += 240; break;
+            default : break;
+        }
+
+        return nowTime;
     }
 }

@@ -3,8 +3,8 @@ package com.maru.inunavi.lecture.domain.entity;
 import com.maru.inunavi.user.domain.entity.User;
 import lombok.*;
 import javax.persistence.*;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Builder
 @AllArgsConstructor
@@ -67,5 +67,14 @@ public class Lecture {
 
     @ManyToMany(mappedBy = "lectures")
     private Set<User> users = new HashSet<>();
+
+    // ------------------------------------------------ //
+
+    public List<Integer> getStartTimeList(){
+        return classTime.equals("-") ? null :
+                Arrays.stream(classTime.split(","))
+                        .map(classTimeToken -> Integer.parseInt(classTimeToken.split("-")[0]))
+                        .collect(Collectors.toList());
+    }
 
 }
