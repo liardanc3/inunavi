@@ -36,7 +36,6 @@ public class NaviService {
     private final PathRepository pathRepository;
     private final PlaceRepository placeRepository;
 
-    // TODO - check nearnode
     /**
      * Update navi info
      */
@@ -81,8 +80,7 @@ public class NaviService {
                 if(nodeId > 1){
                     int nearNodeIdx = Integer.parseInt(nearNodeIdxToken) - 1;
 
-                    String nearNode = nearNodeList.get(nearNodeIdx);
-                    nearNode += nodeId + ",";
+                    nearNodeList.set(nearNodeIdx, nearNodeList.get(nearNodeIdx) + nodeId + ",");
                 }
             }
 

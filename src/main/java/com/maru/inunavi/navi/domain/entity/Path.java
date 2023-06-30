@@ -27,5 +27,4 @@ public class Path {
 
     @Column(length = 10000, nullable = false)
     private String route;
-
 }
