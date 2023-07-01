@@ -164,7 +164,6 @@ public class NaviService {
                 });
     }
 
-    // TODO - 시작이 location일경우 location -> 근처node 로 잇는 구간 추가필요
     /**
      * Find approximately the shortest path
      * @param srcId
@@ -272,13 +271,27 @@ public class NaviService {
 
         // ---- Set other info ---- //
         String query = routeInfo.getQuery();
-        String isArrived = distArray[dstIdx] < 15 ? "true" : "false";
         Double dist = distArray[dstIdx];
+
+        // ---- startLocation -> nearNode ---- //
+        if(routeInfo.getStartPlaceCode().equals("LOCATION")){
+            Double lat1 = Double.parseDouble(routeInfo.getStartLocation().split(",")[0]);
+            Double lng1 = Double.parseDouble(routeInfo.getStartLocation().split(",")[1]);
+
+            Node srcNode = nodeRepository.findById(srcId).get();
+
+            Double lat2 = Double.parseDouble(srcNode.getLat4326());
+            Double lng2 = Double.parseDouble(srcNode.getLng4326());
+
+            dist += distanceBetween(lat1, lng1, lat2, lng2);
+
+            route = routeInfo.getStartLocation() + "," + route;
+        }
 
         return pathRepository.save(
                 Path.builder()
                         .query(query)
-                        .isArrived(isArrived)
+                        .isArrived(dist < 15 ? "true" : "false")
                         .dist(dist)
                         .route(route)
                         .dstId(dstIdx)
