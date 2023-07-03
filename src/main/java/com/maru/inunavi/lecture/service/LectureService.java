@@ -18,6 +18,7 @@ import javax.annotation.PostConstruct;
 import java.io.*;
 import java.time.LocalDate;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -84,6 +85,15 @@ public class LectureService {
             String classTime = parseResult[0];
             String classRoom = parseResult[1];
 
+            String placeCode = classRoom.equals("-") ? "-" :
+                    Arrays.stream(classRoomRaw.split(","))
+                            .sequential()
+                            .reduce((classRoomToken, result) ->
+                                    result + "," + classRoomToken.split("-")[1].split(" ")[0]
+                            )
+                            .get();
+
+
             lectureRepository.save(
                     Lecture.builder()
                             .department(department)
@@ -98,6 +108,7 @@ public class LectureService {
                             .classTime(classTime)
                             .how("-")
                             .point(point)
+                            .placeCode(placeCode)
                             .build()
             );
         }

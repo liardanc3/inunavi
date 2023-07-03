@@ -65,6 +65,10 @@ public class Lecture {
     @Column(length = 45)
     private String point;
 
+    // placeCode
+    @Column(length = 45)
+    private String placeCode;
+
     @ManyToMany(mappedBy = "lectures")
     private Set<User> users = new HashSet<>();
 
