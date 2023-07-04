@@ -80,14 +80,4 @@ public class Lecture {
                         .map(classTimeToken -> Integer.parseInt(classTimeToken.split("-")[0]))
                         .collect(Collectors.toList());
     }
-
-    public List<String> getPlaceCodeList(){
-        return Arrays.stream(classRoomRaw.split(","))
-                .sequential()
-                .map(classRoom ->
-                        classRoom.split("-")[1].split(" ")[0]
-                )
-                .collect(Collectors.toList());
-    }
-
 }

@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface UserRepository extends JpaRepository<User, Long>, UserQueryRepository {
 
@@ -16,5 +17,7 @@ public interface UserRepository extends JpaRepository<User, Long>, UserQueryRepo
     @Query("select l from User u join fetch Lecture l where u.email = :email")
     List<Lecture> findLecturesByEmail(String email);
 
-
+    @Query("select l from User u join fetch Lecture l " +
+            "where u.email = :email and l.classRoom <> '-' and l.placeCode not like '%ZZ%' and l.placeCode not like '%NC%'")
+    Optional<List<Lecture>> findOfflineLecturesByEmail(String email);
 }

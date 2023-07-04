@@ -19,6 +19,8 @@ import java.io.*;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -85,14 +87,18 @@ public class LectureService {
             String classTime = parseResult[0];
             String classRoom = parseResult[1];
 
-            String placeCode = classRoom.equals("-") ? "-" :
+            List<String> detailClassRoomList = classRoom.equals("-") ? List.of("-") :
                     Arrays.stream(classRoomRaw.split(","))
                             .sequential()
-                            .reduce((classRoomToken, result) ->
-                                    result + "," + classRoomToken.split("-")[1].split(" ")[0]
-                            )
-                            .get();
+                            .map(classRoomToken -> classRoomToken.split("-")[1].split(" ")[0])
+                            .collect(Collectors.toList());
 
+            String[] classRoomList = classRoom.split(",");
+
+            String placeCode = IntStream.range(0, detailClassRoomList.size())
+                    .mapToObj(i -> classRoomList[i].split(detailClassRoomList.get(i))[0])
+                    .reduce((result, code) -> result + "," + code)
+                    .get();
 
             lectureRepository.save(
                     Lecture.builder()

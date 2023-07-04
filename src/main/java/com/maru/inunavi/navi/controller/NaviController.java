@@ -3,7 +3,6 @@ package com.maru.inunavi.navi.controller;
 import com.maru.inunavi.aspect.annotation.Log;
 import com.maru.inunavi.aspect.annotation.ParamReplace;
 import com.maru.inunavi.navi.domain.dto.*;
-import com.maru.inunavi.navi.domain.entity.Path;
 import com.maru.inunavi.navi.service.NaviService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -58,9 +57,10 @@ public class NaviController {
         return Map.of("response", naviService.searchPlace(placeSearchFilter));
     }
 
+    @Log
     @PostMapping("/getOverviewRoot")
-    public Map<String, List<Map<String, String>>> getOverviewRoot(@RequestParam(value = "email") String email){
-        return naviService.getOverviewRoot(email);
+    public Map<String, List<RouteOverviewDto>> getOverview(String email){
+        return Map.of("response", naviService.getOverview(email));
     }
 
     @PostMapping("/getAnalysisResult")

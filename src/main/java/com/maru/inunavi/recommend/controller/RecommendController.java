@@ -1,5 +1,6 @@
 package com.maru.inunavi.recommend.controller;
 
+import com.maru.inunavi.aspect.annotation.Log;
 import com.maru.inunavi.recommend.domain.entity.Recommend;
 import com.maru.inunavi.recommend.service.RecommendService;
 import lombok.RequiredArgsConstructor;
@@ -19,20 +20,16 @@ public class RecommendController {
 
     private final RecommendService recommendService;
 
+    @Log
     @PostMapping("/getRecommendLecture")
-    @ResponseBody
-    public Map<String, List<Map<String, String>>> getRecommendLecture(@RequestParam("email") String email){
+    public Map<String, List<Map<String, String>>> getRecommendLecture(String email){
         log.info("getRecommendLecture("+email+")");
         return recommendService.getRecommendLecture(email);
     }
 
+    @Log
     @GetMapping("/admin/updateRecommend")
-    @ResponseBody
     public void updateRecommend(){
-        HttpServletRequest req = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();
-        String ip = req.getHeader("X-Forwarded-For");
-        if(ip==null) ip=req.getRemoteAddr();
-        log.info("updateRecommend("+ip+")");
         recommendService.resetRecommends();
     }
 }
