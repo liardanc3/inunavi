@@ -57,14 +57,21 @@ public class NaviController {
         return Map.of("response", naviService.searchPlace(placeSearchFilter));
     }
 
+    /**
+     * Provide week overview
+     */
     @Log
     @PostMapping("/getOverviewRoot")
     public Map<String, List<RouteOverviewDto>> getOverview(String email){
         return Map.of("response", naviService.getOverview(email));
     }
 
+    /**
+     * Provide week analysis result
+     */
+    @Log
     @PostMapping("/getAnalysisResult")
-    public Map<String, String> getAnalysisResult(@RequestParam("email") String email){
+    public AnalysisDto getAnalysisResult(String email){
         return naviService.getAnalysisResult(email);
     }
 }

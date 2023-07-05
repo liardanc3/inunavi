@@ -438,7 +438,9 @@ public class NaviService {
 
                                 String startTime = startInfo[0];
                                 String endTime = endInfo[0];
+
                                 String endPlaceCode = endInfo[1];
+
                                 String startLectureName = startInfo[2];
                                 String endLectureName = endInfo[2];
 
@@ -457,15 +459,9 @@ public class NaviService {
                                 }
 
                                 String formattedTime = timeFormatting(Integer.parseInt(endTime.split("-")[1]));
-                                String totalTime = null;
-                                String distance = null;
-                                String directionString = null;
-
-                                if (shortestPath != null) {
-                                    totalTime = String.valueOf(((shortestPath.getDist() * 1.65) / 100));
-                                    distance = shortestPath.getDist().toString();
-                                    directionString = shortestPath.getRoute();
-                                }
+                                String totalTime = String.valueOf(((shortestPath.getDist() * 1.65) / 100));
+                                String distance = shortestPath.getDist().toString();
+                                String directionString = shortestPath.getRoute();
 
                                 routeOverviewDtoList.add(
                                         RouteOverviewDto.builder()
@@ -485,63 +481,60 @@ public class NaviService {
     }
 
 
+    /**
+     * Returns the analysis result based on a weekly lecture schedule.
+     * @param email
+     * @return AnalysisDto
+     */
+    public AnalysisDto getAnalysisResult(String email) {
+        return userRepository.findOfflineLecturesByEmail(email)
+                .map(lectureList -> {
 
-    public Map<String, String> getAnalysisResult(String email) {
-        Map<String, List<Map<String, String>>> userOverviewRoot = getOverviewRoot(email);
-        double totalDistance = 0.0;
-        for(int i=0; i<userOverviewRoot.get("response").size(); i++){
-            String distance = "";
-            try{
-                distance = userOverviewRoot.get("response").get(i).get("distance");
-                totalDistance += Double.parseDouble(distance);
-            }catch (Exception e){
-                continue;
-            }
-        }
-        int tightnessPercentage = 0;
-        int distancePercentage = (int)totalDistance/50;
-        int[] timeArr = new int[336];
-        List<UserLectureTable> userLectureTableList = userLectureTableRepository.findAllByEmail(email);
-        Map<String, String> retMap = new HashMap<>();
-        if(userLectureTableList.isEmpty()){
-            retMap.put("success","false");
-            retMap.put("distancePercentage","0");
-            retMap.put("tightnessPercentage","0");
-            retMap.put("totalDistance","0");
-            return retMap;
-        }
-        List<Lecture> lectureList = new ArrayList<>();
-        for(int i = 0; i< userLectureTableList.size(); i++){
-            int lectureIdx = userLectureTableList.get(i).getLectureIdx();
-            Lecture lecture = lectureRepository.getById(lectureIdx);
-            String classTime = lecture.getClassTime();
-            if(classTime.equals("-") || lecture.getClassRoom()==null) continue;
+                    boolean[] isClassTime = new boolean[336];
 
-            // 가상건물 제외
-            String placeCode = lecture.getClassRoom().substring(0,3);
-            if(!placeCode.equals("SY1") && !placeCode.equals("SY2") && !placeCode.equals("SY3"))
-                placeCode = placeCode.substring(0,2);
-            if(placeCode.equals("ZZ")) continue;
+                    lectureList.stream()
+                            .forEach(lecture -> {
+                                String[] classTimeList = lecture.getClassTime().split(",");
 
-            StringTokenizer st = new StringTokenizer(classTime);
-            while(st.hasMoreTokens()) {
-                String start2end = st.nextToken(",");
-                String[] timeTmp = start2end.split("-");
-                int start = Integer.parseInt(timeTmp[0]);
-                int end = Integer.parseInt(timeTmp[1]);
-                for (int j = start; j < end; j++)
-                    timeArr[j] = 1;
-            }
-        }
-        for(int i=1; i<335; i++){
-            if(timeArr[i-1]==1 && timeArr[i+1]==1 && timeArr[i]==0)
-                tightnessPercentage+=15;
-        }
-        retMap.put("success","true");
-        retMap.put("distancePercentage",Integer.toString(distancePercentage));
-        retMap.put("tightnessPercentage",Integer.toString(tightnessPercentage));
-        retMap.put("totalDistance",Double.toString(totalDistance));
-        return retMap;
+                                for (String classTime : classTimeList) {
+                                    int start = Integer.parseInt(classTime.split("-")[0]);
+                                    int end = Integer.parseInt(classTime.split("-")[1]);
+
+                                    for(int i = start; i <= end; i++){
+                                        isClassTime[i] = true;
+                                    }
+                                }
+                            });
+
+                    List<RouteOverviewDto> overviewList = getOverview(email);
+
+                    double totalDist = overviewList.stream()
+                            .mapToDouble(overview -> Double.parseDouble(overview.getDistance()))
+                            .sum();
+
+                    String distancePercentage = String.valueOf((int) totalDist / 50);
+                    String tightnessPercentage = String.valueOf(
+                            IntStream.range(0, isClassTime.length - 1)
+                                    .map(i -> (isClassTime[i-1] && !isClassTime[i] && isClassTime[i+1]) ? 15 : 0)
+                                    .sum()
+                    );
+                    String totalDistance = String.valueOf(totalDist);
+
+                    return AnalysisDto.builder()
+                            .success("true")
+                            .distancePercentage(distancePercentage)
+                            .tightnessPercentage(tightnessPercentage)
+                            .totalDistance(totalDistance)
+                            .build();
+                })
+                .orElseGet(() ->
+                        AnalysisDto.builder()
+                                .success("false")
+                                .distancePercentage("0")
+                                .tightnessPercentage("0")
+                                .totalDistance("0")
+                                .build()
+                );
     }
 
     private int convertCurrentTimeToInt() {

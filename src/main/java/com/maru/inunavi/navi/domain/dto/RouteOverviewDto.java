@@ -14,13 +14,10 @@ public class RouteOverviewDto {
     @JsonProperty(namespace = "endLectureTime")
     private String formattedTime;
 
-    // Path.getTime
     private String totalTime;
 
-    // Path.distance
     private String distance;
 
-    // Path.getRoute
     private String directionString;
 
 }
