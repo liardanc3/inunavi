@@ -1,5 +1,6 @@
 package com.maru.inunavi.recommend.domain.entity;
 
+import com.maru.inunavi.lecture.domain.entity.Lecture;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -21,10 +22,11 @@ public class Recommend {
     @Column(name = "recommend_id")
     private Long id;
 
+    @OneToOne(mappedBy = "recommend", fetch = FetchType.LAZY)
+    private Lecture lecture;
+
     @Lob
     @Column(length = 50000, nullable = false)
     private String similarity;
 
-    public Recommend(String similarityString) {
-    }
 }

@@ -1,6 +1,7 @@
 package com.maru.inunavi.recommend.controller;
 
 import com.maru.inunavi.aspect.annotation.Log;
+import com.maru.inunavi.recommend.domain.dto.RecommendDto;
 import com.maru.inunavi.recommend.domain.entity.Recommend;
 import com.maru.inunavi.recommend.service.RecommendService;
 import lombok.RequiredArgsConstructor;
@@ -14,7 +15,6 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@Slf4j
 @RequiredArgsConstructor
 public class RecommendController {
 
@@ -22,9 +22,8 @@ public class RecommendController {
 
     @Log
     @PostMapping("/getRecommendLecture")
-    public Map<String, List<Map<String, String>>> getRecommendLecture(String email){
-        log.info("getRecommendLecture("+email+")");
-        return recommendService.getRecommendLecture(email);
+    public Map<String, List<RecommendDto>> getRecommendLecture(String email){
+        return Map.of("response", recommendService.getRecommendLecture(email));
     }
 
     @Log

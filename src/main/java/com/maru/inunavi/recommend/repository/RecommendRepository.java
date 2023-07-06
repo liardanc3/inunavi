@@ -8,14 +8,13 @@ import org.springframework.stereotype.Repository;
 
 import javax.transaction.Transactional;
 
-@Repository
-public interface RecommendRepository extends JpaRepository<Recommend, Integer> {
-
-    @Modifying(clearAutomatically = true)
-    @Query(value = "alter TABLE recommend AUTO_INCREMENT = 1",nativeQuery = true)
-    void deleteINCREMENT();
+public interface RecommendRepository extends JpaRepository<Recommend, Integer>, RecommendQueryRepository {
 
     @Modifying
     @Query("update Recommend r set r.similarity = :similarityString where r.id =:id")
     void updateSimilarityString(int id, String similarityString);
+
+    @Modifying(clearAutomatically = true)
+    @Query(value = "alter TABLE recommend AUTO_INCREMENT = 1",nativeQuery = true)
+    void deleteINCREMENT();
 }
