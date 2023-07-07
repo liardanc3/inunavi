@@ -12,10 +12,10 @@ import java.util.Optional;
 
 public interface UserRepository extends JpaRepository<User, Long>, UserQueryRepository {
 
-    User findByEmail(@Param("email") String email);
+    Optional<User> findByEmail(@Param("email") String email);
 
     @Query("select l from User u join fetch Lecture l where u.email = :email")
-    List<Lecture> findLecturesByEmail(String email);
+    Optional<List<Lecture>> findLecturesByEmail(String email);
 
     @Query("select l from User u join fetch Lecture l " +
             "where u.email = :email and l.classRoom <> '-' and l.placeCode not like '%ZZ%' and l.placeCode not like '%NC%'")

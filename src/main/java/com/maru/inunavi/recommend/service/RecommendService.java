@@ -1,20 +1,17 @@
 package com.maru.inunavi.recommend.service;
 
+import com.maru.inunavi.lecture.domain.dto.FormattedTimeDto;
 import com.maru.inunavi.lecture.domain.entity.Lecture;
 import com.maru.inunavi.lecture.repository.LectureRepository;
-import com.maru.inunavi.recommend.domain.dto.RecommendDto;
 import com.maru.inunavi.recommend.repository.RecommendRepository;
 import com.maru.inunavi.recommend.domain.entity.Recommend;
 import com.maru.inunavi.user.domain.entity.User;
-import com.maru.inunavi.user.domain.entity.UserLectureTable;
 import com.maru.inunavi.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
-import java.util.function.Supplier;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 @Service
@@ -53,9 +50,9 @@ public class RecommendService {
     /**
      * Retrieves recommend lecture
      * @param email
-     * @return A List of RecommendDto
+     * @return A List of FormattedTimeDto
      */
-    public List<RecommendDto> getRecommendLecture(String email) {
+    public List<FormattedTimeDto> getRecommendLecture(String email) {
         return userRepository.findLecturesByEmail(email)
                 .map(lectureList -> {
 
@@ -74,7 +71,7 @@ public class RecommendService {
                         }
                     }
 
-                    List<RecommendDto> recommendDtoList = new ArrayList<>();
+                    List<FormattedTimeDto> FormattedTimeDtoList = new ArrayList<>();
 
                     int count = (int) lectureRepository.count();
 
@@ -120,9 +117,9 @@ public class RecommendService {
                         }
                     }
 
-                    User user = userRepository.findByEmail(email);
+                    User user = userRepository.findByEmail(email).get();
 
-                    while(!priorityQueue.isEmpty() && recommendDtoList.size() < 4){
+                    while(!priorityQueue.isEmpty() && FormattedTimeDtoList.size() < 4){
                         Pair pair = priorityQueue.poll();
 
                         Lecture lecture = lectureRepository.findById(pair.id).get();
@@ -141,11 +138,11 @@ public class RecommendService {
                                         !lecture.getDepartment().equals("교양") && !lecture.getDepartment().equals("일선");
 
                         if(!isAttendingLectureId && !isAttendingTime && !isMatchWithMajor){
-                            recommendDtoList.add(new RecommendDto(lecture));
+                            FormattedTimeDtoList.add(new FormattedTimeDto(lecture));
                         }
                     }
 
-                    return recommendDtoList;
+                    return FormattedTimeDtoList;
                 })
                 .orElseGet(ArrayList::new);
     }

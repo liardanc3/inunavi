@@ -1,5 +1,6 @@
 package com.maru.inunavi.lecture.domain.entity;
 
+import com.maru.inunavi.recommend.domain.entity.Recommend;
 import com.maru.inunavi.user.domain.entity.User;
 import lombok.*;
 import javax.persistence.*;
@@ -17,7 +18,7 @@ public class Lecture {
     @Id
     @GeneratedValue
     @Column(name = "lecture_id")
-    private Long id;
+    private Integer id;
 
     // 학과(부)
     @Column(length = 45, nullable = false)
@@ -71,6 +72,10 @@ public class Lecture {
 
     @ManyToMany(mappedBy = "lectures")
     private Set<User> users = new HashSet<>();
+    
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "recommend_id")
+    private Recommend recommend;
 
     // ------------------------------------------------ //
 
@@ -79,5 +84,44 @@ public class Lecture {
                 Arrays.stream(classTime.split(","))
                         .map(classTimeToken -> Integer.parseInt(classTimeToken.split("-")[0]))
                         .collect(Collectors.toList());
+    }
+
+    public String getFormattedTime(){
+        if (this.classTime.equals("-")) {
+            return "-";
+        }
+        else {
+            StringBuilder classTime = new StringBuilder();
+
+            StringTokenizer classTimeToken = new StringTokenizer(this.classTime.replaceAll(",", "-"));
+            while (classTimeToken.hasMoreTokens()) {
+                int start = Integer.parseInt(classTimeToken.nextToken("-"));
+                int end = Integer.parseInt(classTimeToken.nextToken("-"));
+
+                int dayOfWeek = start / 48;
+                int startHour = (start % 48) / 2;
+                int startHalf = (start % 2);
+                int endHour = (end % 48) / 2 + 1;
+                int endHalf = ~(end % 2);
+
+                switch (dayOfWeek) {
+                    case 0: classTime.append("월 "); break;
+                    case 1: classTime.append("화 "); break;
+                    case 2: classTime.append("수 "); break;
+                    case 3: classTime.append("목 "); break;
+                    case 4: classTime.append("금 "); break;
+                    case 5: classTime.append("토 "); break;
+                    case 6: classTime.append("일 "); break;
+                }
+
+                classTime.append(startHour);
+                classTime.append(":");
+                classTime.append(startHalf == 1 ? "30 - " : "00 - ");
+                classTime.append(endHour);
+                classTime.append(":");
+                classTime.append(endHalf == 1 ? "30, " : "00, ");
+            }
+            return classTime.substring(0, classTime.length() - 2);
+        }
     }
 }

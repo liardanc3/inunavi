@@ -9,7 +9,6 @@ import com.maru.inunavi.navi.domain.entity.Place;
 import com.maru.inunavi.navi.repository.node.NodeRepository;
 import com.maru.inunavi.navi.repository.path.PathRepository;
 import com.maru.inunavi.navi.repository.place.PlaceRepository;
-import com.maru.inunavi.user.domain.entity.UserLectureTable;
 import com.maru.inunavi.user.repository.UserRepository;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
