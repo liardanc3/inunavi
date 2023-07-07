@@ -1,6 +1,7 @@
 package com.maru.inunavi.user.controller;
 
 import com.maru.inunavi.aspect.annotation.Log;
+import com.maru.inunavi.aspect.annotation.SnakeToCamel;
 import com.maru.inunavi.lecture.domain.dto.FormattedTimeDto;
 import com.maru.inunavi.user.domain.dto.LoginResultDto;
 import com.maru.inunavi.user.domain.dto.UpdateDto;
@@ -20,16 +21,6 @@ import java.util.Map;
 public class UserController {
 
     private final UserService userService;
-
-    /**
-     * [ADMIN] API to retrieve a list of all members. It is used to fetch the list of
-     * @return
-     */
-    @Log
-    @GetMapping("/admin/memberList")
-    public List<User> memberList(){
-        return userService.memberList();
-    }
 
     /**
      * API to register a new user. It handles user registration by taking email, password, and major as input.
@@ -77,53 +68,51 @@ public class UserController {
         return userService.verify(email);
     }
 
+    /**
+     * API to update password
+     */
     @Log
     @PostMapping("/user/update")
-    public UpdateDto update(String email, String newPassword) {
+    public UpdateDto updatePassword(String email, String newPassword) {
         return userService.updatePassword(email, newPassword);
     }
 
+    /**
+     * API to update major
+     */
+    @Log
+    @PostMapping("/user/update2")
+    public UpdateDto updateMajor(String email, String newMajor) {
+        return userService.updateMajor(email, newMajor);
+    }
 
+    /**
+     * API to delete user
+     */
+    @Log
+    @PostMapping("/user/quit")
+    public UpdateDto deleteUser(String email, String password) {
+        return userService.deleteUser(email, password);
+    }
+
+    /**
+     * API to insert class
+     */
+    @Log
+    @SnakeToCamel
     @PostMapping("/user/insert/class")
-    public Map<String, String> insertClass(HttpServletRequest request) { // ?id=&class_id=
-        return userService.AddLecture(email, classId);
+    public UpdateDto insertClass(String email, String classId) {
+        return userService.insertLecture(email, classId);
     }
 
-    @RequestMapping(value = "/user/delete/class", method = RequestMethod.POST)
-    public Map<String, String> deleteClass(HttpServletRequest request) { // ?id=&class_id=
-        String email = request.getParameter("email");
-        String classId = request.getParameter("class_id");
-        log.info("deleteClass("+email+" / "+classId+")");
+    /**
+     * API to delete class
+     */
+    @Log
+    @SnakeToCamel
+    @PostMapping("/user/delete/class")
+    public UpdateDto deleteClass(String email, String classId) {
         return userService.deleteLecture(email, classId);
-    }
-
-
-
-
-
-
-
-    @RequestMapping(value = "/user/update2", method = RequestMethod.POST)
-    @ResponseBody
-    public Map<String, String> update2(HttpServletRequest request) {
-        String email = request.getParameter("email");
-        String major = request.getParameter("newMajor");
-        log.info("updateMajor("+email+" / "+major+")");
-        return userService.updateMajor(email, major);
-    }
-
-    @RequestMapping(value = "/user/quit", method = RequestMethod.POST)
-    @ResponseBody
-    public Map<String, String> delete(HttpServletRequest request) {
-        String email = request.getParameter("email");
-        String password = request.getParameter("password");
-        log.info("delete("+email+")");
-        return userService.delete(email, password);
-    }
-
-    @GetMapping("/user/session")
-    public String session(HttpServletRequest request) {
-        return (String) request.getSession().getAttribute("id");
     }
 
 }

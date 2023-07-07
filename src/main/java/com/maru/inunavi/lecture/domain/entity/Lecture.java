@@ -79,6 +79,11 @@ public class Lecture {
 
     // ------------------------------------------------ //
 
+    public void addUser(User user){
+        users.add(user);
+        user.getLectures().add(this);
+    }
+
     public List<Integer> getStartTimeList(){
         return classTime.equals("-") ? null :
                 Arrays.stream(classTime.split(","))

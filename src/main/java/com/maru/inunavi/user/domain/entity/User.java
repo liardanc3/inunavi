@@ -43,8 +43,27 @@ public class User {
     )
     private Set<Lecture> lectures = new HashSet<>();
 
+    // --------------------------------------------------- //
+
+    public void addLecture(Lecture lecture){
+        lectures.add(lecture);
+        lecture.getUsers().add(this);
+    }
+
+    public void removeLecture(Lecture lecture){
+        lectures.remove(lecture);
+        lecture.getUsers().remove(this);
+    }
+
     public void removeLectures(){
         lectures.clear();
     }
 
+    public void updatePassword(String password){
+        this.password = password;
+    }
+
+    public void updateMajor(String major) {
+        this.major = major;
+    }
 }

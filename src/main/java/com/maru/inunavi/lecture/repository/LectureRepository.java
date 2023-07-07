@@ -6,10 +6,11 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface LectureRepository extends JpaRepository<Lecture, Integer>, LectureQueryRepository {
 
-    Lecture findByNumber(String number);
+    Optional<Lecture> findByNumber(String number);
 
     @Query("select distinct l.lectureName from Lecture l where l.category = :category and l.grade != :grade and l.department = :department")
     List<String> findDistinctBasicGenerals(String category, String grade, String department);

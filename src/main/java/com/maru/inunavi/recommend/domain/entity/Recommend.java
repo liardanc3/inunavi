@@ -9,6 +9,7 @@ import lombok.extern.jbosslog.JBossLog;
 
 import javax.persistence.*;
 import java.sql.Blob;
+import java.util.Arrays;
 
 @Builder
 @Entity
@@ -28,5 +29,15 @@ public class Recommend {
     @Lob
     @Column(length = 50000, nullable = false)
     private String similarity;
+
+
+    // -------------------------------------------- //
+
+    public void updateSimilarityPoint(int lectureId, int value) {
+        String[] similarities = this.similarity.split(",");
+        similarities[lectureId - 1] =
+                String.valueOf(Integer.parseInt(similarities[lectureId - 1]) + value);
+        this.similarity = String.join(",", similarities);
+    }
 
 }
