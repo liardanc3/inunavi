@@ -1,11 +1,10 @@
 package com.maru.inunavi.config;
 
 import com.maru.inunavi.aspect.filter.SnakeToCamelFilter;
-import com.maru.inunavi.aspect.filter.ParamReplaceFilter;
+import com.maru.inunavi.aspect.filter.ReplaceParameter;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import javax.servlet.Filter;
@@ -23,9 +22,9 @@ public class WebMvcConfig implements WebMvcConfigurer {
     }
 
     @Bean
-    public FilterRegistrationBean addParamReplaceFilter(){
+    public FilterRegistrationBean addReplaceParameterFilter(){
         FilterRegistrationBean<Filter> filterFilterRegistrationBean = new FilterRegistrationBean<>();
-        filterFilterRegistrationBean.setFilter(new ParamReplaceFilter());
+        filterFilterRegistrationBean.setFilter(new ReplaceParameter());
         filterFilterRegistrationBean.addUrlPatterns("/*");
 
         return filterFilterRegistrationBean;

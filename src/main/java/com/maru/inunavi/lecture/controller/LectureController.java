@@ -1,7 +1,7 @@
 package com.maru.inunavi.lecture.controller;
 
 import com.maru.inunavi.aspect.annotation.Log;
-import com.maru.inunavi.aspect.annotation.ParamReplace;
+import com.maru.inunavi.aspect.annotation.ReplaceParameter;
 import com.maru.inunavi.aspect.annotation.SnakeToCamel;
 import com.maru.inunavi.lecture.domain.dto.LectureSearchFilter;
 import com.maru.inunavi.lecture.domain.dto.SelectLectureDto;
@@ -25,8 +25,8 @@ public class LectureController {
     private final RecommendService recommendService;
 
     /**
-     * [ADMIN] Find all lecture
-     * @return {@code List<Lecture>}
+     * [ADMIN] API to find all Lecture
+     * @return A List of Lecture
      */
     @Log
     @GetMapping("/lecture")
@@ -35,7 +35,7 @@ public class LectureController {
     }
 
     /**
-     * [ADMIN] Update lecture table and reset recommend table<b>
+     * [ADMIN] API to update lecture table and reset recommend table
      */
     @Log
     @GetMapping("/admin/newSemester")
@@ -46,7 +46,7 @@ public class LectureController {
     }
 
     /**
-     * Provide semester info
+     * API to Provide semester info
      */
     @Log
     @GetMapping("/getTimeTableInfo")
@@ -55,11 +55,11 @@ public class LectureController {
     }
 
     /**
-     * Search lectures with condition
+     * API to search lectures with condition
      */
     @Log
     @SnakeToCamel
-    @ParamReplace(before = "\"", after = "")
+    @ReplaceParameter(before = "\"", after = "")
     @GetMapping("/selectLecture")
     public Map<String, List<SelectLectureDto>> selectLecture(@ModelAttribute LectureSearchFilter lectureSearchFilter){
         return Map.of("response", lectureService.selectLecture(lectureSearchFilter));

@@ -32,10 +32,10 @@ public class UserService {
 
     /**
      * Registers a user as a member.
-     * @param email    User's email
-     * @param password User's password
-     * @param major    User's major
-     * @return UpdateDto containing the result of the sign-up process
+     * @param email
+     * @param password
+     * @param major
+     * @return UpdateDto
      */
     @Transactional
     public UpdateDto signUp(String email, String password, String major) {
@@ -65,8 +65,8 @@ public class UserService {
 
     /**
      * Retrieves the user's lecture list.
-     * @param email User's email
-     * @return A list of FormattedTimeDto representing the user's lecture list
+     * @param email
+     * @return A list of FormattedTimeDto
      */
     public List<FormattedTimeDto> userLectureList(String email) {
         return userRepository.findLecturesByEmail(email)
@@ -80,8 +80,8 @@ public class UserService {
 
     /**
      * Checks for duplicate email.
-     * @param email User's email to check
-     * @return UpdateDto containing the result of the duplicate check
+     * @param email
+     * @return UpdateDto
      */
     public UpdateDto idCheck(String email) {
         return userRepository.findByEmail(email)
@@ -102,10 +102,9 @@ public class UserService {
 
     /**
      * Performs user login.
-     *
-     * @param email    User's email
-     * @param password User's password
-     * @return LoginResultDto containing the result of the login process
+     * @param email
+     * @param password
+     * @return LoginResultDto
      */
     public LoginResultDto login(String email, String password) {
         return userRepository.findByEmail(email)
@@ -135,10 +134,9 @@ public class UserService {
     }
 
     /**
-     * Sends an email to verify the user's email address.
-     *
-     * @param email User's email address
-     * @return VerifyDto containing the result of the verification process
+     * Sends an email to verify the user's email address to update password.
+     * @param email
+     * @return VerifyDto
      */
     public VerifyDto verify(String email) {
         try {
@@ -166,10 +164,9 @@ public class UserService {
 
     /**
      * Updates the user's password.
-     *
-     * @param email    User's email
-     * @param password New password to update
-     * @return UpdateDto containing the result ofthe password update process
+     * @param email
+     * @param password
+     * @return UpdateDto
      */
     @Transactional
     public UpdateDto updatePassword(String email, String password) {
@@ -192,9 +189,9 @@ public class UserService {
 
     /**
      * Updates the user's major.
-     * @param email User's email
-     * @param major New major to update
-     * @return UpdateDto containing the result of the major update process
+     * @param email
+     * @param major
+     * @return UpdateDto
      */
     @Transactional
     public UpdateDto updateMajor(String email, String major) {
@@ -217,9 +214,9 @@ public class UserService {
 
     /**
      * Deletes the user's account.
-     * @param email    User's email
-     * @param password User's password
-     * @return UpdateDto containing the result of the account deletion process
+     * @param email
+     * @param password
+     * @return UpdateDto
      */
     @Transactional
     public UpdateDto deleteUser(String email, String password) {
@@ -250,9 +247,9 @@ public class UserService {
 
     /**
      * Inserts a lecture for the user.
-     * @param email         User's email
-     * @param lectureNumber Lecture number to insert
-     * @return UpdateDto containing the result of the lecture insertion process
+     * @param email
+     * @param lectureNumber
+     * @return UpdateDto
      */
     @Transactional
     public UpdateDto insertLecture(String email, String lectureNumber) {
@@ -283,9 +280,9 @@ public class UserService {
 
     /**
      * Deletes a lecture from the user's lecture list.
-     * @param email         User's email
-     * @param lectureNumber Lecture number to delete
-     * @return UpdateDto containing the result of the lecture deletion process
+     * @param email
+     * @param lectureNumber
+     * @return UpdateDto
      */
     @Transactional
     public UpdateDto deleteLecture(String email, String lectureNumber) {

@@ -15,15 +15,21 @@ public class RecommendController {
 
     private final RecommendService recommendService;
 
+    /**
+     * API to get recommended lectures for a user.
+     */
     @Log
     @PostMapping("/getRecommendLecture")
-    public Map<String, List<FormattedTimeDto>> getRecommendLecture(String email){
+    public Map<String, List<FormattedTimeDto>> getRecommendLecture(String email) {
         return Map.of("response", recommendService.getRecommendLecture(email));
     }
 
+    /**
+     * API to update the recommendations.
+     */
     @Log
     @GetMapping("/admin/updateRecommend")
-    public void updateRecommend(){
+    public void updateRecommend() {
         recommendService.resetRecommends();
     }
 }

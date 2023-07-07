@@ -33,7 +33,6 @@ public class UserController {
 
     /**
      * API to retrieve the user's class information.
-     * <p>It fetches the list of user's classes based on the provided email.
      */
     @Log
     @PostMapping("/user/select/class")

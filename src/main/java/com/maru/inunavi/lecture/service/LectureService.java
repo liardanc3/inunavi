@@ -40,15 +40,15 @@ public class LectureService {
 
     /**
      * Find all lecture
-     * @return {@code List<Lecture>}
+     * @return A list of Lecture
      */
     public List<Lecture> findLectures(){
         return lectureRepository.findAll();
     }
 
     /**
-     * Update lecture table<b>
-     * @return {@code List<Lecture>}
+     * Update lecture table
+     * @return A list of Lecture
      */
     @Transactional
     @SneakyThrows
@@ -125,7 +125,7 @@ public class LectureService {
     /**
      * Parse raw time text<b>
      * @param classTimeRaw
-     * @return {@code String[]{classTime, classRoom}}
+     * @return An array of String
      */
     public String[] parseTime(String classTimeRaw){
         StringBuilder classTime = new StringBuilder();
@@ -229,7 +229,7 @@ public class LectureService {
 
     /**
      * Provide semester info
-     * @return {@code TimeTableInfo}
+     * @return TimeTableInfo
      */
     public TimeTableInfoDto getTimeTableInfo(){
 
@@ -270,7 +270,7 @@ public class LectureService {
     /**
      * Provide filtered lecture list
      * @param lectureSearchFilter
-     * @return {@code List<SelectLectureDto>}
+     * @return A list of SelectLectureDto
      */
     public List<SelectLectureDto> selectLecture(LectureSearchFilter lectureSearchFilter) {
         return lectureRepository.findBySearchFilter(lectureSearchFilter);

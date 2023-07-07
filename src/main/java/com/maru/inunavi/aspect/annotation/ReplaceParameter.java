@@ -7,7 +7,7 @@ import java.lang.annotation.*;
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
-public @interface ParamReplace {
+public @interface ReplaceParameter {
 
     String before() default "";
     String after() default "";

@@ -164,7 +164,7 @@ public class NaviService {
     }
 
     /**
-     * Find approximately the shortest path
+     * Performs A* algorithm with Manhattan heuristic to find approximately the shortest path.
      * @param srcId
      * @param dstIdList
      * @param routeInfo
