@@ -223,6 +223,12 @@ public class UserService {
         return userRepository.findByEmail(email)
                 .map(user -> {
                     if (new BCryptPasswordEncoder().matches(password, user.getPassword())) {
+
+                        userRepository.findLecturesByEmail(email)
+                                .ifPresent(lectures ->
+                                        lectures.forEach(lecture -> deleteLecture(email, lecture.getNumber()))
+                                );
+
                         user.removeLectures();
                         userRepository.delete(user);
 
