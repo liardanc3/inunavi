@@ -1,6 +1,7 @@
+
 <div align=center><span style='center'><h3> 2022년 인천대학교 졸업작품 발표회에 출품된 작품입니다.</h3></span></div><br>
 
-
+<div align=center><img src="https://img.shields.io/badge/IntelliJ-000000?style=flat&logo=IntelliJ IDEA&logoColor=white"/> <img src="https://img.shields.io/badge/Spring-6DB33F?style=flat&logo=Spring Boot&logoColor=white"/> <img src="https://img.shields.io/badge/Spring Boot-6DB33F?style=flat&logo=Spring Boot&logoColor=white"/> <img src="https://img.shields.io/badge/Spring Security-6DB33F?style=flat&logo=Spring Security&logoColor=white"> <img src="https://img.shields.io/badge/Spring Data JPA-6DB33F?style=flat&logo=Databricks&logoColor=white"> <img src="https://img.shields.io/badge/Java-6DB33F?style=flat&logo=JAVA&logoColor=white"> <img src="https://img.shields.io/badge/MySQL-4479A1?style=flat&logo=MySQL&logoColor=white"></div>
 
 <details>
 <summary> APP 소개 </summary>
@@ -21,57 +22,6 @@
 
 </details>
 
-
-<br>
-<details>
-<summary> APP 구성 </summary>
-
-<div align = center>
-
-### Stack
-
-<img src="https://img.shields.io/badge/IntelliJ-000000?style=flat&logo=IntelliJ IDEA&logoColor=white"/> [<img src="https://img.shields.io/badge/Spring-6DB33F?style=flat&logo=Spring Boot&logoColor=white"/>](https://github.com/liardanc3/Spring) [<img src="https://img.shields.io/badge/Spring Boot-6DB33F?style=flat&logo=Spring Boot&logoColor=white"/>](https://github.com/liardanc3/Spring) <img src="https://img.shields.io/badge/Spring Security-6DB33F?style=flat&logo=Spring Security&logoColor=white"> <img src="https://img.shields.io/badge/Spring Data JPA-6DB33F?style=flat&logo=Databricks&logoColor=white"> <img src="https://img.shields.io/badge/Java-6DB33F?style=flat&logo=JAVA&logoColor=white"> <img src="https://img.shields.io/badge/MySQL-4479A1?style=flat&logo=MySQL&logoColor=white"> 
-
-
-<br>
-
-<details>
-<summary> 런타임 전 전처리 </summary>
-
-<br>
-
-![image](https://user-images.githubusercontent.com/85429793/235808502-107abc0b-8d1f-414d-a833-b9142cbd4189.png)
-
-</details>
-
-
-
-<details>
-<summary> 프로젝트 구성 </summary>
-
-<br>
-
-![image](https://user-images.githubusercontent.com/85429793/235802387-f76ab5ce-c6d8-45f5-b397-348e524564a9.png)
-
-</details>
-
-
-<details>
-<summary> 서버 배포 </summary>
-
-<br>
-
-![image](https://user-images.githubusercontent.com/85429793/235810617-8d295a60-3e2d-43df-a67b-6873d0754ecb.png)
-
-</details>
-
-
-
-</details>
-
-
-
-<br>
 <details>
 <summary> 수상 관련 </summary>
 
@@ -81,6 +31,43 @@
 
 - [대회 정보](https://www.inu.ac.kr/user/indexSub.do?codyMenuSeq=1477369&siteId=isis&dum=dum&boardId=490566&page=1&command=albumView&boardSeq=681579&chkBoxSeq=&categoryId=&categoryDepth=)<br>
 
+</details>
 
+------------------------------------------------------------------------------------------
+
+#### 기능 구현
+
+
+<details>
+ <summary><code>POST</code> <code><b>/</b></code> <code>로그인</code></summary>
+
+##### Parameters
+
+> ```java
+> email : 유저 이메일
+>```
+
+
+##### Responses
+
+> ```HTTP
+> HTTP/1.1 200 OK
+> Content-Type: application/json
+>
+> {
+>  "status": "success",
+>  "message": "Uasdully",
+>  "data": {
+>    "id": 123,
+>    "username": "jdasde",
+>    "email": "asdm"
+>  }
+> }
+>
+> ```
+
+##### Run example
+
+// gif
 
 </details>
