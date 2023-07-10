@@ -1,4 +1,3 @@
-
 <div align=center><span style='center'><h3> 2022년 인천대학교 졸업작품 발표회에 출품된 작품입니다.</h3></span></div><br>
 
 <div align=center><img src="https://img.shields.io/badge/IntelliJ-000000?style=flat&logo=IntelliJ IDEA&logoColor=white"/> <img src="https://img.shields.io/badge/Spring-6DB33F?style=flat&logo=Spring Boot&logoColor=white"/> <img src="https://img.shields.io/badge/Spring Boot-6DB33F?style=flat&logo=Spring Boot&logoColor=white"/> <img src="https://img.shields.io/badge/Spring Security-6DB33F?style=flat&logo=Spring Security&logoColor=white"> <img src="https://img.shields.io/badge/Spring Data JPA-6DB33F?style=flat&logo=Databricks&logoColor=white"> <img src="https://img.shields.io/badge/Java-6DB33F?style=flat&logo=JAVA&logoColor=white"> <img src="https://img.shields.io/badge/MySQL-4479A1?style=flat&logo=MySQL&logoColor=white"></div>
@@ -33,41 +32,54 @@
 
 </details>
 
-------------------------------------------------------------------------------------------
+<br><br>
 
-#### 기능 구현
-
+## 기능 구현
 
 <details>
- <summary><code>POST</code> <code><b>/</b></code> <code>로그인</code></summary>
+ <summary><code>회원가입</code> <code>POST</code> <code><b>/user/insert</b></code> </summary>
 
-##### Parameters
+<br>
 
+> ### Parameters
 > ```java
-> email : 유저 이메일
+> email : 이메일
+> password : 비밀번호
+> major : 전공
 >```
-
-
-##### Responses
-
+> 
+>
+> ### Responses
+> <details open><summary>success</summary> 
+> <br>
+>
 > ```HTTP
 > HTTP/1.1 200 OK
-> Content-Type: application/json
+> Content-Type: application/json;charset=UTF-8
 >
-> {
->  "status": "success",
->  "message": "Uasdully",
->  "data": {
->    "id": 123,
->    "username": "jdasde",
->    "email": "asdm"
->  }
-> }
->
+>{
+>    "success": "true",
+>    "email": "liardanc3@gmail.com"
+>}
 > ```
-
-##### Run example
-
-// gif
-
-</details>
+> </details>
+>
+> <details><summary>failure</summary> 
+> <br>
+>
+> ```HTTP
+> HTTP/1.1 500 Internal Server Error
+> Content-Type: application/json;charset=UTF-8
+>
+>{
+>    "success": "false",
+>    "email": "liardanc3@gmail.com"
+>}
+> ```
+></details>
+>
+>
+> ### Run example
+>
+> // gif
+> </details>
