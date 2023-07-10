@@ -34,10 +34,10 @@
 
 <br><br>
 
-## 기능 구현
+## 구현 API
 
 <details>
- <summary><code>회원가입</code> <code>POST</code> <code><b>/user/insert</b></code> </summary>
+ <summary><code>d회원가입</code> <code>POST</code> <code><b>/user/insert</b></code> </summary>
 
 <br>
 
@@ -67,7 +67,7 @@
 > <details><summary>failure</summary> 
 > <br>
 >
-> ```HTTP
+> ```java
 > HTTP/1.1 500 Internal Server Error
 > Content-Type: application/json;charset=UTF-8
 >
@@ -77,9 +77,789 @@
 >}
 > ```
 ></details>
+></details>
+
+<details>
+ <summary><code>유저 강의 조회</code> <code>POST</code> <code><b>/user/select/class</b></code> </summary>
+
+<br>
+
+> ### Parameters
+> ```java
+> email : 이메일
+>```
+> 
+>
+> ### Responses
+> <details open><summary>success</summary> 
+> <br>
+>
+> ```HTTP
+> HTTP/1.1 200 OK
+> Content-Type: application/json;charset=UTF-8
+>
+>{
+>    "success": "true",
+>    "email": "liardanc3@gmail.com"
+>}
+> ```
+> </details>
+>
+> <details><summary>failure</summary> 
+> <br>
+>
+> ```java
+> HTTP/1.1 500 Internal Server Error
+> Content-Type: application/json;charset=UTF-8
+>
+>{
+>    "response": []
+>}
+> ```
+></details>
 >
 >
 > ### Run example
 >
 > // gif
+> </details>
+> </details>
+
+<details>
+ <summary><code>아이디 중복 체크</code> <code>POST</code> <code><b>/user/check/id={id}</b></code> </summary>
+
+<br>
+
+> ### Parameters
+> ```java
+> email : 이메일
+>```
+> 
+>
+> ### Responses
+> <details open><summary>success</summary> 
+> <br>
+>
+> ```HTTP
+> HTTP/1.1 200 OK
+> Content-Type: application/json;charset=UTF-8
+>
+>{
+>    "success": "true",
+>    "email": "liardanc3@gmail.com"
+>}
+> ```
+> </details>
+>
+> <details><summary>failure</summary> 
+> <br>
+>
+> ```java
+> HTTP/1.1 500 Internal Server Error
+> Content-Type: application/json;charset=UTF-8
+>
+>{
+>    "response": []
+>}
+> ```
+></details>
+>
+>
+> ### Run example
+>
+> // gif
+> </details>
+> </details>
+
+<details>
+ <summary><code>로그인</code> <code>POST</code> <code><b>/user/login</b></code> </summary>
+
+<br>
+
+> ### Parameters
+> ```java
+> email : 이메일
+>```
+> 
+>
+> ### Responses
+> <details open><summary>success</summary> 
+> <br>
+>
+> ```HTTP
+> HTTP/1.1 200 OK
+> Content-Type: application/json;charset=UTF-8
+>
+>{
+>    "success": "true",
+>    "email": "liardanc3@gmail.com"
+>}
+> ```
+> </details>
+>
+> <details><summary>failure</summary> 
+> <br>
+>
+> ```java
+> HTTP/1.1 500 Internal Server Error
+> Content-Type: application/json;charset=UTF-8
+>
+>{
+>    "response": []
+>}
+> ```
+></details>
+>
+>
+> ### Run example
+>
+> // gif
+> </details>
+> </details>
+
+<details>
+ <summary><code>이메일 인증</code> <code>POST</code> <code><b>/user/verify</b></code> </summary>
+
+<br>
+
+> ### Parameters
+> ```java
+> email : 이메일
+>```
+> 
+>
+> ### Responses
+> <details open><summary>success</summary> 
+> <br>
+>
+> ```HTTP
+> HTTP/1.1 200 OK
+> Content-Type: application/json;charset=UTF-8
+>
+>{
+>    "success": "true",
+>    "email": "liardanc3@gmail.com"
+>}
+> ```
+> </details>
+>
+> <details><summary>failure</summary> 
+> <br>
+>
+> ```java
+> HTTP/1.1 500 Internal Server Error
+> Content-Type: application/json;charset=UTF-8
+>
+>{
+>    "response": []
+>}
+> ```
+></details>
+>
+>
+> ### Run example
+>
+> // gif
+> </details>
+> </details>
+
+<details>
+ <summary><code>비밀번호 변경</code> <code>POST</code> <code><b>/user/update</b></code> </summary>
+
+<br>
+
+> ### Parameters
+> ```java
+> email : 이메일
+>```
+> 
+>
+> ### Responses
+> <details open><summary>success</summary> 
+> <br>
+>
+> ```HTTP
+> HTTP/1.1 200 OK
+> Content-Type: application/json;charset=UTF-8
+>
+>{
+>    "success": "true",
+>    "email": "liardanc3@gmail.com"
+>}
+> ```
+> </details>
+>
+> <details><summary>failure</summary> 
+> <br>
+>
+> ```java
+> HTTP/1.1 500 Internal Server Error
+> Content-Type: application/json;charset=UTF-8
+>
+>{
+>    "response": []
+>}
+> ```
+></details>
+>
+>
+> ### Run example
+>
+> // gif
+> </details>
+> </details>
+
+<details>
+ <summary><code>전공 업데이트</code> <code>POST</code> <code><b>/user/update2</b></code> </summary>
+
+<br>
+
+> ### Parameters
+> ```java
+> email : 이메일
+>```
+> 
+>
+> ### Responses
+> <details open><summary>success</summary> 
+> <br>
+>
+> ```HTTP
+> HTTP/1.1 200 OK
+> Content-Type: application/json;charset=UTF-8
+>
+>{
+>    "success": "true",
+>    "email": "liardanc3@gmail.com"
+>}
+> ```
+> </details>
+>
+> <details><summary>failure</summary> 
+> <br>
+>
+> ```java
+> HTTP/1.1 500 Internal Server Error
+> Content-Type: application/json;charset=UTF-8
+>
+>{
+>    "response": []
+>}
+> ```
+></details>
+>
+>
+> ### Run example
+>
+> // gif
+> </details>
+> </details>
+
+<details>
+ <summary><code>회원 탈퇴</code> <code>POST</code> <code><b>/user/quit</b></code> </summary>
+
+<br>
+
+> ### Parameters
+> ```java
+> email : 이메일
+>```
+> 
+>
+> ### Responses
+> <details open><summary>success</summary> 
+> <br>
+>
+> ```HTTP
+> HTTP/1.1 200 OK
+> Content-Type: application/json;charset=UTF-8
+>
+>{
+>    "success": "true",
+>    "email": "liardanc3@gmail.com"
+>}
+> ```
+> </details>
+>
+> <details><summary>failure</summary> 
+> <br>
+>
+> ```java
+> HTTP/1.1 500 Internal Server Error
+> Content-Type: application/json;charset=UTF-8
+>
+>{
+>    "response": []
+>}
+> ```
+></details>
+>
+>
+> ### Run example
+>
+> // gif
+> </details>
+> </details>
+
+<details>
+ <summary><code>강의 추가</code> <code>POST</code> <code><b>/user/insert/class</b></code> </summary>
+
+<br>
+
+> ### Parameters
+> ```java
+> email : 이메일
+>```
+> 
+>
+> ### Responses
+> <details open><summary>success</summary> 
+> <br>
+>
+> ```HTTP
+> HTTP/1.1 200 OK
+> Content-Type: application/json;charset=UTF-8
+>
+>{
+>    "success": "true",
+>    "email": "liardanc3@gmail.com"
+>}
+> ```
+> </details>
+>
+> <details><summary>failure</summary> 
+> <br>
+>
+> ```java
+> HTTP/1.1 500 Internal Server Error
+> Content-Type: application/json;charset=UTF-8
+>
+>{
+>    "response": []
+>}
+> ```
+></details>
+>
+>
+> ### Run example
+>
+> // gif
+> </details>
+> </details>
+
+<details>
+ <summary><code>강의 삭제</code> <code>POST</code> <code><b>/user/delete/class</b></code> </summary>
+
+<br>
+
+> ### Parameters
+> ```java
+> email : 이메일
+>```
+> 
+>
+> ### Responses
+> <details open><summary>success</summary> 
+> <br>
+>
+> ```HTTP
+> HTTP/1.1 200 OK
+> Content-Type: application/json;charset=UTF-8
+>
+>{
+>    "success": "true",
+>    "email": "liardanc3@gmail.com"
+>}
+> ```
+> </details>
+>
+> <details><summary>failure</summary> 
+> <br>
+>
+> ```java
+> HTTP/1.1 500 Internal Server Error
+> Content-Type: application/json;charset=UTF-8
+>
+>{
+>    "response": []
+>}
+> ```
+></details>
+>
+>
+> ### Run example
+>
+> // gif
+> </details>
+> </details>
+
+<details>
+ <summary><code>시간표 정보</code> <code>GET</code> <code><b>/getTimeTableInfo</b></code> </summary>
+
+<br>
+
+> ### Parameters
+> ```java
+> email : 이메일
+>```
+> 
+>
+> ### Responses
+> <details open><summary>success</summary> 
+> <br>
+>
+> ```HTTP
+> HTTP/1.1 200 OK
+> Content-Type: application/json;charset=UTF-8
+>
+>{
+>    "success": "true",
+>    "email": "liardanc3@gmail.com"
+>}
+> ```
+> </details>
+>
+> <details><summary>failure</summary> 
+> <br>
+>
+> ```java
+> HTTP/1.1 500 Internal Server Error
+> Content-Type: application/json;charset=UTF-8
+>
+>{
+>    "response": []
+>}
+> ```
+></details>
+>
+>
+> ### Run example
+>
+> // gif
+> </details>
+> </details>
+
+<details>
+ <summary><code>강의 검색</code> <code>GET</code> <code><b>/selectLecture</b></code> </summary>
+
+<br>
+
+> ### Parameters
+> ```java
+> email : 이메일
+>```
+> 
+>
+> ### Responses
+> <details open><summary>success</summary> 
+> <br>
+>
+> ```HTTP
+> HTTP/1.1 200 OK
+> Content-Type: application/json;charset=UTF-8
+>
+>{
+>    "success": "true",
+>    "email": "liardanc3@gmail.com"
+>}
+> ```
+> </details>
+>
+> <details><summary>failure</summary> 
+> <br>
+>
+> ```java
+> HTTP/1.1 500 Internal Server Error
+> Content-Type: application/json;charset=UTF-8
+>
+>{
+>    "response": []
+>}
+> ```
+></details>
+>
+>
+> ### Run example
+>
+> // gif
+> </details>
+> </details>
+
+<details>
+ <summary><code>경로 묻기</code> <code>GET</code> <code><b>/getRootLive</b></code> </summary>
+
+<br>
+
+> ### Parameters
+> ```java
+> email : 이메일
+>```
+> 
+>
+> ### Responses
+> <details open><summary>success</summary> 
+> <br>
+>
+> ```HTTP
+> HTTP/1.1 200 OK
+> Content-Type: application/json;charset=UTF-8
+>
+>{
+>    "success": "true",
+>    "email": "liardanc3@gmail.com"
+>}
+> ```
+> </details>
+>
+> <details><summary>failure</summary> 
+> <br>
+>
+> ```java
+> HTTP/1.1 500 Internal Server Error
+> Content-Type: application/json;charset=UTF-8
+>
+>{
+>    "response": []
+>}
+> ```
+></details>
+>
+>
+> ### Run example
+>
+> // gif
+> </details>
+> </details>
+
+<details>
+ <summary><code>다음 강의장소 조회</code> <code>POST</code> <code><b>/getNextPlace</b></code> </summary>
+
+<br>
+
+> ### Parameters
+> ```java
+> email : 이메일
+>```
+> 
+>
+> ### Responses
+> <details open><summary>success</summary> 
+> <br>
+>
+> ```HTTP
+> HTTP/1.1 200 OK
+> Content-Type: application/json;charset=UTF-8
+>
+>{
+>    "success": "true",
+>    "email": "liardanc3@gmail.com"
+>}
+> ```
+> </details>
+>
+> <details><summary>failure</summary> 
+> <br>
+>
+> ```java
+> HTTP/1.1 500 Internal Server Error
+> Content-Type: application/json;charset=UTF-8
+>
+>{
+>    "response": []
+>}
+> ```
+></details>
+>
+>
+> ### Run example
+>
+> // gif
+> </details>
+> </details>
+
+
+<details>
+ <summary><code>장소 검색</code> <code>GET</code> <code><b>/placeSearchList</b></code> </summary>
+
+<br>
+
+> ### Parameters
+> ```java
+> email : 이메일
+>```
+> 
+>
+> ### Responses
+> <details open><summary>success</summary> 
+> <br>
+>
+> ```HTTP
+> HTTP/1.1 200 OK
+> Content-Type: application/json;charset=UTF-8
+>
+>{
+>    "success": "true",
+>    "email": "liardanc3@gmail.com"
+>}
+> ```
+> </details>
+>
+> <details><summary>failure</summary> 
+> <br>
+>
+> ```java
+> HTTP/1.1 500 Internal Server Error
+> Content-Type: application/json;charset=UTF-8
+>
+>{
+>    "response": []
+>}
+> ```
+></details>
+>
+>
+> ### Run example
+>
+> // gif
+> </details>
+> </details>
+
+
+<details>
+ <summary><code>주간 경로 미리보기</code> <code>POST</code> <code><b>/getOverviewRoot</b></code> </summary>
+
+<br>
+
+> ### Parameters
+> ```java
+> email : 이메일
+>```
+> 
+>
+> ### Responses
+> <details open><summary>success</summary> 
+> <br>
+>
+> ```HTTP
+> HTTP/1.1 200 OK
+> Content-Type: application/json;charset=UTF-8
+>
+>{
+>    "success": "true",
+>    "email": "liardanc3@gmail.com"
+>}
+> ```
+> </details>
+>
+> <details><summary>failure</summary> 
+> <br>
+>
+> ```java
+> HTTP/1.1 500 Internal Server Error
+> Content-Type: application/json;charset=UTF-8
+>
+>{
+>    "response": []
+>}
+> ```
+></details>
+>
+>
+> ### Run example
+>
+> // gif
+> </details>
+> </details>
+
+<details>
+ <summary><code>경로 분석 결과 조회</code> <code>POST</code> <code><b>/getAnalysisResult</b></code> </summary>
+
+<br>
+
+> ### Parameters
+> ```java
+> email : 이메일
+>```
+> 
+>
+> ### Responses
+> <details open><summary>success</summary> 
+> <br>
+>
+> ```HTTP
+> HTTP/1.1 200 OK
+> Content-Type: application/json;charset=UTF-8
+>
+>{
+>    "success": "true",
+>    "email": "liardanc3@gmail.com"
+>}
+> ```
+> </details>
+>
+> <details><summary>failure</summary> 
+> <br>
+>
+> ```java
+> HTTP/1.1 500 Internal Server Error
+> Content-Type: application/json;charset=UTF-8
+>
+>{
+>    "response": []
+>}
+> ```
+></details>
+>
+>
+> ### Run example
+>
+> // gif
+> </details>
+> </details>
+
+
+<details>
+ <summary><code>추천 강의 조회</code> <code>POST</code> <code><b>/getRecommendLecture</b></code> </summary>
+
+<br>
+
+> ### Parameters
+> ```java
+> email : 이메일
+>```
+> 
+>
+> ### Responses
+> <details open><summary>success</summary> 
+> <br>
+>
+> ```HTTP
+> HTTP/1.1 200 OK
+> Content-Type: application/json;charset=UTF-8
+>
+>{
+>    "success": "true",
+>    "email": "liardanc3@gmail.com"
+>}
+> ```
+> </details>
+>
+> <details><summary>failure</summary> 
+> <br>
+>
+> ```java
+> HTTP/1.1 500 Internal Server Error
+> Content-Type: application/json;charset=UTF-8
+>
+>{
+>    "response": []
+>}
+> ```
+></details>
+>
+>
+> ### Run example
+>
+> // gif
+> </details>
 > </details>
