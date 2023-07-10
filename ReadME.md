@@ -32,7 +32,7 @@
 
 </details>
 
-<br><br>
+<br>
 
 ## 구현 API
 
