@@ -253,13 +253,14 @@
 > </details>
 
 <details>
- <summary><code>비밀번호 변경</code> <code>POST</code> <code><b>/user/update</b></code> </summary>
+ <summary><code>d비밀번호 변경</code> <code>POST</code> <code><b>/user/update</b></code> </summary>
 
 <br>
 
 > ### Parameters
 > ```java
 > email : 이메일
+> newPassword : 새로운 비밀번호
 >```
 > 
 >
@@ -273,7 +274,7 @@
 >
 >{
 >    "success": "true",
->    "email": "liardanc3@gmail.com"
+>    "email": "test@gmail.com"
 >}
 > ```
 > </details>
@@ -286,7 +287,8 @@
 > Content-Type: application/json;charset=UTF-8
 >
 >{
->    "response": []
+>    "success": "false",
+>    "email": "not_present_email@no.com"
 >}
 > ```
 ></details>
@@ -299,13 +301,14 @@
 > </details>
 
 <details>
- <summary><code>전공 업데이트</code> <code>POST</code> <code><b>/user/update2</b></code> </summary>
+ <summary><code>d전공 업데이트</code> <code>POST</code> <code><b>/user/update2</b></code> </summary>
 
 <br>
 
 > ### Parameters
 > ```java
 > email : 이메일
+> newMajor : 새로운 전공
 >```
 > 
 >
@@ -332,7 +335,8 @@
 > Content-Type: application/json;charset=UTF-8
 >
 >{
->    "response": []
+>    "success": "false",
+>    "email": "not_present_email@no.com"
 >}
 > ```
 ></details>
@@ -345,13 +349,14 @@
 > </details>
 
 <details>
- <summary><code>회원 탈퇴</code> <code>POST</code> <code><b>/user/quit</b></code> </summary>
+ <summary><code>d회원 탈퇴</code> <code>POST</code> <code><b>/user/quit</b></code> </summary>
 
 <br>
 
 > ### Parameters
 > ```java
 > email : 이메일
+> password : 비밀번호호
 >```
 > 
 >
@@ -365,7 +370,7 @@
 >
 >{
 >    "success": "true",
->    "email": "liardanc3@gmail.com"
+>    "email": "test@gmail.com"
 >}
 > ```
 > </details>
@@ -378,7 +383,8 @@
 > Content-Type: application/json;charset=UTF-8
 >
 >{
->    "response": []
+>    "success": "false",
+>    "email": "not_present_email@no.com"
 >}
 > ```
 ></details>
