@@ -1,5 +1,7 @@
 package com.maru.inunavi.user.service;
 
+import com.maru.inunavi.aspect.exceptionhandler.exception.SelectClassException;
+import com.maru.inunavi.aspect.exceptionhandler.exception.UpdateException;
 import com.maru.inunavi.lecture.domain.dto.FormattedTimeDto;
 import com.maru.inunavi.lecture.domain.entity.Lecture;
 import com.maru.inunavi.lecture.repository.LectureRepository;
@@ -39,8 +41,8 @@ public class UserService {
      */
     @Transactional
     public UpdateDto signUp(String email, String password, String major) {
-        return userRepository.findByEmail(email)
-                .map(user -> {
+        return userRepository.isNotPresentByEmail(email)
+                .map(result -> {
                     userRepository.save(
                             User.builder()
                                     .email(email)
@@ -48,19 +50,12 @@ public class UserService {
                                     .major(major)
                                     .build()
                     );
-
                     return UpdateDto.builder()
                             .email(email)
-                            .success("success")
+                            .success("true")
                             .build();
                 })
-                .orElseGet(() ->
-                        UpdateDto
-                                .builder()
-                                .email(email)
-                                .success("false")
-                                .build()
-                );
+                .orElseThrow(() -> new UpdateException(email));
     }
 
     /**
@@ -69,13 +64,13 @@ public class UserService {
      * @return A list of FormattedTimeDto
      */
     public List<FormattedTimeDto> userLectureList(String email) {
-        return userRepository.findLecturesByEmail(email)
-                .map(lectures ->
-                        lectures.stream()
+        return userRepository.findByEmail(email)
+                .map(user ->
+                        user.getLectures().stream()
                                 .map(FormattedTimeDto::new)
                                 .collect(Collectors.toList())
                 )
-                .orElseGet(ArrayList::new);
+                .orElseThrow(SelectClassException::new);
     }
 
     /**
@@ -261,12 +256,13 @@ public class UserService {
     public UpdateDto insertLecture(String email, String lectureNumber) {
         return lectureRepository.findByNumber(lectureNumber)
                 .map(lectureToAdd -> {
-                    List<Lecture> lectureList = userRepository.findLecturesByEmail(email).orElseThrow();
-
-                    for (Lecture lecture : lectureList) {
-                        lecture.getRecommend().updateSimilarityPoint(lectureToAdd.getId(), 1);
-                        lectureToAdd.getRecommend().updateSimilarityPoint(lecture.getId(), 1);
-                    }
+                    userRepository.findLecturesByEmail(email)
+                            .ifPresent(lectureList -> {
+                                for (Lecture lecture : lectureList) {
+                                    lecture.getRecommend().updateSimilarityPoint(lectureToAdd.getId(), 1);
+                                    lectureToAdd.getRecommend().updateSimilarityPoint(lecture.getId(), 1);
+                                }
+                            });
 
                     User user = userRepository.findByEmail(email).orElseThrow();
                     user.addLecture(lectureToAdd);
@@ -275,13 +271,9 @@ public class UserService {
                             .success("true")
                             .email(email)
                             .build();
+
                 })
-                .orElse(
-                        UpdateDto.builder()
-                                .success("false")
-                                .email(email)
-                                .build()
-                );
+                .orElseThrow(() -> new UpdateException(email));
     }
 
     /**

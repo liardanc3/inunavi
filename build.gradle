@@ -3,7 +3,6 @@ plugins {
 	id 'io.spring.dependency-management' version '1.0.11.RELEASE'
 	id "com.ewerk.gradle.plugins.querydsl" version "1.0.10"
 	id 'java'
-	id 'war'
 }
 
 group = 'com.maru'
@@ -57,10 +56,6 @@ jar{
 	manifest{
 		attributes 'Main-Class': 'com.maru.inunavi.InunaviApplication'
 	}
-}
-
-bootWar{
-	archiveName("ROOT.war")
 }
 
 def querydslDir = "$buildDir/generated/inunavi"

@@ -88,17 +88,19 @@ public class LectureService {
             String classRoom = parseResult[1];
 
             List<String> detailClassRoomList = classRoom.equals("-") ? List.of("-") :
-                    Arrays.stream(classRoomRaw.split(","))
+                    Arrays.stream(classRoomRaw.split("]"))
                             .sequential()
-                            .map(classRoomToken -> classRoomToken.split("-")[1].split(" ")[0])
+                            .filter(classRoomToken -> classRoomToken.contains("-"))
+                            .map(this::getDetailClassRoom)
                             .collect(Collectors.toList());
 
             String[] classRoomList = classRoom.split(",");
 
-            String placeCode = IntStream.range(0, detailClassRoomList.size())
-                    .mapToObj(i -> classRoomList[i].split(detailClassRoomList.get(i))[0])
-                    .reduce((result, code) -> result + "," + code)
-                    .get();
+            String placeCode = classRoomList[0].equals("-") ? "-" :
+                    IntStream.range(0, detailClassRoomList.size())
+                            .mapToObj(i -> classRoomList[i].split(detailClassRoomList.get(i))[0])
+                            .reduce((result, code) -> result + "," + code)
+                            .get();
 
             lectureRepository.save(
                     Lecture.builder()
@@ -121,6 +123,7 @@ public class LectureService {
 
         return lectureRepository.findAll();
     }
+
 
     /**
      * Parse raw time text<b>
@@ -274,5 +277,14 @@ public class LectureService {
      */
     public List<SelectLectureDto> selectLecture(LectureSearchFilter lectureSearchFilter) {
         return lectureRepository.findBySearchFilter(lectureSearchFilter);
+    }
+
+    private String getDetailClassRoom(String classRoomToken) {
+        for (int i = 0; i < classRoomToken.length(); i++) {
+            if(classRoomToken.charAt(i) == '-'){
+                return classRoomToken.substring(i + 1).split(" ")[0];
+            }
+        }
+        return null;
     }
 }

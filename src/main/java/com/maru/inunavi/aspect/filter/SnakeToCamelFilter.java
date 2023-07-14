@@ -46,11 +46,9 @@ public class SnakeToCamelFilter implements Filter {
             while(parameterNameIter.hasNext()){
 
                 String snakeCase = parameterNameIter.next();
-                String camelCase = convert(snakeCase);
+                String camelCase = convertSnakeToCamel(snakeCase);
 
                 camelParameters.add(camelCase);
-
-                camelToSnakeMap.put(camelCase, snakeCase);
             }
 
             return Collections.enumeration(camelParameters);
@@ -58,10 +56,14 @@ public class SnakeToCamelFilter implements Filter {
 
         @Override
         public String[] getParameterValues(String name) {
-            return isSnakeToCamelPresent ? super.getParameterValues(camelToSnakeMap.get(name)) : super.getParameterValues(name);
+            isSnakeToCamelPresent = ((HandlerMethod) super.getAttribute(HandlerMapping.BEST_MATCHING_HANDLER_ATTRIBUTE))
+                    .getMethod()
+                    .isAnnotationPresent(SnakeToCamel.class);
+
+            return isSnakeToCamelPresent ? super.getParameterValues(convertCamelToSnake(name)) : super.getParameterValues(name);
         }
 
-        public String convert(String snakeParam) {
+        public String convertSnakeToCamel(String snakeParam) {
             StringBuilder camelParam = new StringBuilder();
 
             boolean nextUpper = false;
@@ -81,5 +83,22 @@ public class SnakeToCamelFilter implements Filter {
 
             return camelParam.toString();
         }
+
+        public String convertCamelToSnake(String camelParam) {
+            StringBuilder snakeParam = new StringBuilder();
+
+            for (int i = 0; i < camelParam.length(); i++) {
+                char currentChar = camelParam.charAt(i);
+
+                if (Character.isUpperCase(currentChar) && i > 0 && Character.isLowerCase(camelParam.charAt(i - 1))) {
+                    snakeParam.append("_");
+                }
+
+                snakeParam.append(Character.toLowerCase(currentChar));
+            }
+
+            return snakeParam.toString();
+        }
+
     }
 }
