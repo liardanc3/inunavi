@@ -126,7 +126,7 @@
 > </details>
 
 <details>
- <summary><code>아이디 중복 체크</code> <code>POST</code> <code><b>/user/check/id={id}</b></code> </summary>
+ <summary><code>d아이디 중복 체크</code> <code>POST</code> <code><b>/user/check/id={id}</b></code> </summary>
 
 <br>
 
@@ -150,20 +150,6 @@
 >}
 > ```
 > </details>
->
-> <details><summary>failure</summary> 
-> <br>
->
-> ```java
-> HTTP/1.1 500 Internal Server Error
-> Content-Type: application/json;charset=UTF-8
->
->{
->    "response": []
->}
-> ```
-></details>
->
 >
 > ### Run example
 >
@@ -172,13 +158,14 @@
 > </details>
 
 <details>
- <summary><code>로그인</code> <code>POST</code> <code><b>/user/login</b></code> </summary>
+ <summary><code>d로그인</code> <code>POST</code> <code><b>/user/login</b></code> </summary>
 
 <br>
 
 > ### Parameters
 > ```java
 > email : 이메일
+> password : 비밀번호
 >```
 > 
 >
@@ -205,7 +192,9 @@
 > Content-Type: application/json;charset=UTF-8
 >
 >{
->    "response": []
+>    "success": "false",
+>    "email": "liardanc3@gmail.com",
+>    "message": "로그인 실패"
 >}
 > ```
 ></details>
