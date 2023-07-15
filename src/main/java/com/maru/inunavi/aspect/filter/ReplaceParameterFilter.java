@@ -10,7 +10,7 @@ import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class ReplaceParameter implements Filter {
+public class ReplaceParameterFilter implements Filter {
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
@@ -42,6 +42,7 @@ public class ReplaceParameter implements Filter {
                 after = replaceParameter.after();
             }
 
+            System.out.println("name = " + name);
             return isParameterReplacePresent ? new String[] {
                     Arrays.stream(super.getParameterValues(name))
                             .map(str -> str.replaceAll(before, after))

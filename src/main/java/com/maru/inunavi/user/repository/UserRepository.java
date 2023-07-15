@@ -15,12 +15,9 @@ public interface UserRepository extends JpaRepository<User, Long>, UserQueryRepo
     // null -> 이미 있음
     // 1 -> 아무도 없음
     @Query("SELECT CASE WHEN COUNT(u) > 0 THEN NULLIF(1,1) ELSE true END FROM User u WHERE u.email = :email")
-    Optional<Boolean> isNotPresentByEmail(String email);
+    Optional<Integer> isNotPresentByEmail(String email);
 
     Optional<User> findByEmail(@Param("email") String email);
-
-    @Query("select l from User u join fetch Lecture l on u.email = :email")
-    Optional<List<Lecture>> findLecturesByEmail(String email);
 
     @Query("select l from User u join fetch Lecture l " +
             "where u.email = :email and l.classRoom <> '-' and l.placeCode not like '%ZZ%' and l.placeCode not like '%NC%'")

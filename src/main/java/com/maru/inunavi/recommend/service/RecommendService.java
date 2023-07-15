@@ -39,10 +39,12 @@ public class RecommendService {
 
         lectureRepository.findAll()
                 .forEach(lecture ->
-                        recommendRepository.save(
-                                Recommend.builder()
-                                        .similarity(similarity.toString())
-                                        .build()
+                        lecture.updateRecommend(
+                                recommendRepository.save(
+                                        Recommend.builder()
+                                                .similarity(similarity.toString())
+                                                .build()
+                                )
                         )
                 );
     }
@@ -53,8 +55,8 @@ public class RecommendService {
      * @return A List of FormattedTimeDto
      */
     public List<FormattedTimeDto> getRecommendLecture(String email) {
-        return userRepository.findLecturesByEmail(email)
-                .map(lectureList -> {
+        return userRepository.findByEmail(email)
+                .map(user -> {
 
                     class Pair implements Comparable<Pair>{
 
@@ -79,28 +81,24 @@ public class RecommendService {
                     boolean[] attendingTime = new boolean[count + 1];
                     boolean[] attendingLectureId = new boolean[count + 1];
 
-                    userRepository.findLecturesByEmail(email)
-                            .ifPresent(lectures ->
-                                    lectures.stream()
-                                            .forEach(lecture -> {
-                                                attendingLectureId[lecture.getId()] = true;
+                    user.getLectures()
+                            .forEach(lecture -> {
+                                attendingLectureId[lecture.getId()] = true;
 
-                                                String[] classTimeList = lecture.getClassTime().split(",");
+                                String[] classTimeList = lecture.getClassTime().split(",");
 
-                                                for (String classTime : classTimeList) {
-                                                    int[] timeRange = Arrays.stream(classTime.split("-"))
-                                                            .mapToInt(Integer::parseInt)
-                                                            .toArray();
+                                for (String classTime : classTimeList) {
+                                    int[] timeRange = Arrays.stream(classTime.split("-"))
+                                            .mapToInt(Integer::parseInt)
+                                            .toArray();
 
-                                                    for(int i = timeRange[0]; i <= timeRange[1]; i++) {
-                                                        attendingTime[i] = true;
-                                                    }
-                                                }
-                                    })
-                            );
+                                    for(int i = timeRange[0]; i <= timeRange[1]; i++) {
+                                        attendingTime[i] = true;
+                                    }
+                                }
+                            });
 
                     recommendRepository.findRecommendsByEmail(email)
-                            .stream()
                             .forEach(similarity -> {
                                 String[] similarArr = similarity.split(",");
 
@@ -116,8 +114,6 @@ public class RecommendService {
                             priorityQueue.add(new Pair(i, similarityPoint[i]));
                         }
                     }
-
-                    User user = userRepository.findByEmail(email).get();
 
                     while(!priorityQueue.isEmpty() && FormattedTimeDtoList.size() < 4){
                         Pair pair = priorityQueue.poll();

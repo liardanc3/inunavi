@@ -1,12 +1,12 @@
 package com.maru.inunavi.user.service;
 
+import com.maru.inunavi.aspect.exceptionhandler.exception.LoginProcessException;
 import com.maru.inunavi.aspect.exceptionhandler.exception.SelectClassException;
 import com.maru.inunavi.aspect.exceptionhandler.exception.UpdateException;
 import com.maru.inunavi.lecture.domain.dto.FormattedTimeDto;
 import com.maru.inunavi.lecture.domain.entity.Lecture;
 import com.maru.inunavi.lecture.repository.LectureRepository;
 import com.maru.inunavi.recommend.domain.entity.Recommend;
-import com.maru.inunavi.recommend.repository.RecommendRepository;
 import com.maru.inunavi.user.domain.dto.LoginResultDto;
 import com.maru.inunavi.user.domain.dto.UpdateDto;
 import com.maru.inunavi.user.domain.dto.VerifyDto;
@@ -15,7 +15,6 @@ import com.maru.inunavi.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.transaction.annotation.Transactional;
@@ -104,6 +103,8 @@ public class UserService {
     public LoginResultDto login(String email, String password) {
         return userRepository.findByEmail(email)
                 .map(user -> {
+                    System.out.println("user = " + user);
+                    System.out.println("user = " + user);
                     if (new BCryptPasswordEncoder().matches(password, user.getPassword())) {
                         return LoginResultDto.builder()
                                 .email(email)
@@ -112,20 +113,10 @@ public class UserService {
                                 .major(user.getMajor())
                                 .build();
                     } else {
-                        return LoginResultDto.builder()
-                                .email(email)
-                                .success("false")
-                                .message("비밀번호 오류")
-                                .build();
+                        throw new LoginProcessException(email);
                     }
                 })
-                .orElse(
-                        LoginResultDto.builder()
-                                .email(email)
-                                .success("false")
-                                .message("아이디가 틀림")
-                                .build()
-                );
+                .orElseThrow(() -> new LoginProcessException(email));
     }
 
     /**
@@ -174,12 +165,7 @@ public class UserService {
                             .email(email)
                             .build();
                 })
-                .orElse(
-                        UpdateDto.builder()
-                                .success("false")
-                                .email(email)
-                                .build()
-                );
+                .orElseThrow(() -> new UpdateException(email));
     }
 
     /**
@@ -199,12 +185,7 @@ public class UserService {
                             .email(email)
                             .build();
                 })
-                .orElse(
-                        UpdateDto.builder()
-                                .success("false")
-                                .email(email)
-                                .build()
-                );
+                .orElseThrow(() -> new UpdateException(email));
     }
 
     /**
@@ -219,12 +200,9 @@ public class UserService {
                 .map(user -> {
                     if (new BCryptPasswordEncoder().matches(password, user.getPassword())) {
 
-                        userRepository.findLecturesByEmail(email)
-                                .ifPresent(lectures ->
-                                        lectures.forEach(lecture -> deleteLecture(email, lecture.getNumber()))
-                                );
-
+                        user.getLectures().forEach(lecture -> deleteLecture(email, lecture.getNumber()));
                         user.removeLectures();
+
                         userRepository.delete(user);
 
                         return UpdateDto.builder()
@@ -232,18 +210,10 @@ public class UserService {
                                 .email(email)
                                 .build();
                     } else {
-                        return UpdateDto.builder()
-                                .success("false")
-                                .email(email)
-                                .build();
+                        throw new UpdateException(email);
                     }
                 })
-                .orElse(
-                        UpdateDto.builder()
-                                .success("false")
-                                .email(email)
-                                .build()
-                );
+                .orElseThrow(() -> new UpdateException(email));
     }
 
     /**
@@ -256,22 +226,20 @@ public class UserService {
     public UpdateDto insertLecture(String email, String lectureNumber) {
         return lectureRepository.findByNumber(lectureNumber)
                 .map(lectureToAdd -> {
-                    userRepository.findLecturesByEmail(email)
-                            .ifPresent(lectureList -> {
-                                for (Lecture lecture : lectureList) {
-                                    lecture.getRecommend().updateSimilarityPoint(lectureToAdd.getId(), 1);
-                                    lectureToAdd.getRecommend().updateSimilarityPoint(lecture.getId(), 1);
-                                }
-                            });
 
-                    User user = userRepository.findByEmail(email).orElseThrow();
+                    User user = userRepository.findByEmail(email)
+                            .orElseThrow(() -> new UpdateException(email));
+
+                    user.getLectures().forEach(lecture -> {
+                        lecture.getRecommend().updateSimilarityPoint(lectureToAdd.getId(), 1);
+                        lectureToAdd.getRecommend().updateSimilarityPoint(lecture.getId(), 1);
+                    });
                     user.addLecture(lectureToAdd);
 
                     return UpdateDto.builder()
                             .success("true")
                             .email(email)
                             .build();
-
                 })
                 .orElseThrow(() -> new UpdateException(email));
     }
@@ -285,27 +253,20 @@ public class UserService {
     @Transactional
     public UpdateDto deleteLecture(String email, String lectureNumber) {
         return lectureRepository.findByNumber(lectureNumber)
-                .map(lectureToAdd -> {
-                    List<Lecture> lectureList = userRepository.findLecturesByEmail(email).orElseThrow();
+                .map(lectureToDelete -> {
 
-                    for (Lecture lecture : lectureList) {
-                        lecture.getRecommend().updateSimilarityPoint(lectureToAdd.getId(), -1);
-                        lectureToAdd.getRecommend().updateSimilarityPoint(lecture.getId(), -1);
-                    }
-
-                    User user = userRepository.findByEmail(email).orElseThrow();
-                    user.removeLecture(lectureToAdd);
+                    User user = userRepository.findByEmail(email).orElseThrow(() -> new UpdateException(email));
+                    user.getLectures().forEach(lecture -> {
+                        lecture.getRecommend().updateSimilarityPoint(lectureToDelete.getId(), -1);
+                        lectureToDelete.getRecommend().updateSimilarityPoint(lecture.getId(), -1);
+                    });
+                    user.removeLecture(lectureToDelete);
 
                     return UpdateDto.builder()
                             .success("true")
                             .email(email)
                             .build();
                 })
-                .orElse(
-                        UpdateDto.builder()
-                                .success("false")
-                                .email(email)
-                                .build()
-                );
+                .orElseThrow(() -> new UpdateException(email));
     }
 }

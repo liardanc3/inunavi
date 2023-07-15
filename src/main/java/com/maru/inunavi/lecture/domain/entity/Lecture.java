@@ -124,4 +124,8 @@ public class Lecture {
             return classTime.substring(0, classTime.length() - 2);
         }
     }
+
+    public void updateRecommend(Recommend recommend){
+        this.recommend = recommend;
+    }
 }

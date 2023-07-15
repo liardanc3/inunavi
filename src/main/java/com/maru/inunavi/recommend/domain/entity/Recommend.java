@@ -23,7 +23,7 @@ public class Recommend {
     @Column(name = "recommend_id")
     private Long id;
 
-    @OneToOne(mappedBy = "recommend", fetch = FetchType.LAZY)
+    @OneToOne(mappedBy = "recommend")
     private Lecture lecture;
 
     @Lob

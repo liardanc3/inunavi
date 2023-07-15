@@ -2,8 +2,10 @@ package com.maru.inunavi.lecture.domain.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
+import lombok.Getter;
 
 @Builder
+@Getter
 public class TimeTableInfoDto {
 
     private String year;

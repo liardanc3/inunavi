@@ -2,7 +2,9 @@ package com.maru.inunavi.lecture.domain.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.maru.inunavi.lecture.domain.entity.Lecture;
+import lombok.Getter;
 
+@Getter
 public class FormattedTimeDto {
 
     private String id;
