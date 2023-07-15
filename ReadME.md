@@ -2,6 +2,8 @@
 
 <div align=center><img src="https://img.shields.io/badge/IntelliJ-000000?style=flat&logo=IntelliJ IDEA&logoColor=white"/> <img src="https://img.shields.io/badge/Spring-6DB33F?style=flat&logo=Spring Boot&logoColor=white"/> <img src="https://img.shields.io/badge/Spring Boot-6DB33F?style=flat&logo=Spring Boot&logoColor=white"/> <img src="https://img.shields.io/badge/Spring Security-6DB33F?style=flat&logo=Spring Security&logoColor=white"> <img src="https://img.shields.io/badge/Spring Data JPA-6DB33F?style=flat&logo=Databricks&logoColor=white"> <img src="https://img.shields.io/badge/Java-6DB33F?style=flat&logo=JAVA&logoColor=white"> <img src="https://img.shields.io/badge/MySQL-4479A1?style=flat&logo=MySQL&logoColor=white"></div>
 
+<br>
+
 <details>
 <summary> APP 소개 </summary>
 
@@ -126,7 +128,7 @@
 > </details>
 
 <details>
- <summary><code>아이디 중복 체크</code> <code>POST</code> <code><b>/user/check/id={id}</b></code> </summary>
+ <summary><code>d아이디 중복 체크</code> <code>POST</code> <code><b>/user/check/id={id}</b></code> </summary>
 
 <br>
 
@@ -150,20 +152,6 @@
 >}
 > ```
 > </details>
->
-> <details><summary>failure</summary> 
-> <br>
->
-> ```java
-> HTTP/1.1 500 Internal Server Error
-> Content-Type: application/json;charset=UTF-8
->
->{
->    "response": []
->}
-> ```
-></details>
->
 >
 > ### Run example
 >
@@ -172,13 +160,14 @@
 > </details>
 
 <details>
- <summary><code>로그인</code> <code>POST</code> <code><b>/user/login</b></code> </summary>
+ <summary><code>d로그인</code> <code>POST</code> <code><b>/user/login</b></code> </summary>
 
 <br>
 
 > ### Parameters
 > ```java
 > email : 이메일
+> password : 비밀번호
 >```
 > 
 >
@@ -205,7 +194,9 @@
 > Content-Type: application/json;charset=UTF-8
 >
 >{
->    "response": []
+>    "success": "false",
+>    "email": "liardanc3@gmail.com",
+>    "message": "로그인 실패"
 >}
 > ```
 ></details>
@@ -264,13 +255,14 @@
 > </details>
 
 <details>
- <summary><code>비밀번호 변경</code> <code>POST</code> <code><b>/user/update</b></code> </summary>
+ <summary><code>d비밀번호 변경</code> <code>POST</code> <code><b>/user/update</b></code> </summary>
 
 <br>
 
 > ### Parameters
 > ```java
 > email : 이메일
+> newPassword : 새로운 비밀번호
 >```
 > 
 >
@@ -284,7 +276,7 @@
 >
 >{
 >    "success": "true",
->    "email": "liardanc3@gmail.com"
+>    "email": "test@gmail.com"
 >}
 > ```
 > </details>
@@ -297,7 +289,8 @@
 > Content-Type: application/json;charset=UTF-8
 >
 >{
->    "response": []
+>    "success": "false",
+>    "email": "not_present_email@no.com"
 >}
 > ```
 ></details>
@@ -310,13 +303,14 @@
 > </details>
 
 <details>
- <summary><code>전공 업데이트</code> <code>POST</code> <code><b>/user/update2</b></code> </summary>
+ <summary><code>d전공 업데이트</code> <code>POST</code> <code><b>/user/update2</b></code> </summary>
 
 <br>
 
 > ### Parameters
 > ```java
 > email : 이메일
+> newMajor : 새로운 전공
 >```
 > 
 >
@@ -343,7 +337,8 @@
 > Content-Type: application/json;charset=UTF-8
 >
 >{
->    "response": []
+>    "success": "false",
+>    "email": "not_present_email@no.com"
 >}
 > ```
 ></details>
@@ -356,13 +351,14 @@
 > </details>
 
 <details>
- <summary><code>회원 탈퇴</code> <code>POST</code> <code><b>/user/quit</b></code> </summary>
+ <summary><code>d회원 탈퇴</code> <code>POST</code> <code><b>/user/quit</b></code> </summary>
 
 <br>
 
 > ### Parameters
 > ```java
 > email : 이메일
+> password : 비밀번호호
 >```
 > 
 >
@@ -376,7 +372,7 @@
 >
 >{
 >    "success": "true",
->    "email": "liardanc3@gmail.com"
+>    "email": "test@gmail.com"
 >}
 > ```
 > </details>
@@ -389,7 +385,8 @@
 > Content-Type: application/json;charset=UTF-8
 >
 >{
->    "response": []
+>    "success": "false",
+>    "email": "not_present_email@no.com"
 >}
 > ```
 ></details>
