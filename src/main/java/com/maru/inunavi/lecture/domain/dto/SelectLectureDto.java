@@ -2,14 +2,17 @@ package com.maru.inunavi.lecture.domain.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.querydsl.core.annotations.QueryProjection;
+import lombok.AccessLevel;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.StringTokenizer;
 
 @Data
+@NoArgsConstructor
 public class SelectLectureDto {
 
-    private String id;
+    private Integer id;
     private String department;
     private String grade;
     private String category;
@@ -28,7 +31,7 @@ public class SelectLectureDto {
     
     private String realTime;
 
-    public SelectLectureDto(String id, String department, String grade, String category, String number, String lectureName, String professor, String classRoomRaw, String classTimeRaw, String classRoom, String classTime, String how, String point) {
+    public SelectLectureDto(Integer id, String department, String grade, String category, String number, String lectureName, String professor, String classRoomRaw, String classTimeRaw, String classRoom, String classTime, String how, String point) {
         this.id = id;
         this.department = department;
         this.grade = grade;

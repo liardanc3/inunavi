@@ -42,7 +42,6 @@ public class ReplaceParameterFilter implements Filter {
                 after = replaceParameter.after();
             }
 
-            System.out.println("name = " + name);
             return isParameterReplacePresent ? new String[] {
                     Arrays.stream(super.getParameterValues(name))
                             .map(str -> str.replaceAll(before, after))

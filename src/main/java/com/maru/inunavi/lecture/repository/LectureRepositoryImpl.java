@@ -2,6 +2,9 @@ package com.maru.inunavi.lecture.repository;
 
 import com.maru.inunavi.lecture.domain.dto.LectureSearchFilter;
 import com.maru.inunavi.lecture.domain.dto.SelectLectureDto;
+import com.maru.inunavi.lecture.domain.entity.Lecture;
+import com.querydsl.core.types.NullExpression;
+import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
@@ -21,7 +24,7 @@ public class LectureRepositoryImpl implements LectureQueryRepository{
     public List<SelectLectureDto> findBySearchFilter(LectureSearchFilter lectureSearchFilter) {
         return queryFactory
                 .select(Projections.constructor(SelectLectureDto.class,
-                        lecture.id.stringValue(),
+                        lecture.id,
                         lecture.department,
                         lecture.grade,
                         lecture.category,
@@ -46,18 +49,19 @@ public class LectureRepositoryImpl implements LectureQueryRepository{
                 )
                 .orderBy(orderCondition(lectureSearchFilter.getSortOption()))
                 .fetch();
+
     }
 
     // -------------------------- CONDITION ---------------------------------- //
 
-    private OrderSpecifier<String> orderCondition(String sortOption){
+    private OrderSpecifier orderCondition(String sortOption){
         if(sortOption.equals("과목코드")){
             return lecture.number.asc();
         }
         if(sortOption.equals("과목명")){
             return lecture.lectureName.asc();
         }
-        return null;
+        return new OrderSpecifier(Order.ASC, NullExpression.DEFAULT, OrderSpecifier.NullHandling.Default);
     }
 
     private BooleanExpression gradeCondition(String gradeOption){
@@ -139,7 +143,7 @@ public class LectureRepositoryImpl implements LectureQueryRepository{
             return null;
         }
 
-        BooleanExpression booleanExpression = null;
+        BooleanExpression booleanExpression = lecture.isNotNull();
 
         if(keywordOption.equals("전체")){
             booleanExpression
