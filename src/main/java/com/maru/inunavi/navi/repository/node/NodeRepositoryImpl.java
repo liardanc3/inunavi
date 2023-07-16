@@ -3,6 +3,8 @@ package com.maru.inunavi.navi.repository.node;
 import com.maru.inunavi.navi.domain.dto.RouteInfo;
 import com.maru.inunavi.navi.domain.entity.Node;
 import com.maru.inunavi.navi.repository.node.NodeQueryRepository;
+import com.querydsl.core.types.NullExpression;
+import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
@@ -55,11 +57,12 @@ public class NodeRepositoryImpl implements NodeQueryRepository {
     private OrderSpecifier<Double> distanceAsc(String location) {
         StringTokenizer locationToken = new StringTokenizer(location);
 
-        Double lat = Double.parseDouble(locationToken.nextToken(", "));
-        Double lng = Double.parseDouble(locationToken.nextToken(", "));
+        String lat = locationToken.nextToken(", ");
+        String lng = locationToken.nextToken(", ");
 
-        return Expressions.numberTemplate(Double.class, "abs({0} - {1})", node.lat4326, lat)
-                .add(Expressions.numberTemplate(Double.class, "abs({0} - {1})", node.lat4326, lng)).asc();
+        return Expressions.numberTemplate(Double.class, "abs({0} - {1})", String.valueOf(node.lat4326), lat)
+                .add(Expressions.numberTemplate(Double.class, "abs({0} - {1})", String.valueOf(node.lng4326), lng))
+                .asc();
     }
 
     private BooleanExpression ifPlaceCode(String placeCode) {
@@ -67,6 +70,6 @@ public class NodeRepositoryImpl implements NodeQueryRepository {
     }
 
     private OrderSpecifier<Double> ifLocation(String location, String placeCode){
-        return placeCode.equals("LOCATION") ? distanceAsc(location) : null;
+        return placeCode.equals("LOCATION") ? distanceAsc(location) : new OrderSpecifier(Order.ASC, NullExpression.DEFAULT, OrderSpecifier.NullHandling.Default);
     }
 }

@@ -27,7 +27,7 @@ public interface NodeRepository extends JpaRepository<Node, Integer>, NodeQueryR
     // ---------------------------------------- //
 
     @Modifying
-    @Query(value = "alter TABLE navi AUTO_INCREMENT = 1",nativeQuery = true)
+    @Query(value = "alter TABLE node AUTO_INCREMENT = 1",nativeQuery = true)
     void deleteINCREMENT();
 
 }

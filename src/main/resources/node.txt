@@ -804,7 +804,7 @@
 804	갈수있는 노드: 502<br>placeCode: SO<br>	#icon-1899-0288D1-labelson	502	갈수있는 노드	SO	placeCode	126.6328934	37.3765213	0
 805	갈수있는 노드: 208<br>placeCode: IKD	#icon-1899-0288D1-labelson	208	갈수있는 노드	IKD	placeCode	126.6358071	37.3753593	0
 806	갈수있는 노드: 211<br>placeCode: IWA	#icon-1899-0288D1-labelson	211	갈수있는 노드	IWA	placeCode	126.6355355	37.3752424	0
-807	"갈수있는 노드: 770<br>placeCode: SY3,SMK29<br>"	#icon-1899-0288D1-labelson	808	갈수있는 노드	"SY3,SMK29"	placeCode	126.6308753	37.3723285	0
+807	"갈수있는 노드: 770<br>placeCode: SY3,SMK29<br>"	#icon-1899-0288D1-labelson	770	갈수있는 노드	"SY3,SMK29"	placeCode	126.6308753	37.3723285	0
 808	"갈수있는 노드: 807,771<br>placeCode: SY3<br>"	#icon-1899-0288D1-labelson	"807,771"	갈수있는 노드	SY3	placeCode	126.6313406	37.3721315	0
 809	"갈수있는 노드: 204,737<br>placeCode: SMK5<br>"	#icon-1899-0288D1-labelson	"204,737"	갈수있는 노드	SMK5	placeCode	126.6347769	37.3752923	0
 810	"갈수있는 노드: 711,326<br>placeCode: SMK14"	#icon-1899-0288D1-labelson	"711,326"	갈수있는 노드	SMK14	placeCode	126.6328073	37.3767337	0

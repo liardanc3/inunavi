@@ -3,6 +3,7 @@ package com.maru.inunavi.user.service;
 import com.maru.inunavi.aspect.exceptionhandler.exception.LoginProcessException;
 import com.maru.inunavi.aspect.exceptionhandler.exception.SelectClassException;
 import com.maru.inunavi.aspect.exceptionhandler.exception.UpdateException;
+import com.maru.inunavi.aspect.exceptionhandler.exception.VerifyException;
 import com.maru.inunavi.lecture.domain.dto.FormattedTimeDto;
 import com.maru.inunavi.lecture.domain.entity.Lecture;
 import com.maru.inunavi.lecture.repository.LectureRepository;
@@ -125,27 +126,23 @@ public class UserService {
      * @return VerifyDto
      */
     public VerifyDto verify(String email) {
-        try {
-            String code = UUID.randomUUID().toString().substring(0, 7);
+        return userRepository.findByEmail(email)
+                .map(user -> {
+                    String code = UUID.randomUUID().toString().substring(0, 8);
 
-            SimpleMailMessage simpleMailMessage = new SimpleMailMessage();
-            simpleMailMessage.setTo(email);
-            simpleMailMessage.setSubject("verify");
-            simpleMailMessage.setText(code);
+                    SimpleMailMessage simpleMailMessage = new SimpleMailMessage();
+                    simpleMailMessage.setTo(email);
+                    simpleMailMessage.setSubject("INUNAVI 인증코드 발송");
+                    simpleMailMessage.setText("인증코드 : " + code);
 
-            javaMailSender.send(simpleMailMessage);
+                    javaMailSender.send(simpleMailMessage);
 
-            return VerifyDto.builder()
-                    .success("true")
-                    .code(code)
-                    .build();
-        } catch (Exception e) {
-
-            return VerifyDto.builder()
-                    .success("false")
-                    .message(e.getMessage())
-                    .build();
-        }
+                    return VerifyDto.builder()
+                            .success("true")
+                            .code(code)
+                            .build();
+                })
+                .orElseThrow(() -> new VerifyException("Unauthorized Access"));
     }
 
     /**

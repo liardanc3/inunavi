@@ -79,7 +79,7 @@ public class NaviService {
                 if(nodeId > 1){
                     int nearNodeIdx = Integer.parseInt(nearNodeIdxToken) - 1;
 
-                    nearNodeList.set(nearNodeIdx, nearNodeList.get(nearNodeIdx) + nodeId + ",");
+                    nearNodeList.set(nearNodeIdx, nearNodeList.get(nearNodeIdx) + "," + nodeId);
                 }
             }
 
@@ -189,11 +189,11 @@ public class NaviService {
                 this.id = id;
                 this.dstId = dstId;
 
-                Double srcLat = latList.get(id -1);
-                Double srcLng = lngList.get(id -1);
+                Double srcLat = latList.get(id - 1);
+                Double srcLng = lngList.get(id - 1);
 
-                Double dstLat = latList.get(dstId-1);
-                Double dstLng = lngList.get(dstId-1);
+                Double dstLat = latList.get(dstId - 1);
+                Double dstLng = lngList.get(dstId - 1);
 
                 Double manhattanDist = 1.2 * (distanceBetween(srcLat, srcLng, srcLat, dstLng) + distanceBetween(srcLat, dstLng, dstLat, dstLng));
 
@@ -235,7 +235,7 @@ public class NaviService {
             Double nowLat = latList.get(now - 1);
             Double nowLng = lngList.get(now - 1);
 
-            String nearNodes = nodeRepository.findById(now - 1).get().getNearNode();
+            String nearNodes = nodeRepository.findById(now).get().getNearNode();
             StringTokenizer nearNodesToken = new StringTokenizer(nearNodes);
             while (nearNodesToken.hasMoreTokens()) {
                 int next = Integer.parseInt(nearNodesToken.nextToken(","));
