@@ -225,7 +225,7 @@
 > </details>
 
 <details>
- <summary><code>이메일 인증</code> <code>POST</code> <code><b>/user/verify</b></code> </summary>
+ <summary><code>d이메일 인증</code> <code>POST</code> <code><b>/user/verify</b></code> </summary>
 
 <br>
 
@@ -245,7 +245,7 @@
 >
 >{
 >    "success": "true",
->    "email": "liardanc3@gmail.com"
+>    "code": "4b52bb9f"
 >}
 > ```
 > </details>
@@ -258,7 +258,8 @@
 > Content-Type: application/json;charset=UTF-8
 >
 >{
->    "response": []
+>    "success": "false",
+>    "message": "Unauthorized Access"
 >}
 > ```
 ></details>
@@ -698,13 +699,14 @@
 
 
 <details>
- <summary><code>장소 검색</code> <code>GET</code> <code><b>/placeSearchList</b></code> </summary>
+ <summary><code>d장소 검색</code> <code>GET</code> <code><b>/placeSearchList</b></code> </summary>
 
 <br>
 
 > ### Parameters
 > ```java
-> email : 이메일
+> searchKeyword : 검색어
+> myLocation : 현재 좌표
 >```
 > 
 >
@@ -717,24 +719,29 @@
 > Content-Type: application/json;charset=UTF-8
 >
 >{
->    "success": "true",
->    "email": "liardanc3@gmail.com"
+>    "response": [
+>        {
+>            "placeCode": "FOODSTU0,CAFECDSTU0",
+>            "title": "학생식당",
+>            "sort": "식당",
+>            "distance": 1011.9700490800614,
+>            "location": "37.374161554994025, 126.63175437187864",
+>            "time": "점심 10:30 ~ 14:00 · 저녁 17:00 ~ 18:30",
+>            "callNum": "-"
+>        },
+>        {
+>            "placeCode": "FOODSTU1,CONGSSTU1",
+>            "title": "제1기숙사 식당",
+>            "sort": "식당",
+>            "distance": 1127.305253103789,
+>            "location": "37.37357062725584, 126.62995831475537",
+>            "time": "아침 08:00 ~ 10:00 · 점심 11:30 ~ 13:30 ",
+>            "callNum": "-"
+>        }
+>    ]
 >}
 > ```
 > </details>
->
-> <details><summary>failure</summary> 
-> <br>
->
-> ```java
-> HTTP/1.1 500 Internal Server Error
-> Content-Type: application/json;charset=UTF-8
->
->{
->    "response": []
->}
-> ```
-></details>
 >
 >
 > ### Run example
