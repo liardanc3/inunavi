@@ -82,7 +82,7 @@
 ></details>
 
 <details>
- <summary><code>유저 강의 조회</code> <code>POST</code> <code><b>/user/select/class</b></code> </summary>
+ <summary><code>d유저 강의 조회</code> <code>POST</code> <code><b>/user/select/class</b></code> </summary>
 
 <br>
 
@@ -101,8 +101,24 @@
 > Content-Type: application/json;charset=UTF-8
 >
 >{
->    "success": "true",
->    "email": "liardanc3@gmail.com"
+>    "response": [
+>        {
+>            "id": "799",
+>            "department": "컴퓨터공학부",
+>            "grade": "3",
+>            "category": "전공필수",
+>            "number": "IAA6021002",
+>            "lectureName": "컴퓨터네트워크",
+>            "professor": "---",
+>            "classRoomRaw": "제7호관 정보기술대학-504 강의실(중)-1[SH504]",
+>            "classTimeRaw": "\" [SH504:화(2B-3),금(7-8A)]\"",
+>            "classRoom": "SH504,SH504,",
+>            "classTime": "69-71,222-224,",
+>            "how": "-",
+>            "point": "3",
+>            "formattedTime": "화 10:30 - 12:00, 금 15:00 - 17:00"
+>        }
+>    ]
 >}
 > ```
 > </details>
@@ -209,7 +225,7 @@
 > </details>
 
 <details>
- <summary><code>이메일 인증</code> <code>POST</code> <code><b>/user/verify</b></code> </summary>
+ <summary><code>d이메일 인증</code> <code>POST</code> <code><b>/user/verify</b></code> </summary>
 
 <br>
 
@@ -229,7 +245,7 @@
 >
 >{
 >    "success": "true",
->    "email": "liardanc3@gmail.com"
+>    "code": "4b52bb9f"
 >}
 > ```
 > </details>
@@ -242,7 +258,8 @@
 > Content-Type: application/json;charset=UTF-8
 >
 >{
->    "response": []
+>    "success": "false",
+>    "message": "Unauthorized Access"
 >}
 > ```
 ></details>
@@ -399,13 +416,14 @@
 > </details>
 
 <details>
- <summary><code>강의 추가</code> <code>POST</code> <code><b>/user/insert/class</b></code> </summary>
+ <summary><code>d강의 추가</code> <code>POST</code> <code><b>/user/insert/class</b></code> </summary>
 
 <br>
 
 > ### Parameters
 > ```java
 > email : 이메일
+> class_id : 강좌번호
 >```
 > 
 >
@@ -419,7 +437,7 @@
 >
 >{
 >    "success": "true",
->    "email": "liardanc3@gmail.com"
+>    "email": "test@gmail.com"
 >}
 > ```
 > </details>
@@ -432,7 +450,8 @@
 > Content-Type: application/json;charset=UTF-8
 >
 >{
->    "response": []
+>    "success": "false",
+>    "email": "test@gmail.com"
 >}
 > ```
 ></details>
@@ -445,13 +464,14 @@
 > </details>
 
 <details>
- <summary><code>강의 삭제</code> <code>POST</code> <code><b>/user/delete/class</b></code> </summary>
+ <summary><code>d강의 삭제</code> <code>POST</code> <code><b>/user/delete/class</b></code> </summary>
 
 <br>
 
 > ### Parameters
 > ```java
 > email : 이메일
+> class_id : 강의번호
 >```
 > 
 >
@@ -465,7 +485,7 @@
 >
 >{
 >    "success": "true",
->    "email": "liardanc3@gmail.com"
+>    "email": "test@gmail.com"
 >}
 > ```
 > </details>
@@ -478,7 +498,8 @@
 > Content-Type: application/json;charset=UTF-8
 >
 >{
->    "response": []
+>    "success": "false",
+>    "email": "test@gmail.com"
 >}
 > ```
 ></details>
@@ -491,13 +512,13 @@
 > </details>
 
 <details>
- <summary><code>시간표 정보</code> <code>GET</code> <code><b>/getTimeTableInfo</b></code> </summary>
+ <summary><code>d시간표 정보</code> <code>GET</code> <code><b>/getTimeTableInfo</b></code> </summary>
 
 <br>
 
 > ### Parameters
 > ```java
-> email : 이메일
+> x
 >```
 > 
 >
@@ -510,34 +531,20 @@
 > Content-Type: application/json;charset=UTF-8
 >
 >{
->    "success": "true",
->    "email": "liardanc3@gmail.com"
+>    "response": {
+>        "year": "2023",
+>        "semester": "여름",
+>        "majorArrayString": "국어국문학과,영어영문학과,독어독문학과,불어불문학과,일어일문학과,중어중국학과,수학과,물리학과,화학과,소비자ㆍ아동학과,패션산업학과,해양학과,사회복지학과,신문방송학과,문헌정보학과,창의인재개발학과,행정학과,정치외교학과,경제학과,경제학과(야),무역학부,무역학부(야),소비자학과,기계공학과,기계공학과(야),메카트로닉스공학과,전기공학과,전자공학과,전자공학과(야),산업경영공학과,산업경영공학과(야),안전공학과,신소재공학과,에너지화학공학과,컴퓨터공학부,컴퓨터공학부(야),정보통신공학과,임베디드시스템공학과,경영학부,세무회계학과,조형예술학부,한국화전공,서양화전공,디자인학부,공연예술학과,체육학부,운동건강학부,국어교육과,영어교육과,일어교육과,수학교육과,체육교육과,유아교육과,역사교육과,윤리교육과,도시행정학과,도시건축학부,건축공학전공,도시건축학전공,도시공학과,도시환경공학부,건설환경공학전공,환경공학전공,생명과학부,생명과학전공,분자의생명전공,생명공학부,생명공학전공,나노바이오전공,동북아국제통상학부,한국통상전공,법학부,광전자공학전공(연계),물류학전공(연계),인공지능소프트웨어연계전공,창의적디자인연계전공,뷰티산업연계전공,인문문화예술기획연계전공,소셜데이터사이언스연계전공,전체",
+>        "CSEArrayString": "대학영어2,Academic English,컴퓨팅적사고와SW,글쓰기이론과실제,대학영어회화2,전체",
+>        "categoryListString": "전공기초,전공선택,전공필수,교양필수,기초과학,교양선택,교직,일반선택,군사학,전체"
+>    }
 >}
 > ```
-> </details>
->
-> <details><summary>failure</summary> 
-> <br>
->
-> ```java
-> HTTP/1.1 500 Internal Server Error
-> Content-Type: application/json;charset=UTF-8
->
->{
->    "response": []
->}
-> ```
-></details>
->
->
-> ### Run example
->
-> // gif
 > </details>
 > </details>
 
 <details>
- <summary><code>강의 검색</code> <code>GET</code> <code><b>/selectLecture</b></code> </summary>
+ <summary><code>d강의 검색</code> <code>GET</code> <code><b>/selectLecture</b></code> </summary>
 
 <br>
 
@@ -556,8 +563,24 @@
 > Content-Type: application/json;charset=UTF-8
 >
 >{
->    "success": "true",
->    "email": "liardanc3@gmail.com"
+>    "response": [
+>        {
+>            "id": 767,
+>            "department": "컴퓨터공학부",
+>            "grade": "1",
+>            "category": "교양필수",
+>            "number": "XAA1359031",
+>            "professor": "XXX",
+>            "classRoomRaw": "제7호관 정보기술대학-304 강의실(대)-계단식[SH304]",
+>            "classTimeRaw": "\" [SH304:화(2)(3),목(6)]\"",
+>            "classRoom": "SH304,SH304",
+>            "classTime": "68-71,172-173,",
+>            "how": "-",
+>            "point": "3",
+>            "realTime": "화 10:00 - 12:00, 목 14:00 - 15:00",
+>            "lecturename": "대학수학(2)"
+>        }
+>     ]
 >}
 > ```
 > </details>
@@ -566,7 +589,7 @@
 > <br>
 >
 > ```java
-> HTTP/1.1 500 Internal Server Error
+> HTTP/1.1 200 OK
 > Content-Type: application/json;charset=UTF-8
 >
 >{
@@ -676,13 +699,14 @@
 
 
 <details>
- <summary><code>장소 검색</code> <code>GET</code> <code><b>/placeSearchList</b></code> </summary>
+ <summary><code>d장소 검색</code> <code>GET</code> <code><b>/placeSearchList</b></code> </summary>
 
 <br>
 
 > ### Parameters
 > ```java
-> email : 이메일
+> searchKeyword : 검색어
+> myLocation : 현재 좌표
 >```
 > 
 >
@@ -695,24 +719,29 @@
 > Content-Type: application/json;charset=UTF-8
 >
 >{
->    "success": "true",
->    "email": "liardanc3@gmail.com"
+>    "response": [
+>        {
+>            "placeCode": "FOODSTU0,CAFECDSTU0",
+>            "title": "학생식당",
+>            "sort": "식당",
+>            "distance": 1011.9700490800614,
+>            "location": "37.374161554994025, 126.63175437187864",
+>            "time": "점심 10:30 ~ 14:00 · 저녁 17:00 ~ 18:30",
+>            "callNum": "-"
+>        },
+>        {
+>            "placeCode": "FOODSTU1,CONGSSTU1",
+>            "title": "제1기숙사 식당",
+>            "sort": "식당",
+>            "distance": 1127.305253103789,
+>            "location": "37.37357062725584, 126.62995831475537",
+>            "time": "아침 08:00 ~ 10:00 · 점심 11:30 ~ 13:30 ",
+>            "callNum": "-"
+>        }
+>    ]
 >}
 > ```
 > </details>
->
-> <details><summary>failure</summary> 
-> <br>
->
-> ```java
-> HTTP/1.1 500 Internal Server Error
-> Content-Type: application/json;charset=UTF-8
->
->{
->    "response": []
->}
-> ```
-></details>
 >
 >
 > ### Run example
