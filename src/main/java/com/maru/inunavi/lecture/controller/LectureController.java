@@ -50,8 +50,8 @@ public class LectureController {
      */
     @Log
     @GetMapping("/getTimeTableInfo")
-    public Map<String, TimeTableInfoDto> getTimeTableInfo(){
-        return Map.of("response", lectureService.getTimeTableInfo());
+    public Map<String, List<TimeTableInfoDto>> getTimeTableInfo(){
+        return Map.of("response", List.of(lectureService.getTimeTableInfo()));
     }
 
     /**
