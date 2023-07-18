@@ -86,6 +86,10 @@ public class Lecture {
                         .collect(Collectors.toList());
     }
 
+    public String getMultipliedPlaceCode(){
+        return (this.placeCode + ",").repeat(classTime.split(",").length);
+    }
+
     public String getFormattedTime(){
         if (this.classTime.equals("-")) {
             return "-";

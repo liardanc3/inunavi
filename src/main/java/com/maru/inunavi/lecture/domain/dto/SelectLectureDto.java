@@ -22,9 +22,17 @@ public class SelectLectureDto {
     private String lectureName;
 
     private String professor;
+
+    @JsonProperty("classroom_raw")
     private String classRoomRaw;
+
+    @JsonProperty("classtime_raw")
     private String classTimeRaw;
+
+    @JsonProperty("classroom")
     private String classRoom;
+
+    @JsonProperty("classtime")
     private String classTime;
     private String how;
     private String point;

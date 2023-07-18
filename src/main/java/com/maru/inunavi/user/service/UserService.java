@@ -104,12 +104,10 @@ public class UserService {
     public LoginResultDto login(String email, String password) {
         return userRepository.findByEmail(email)
                 .map(user -> {
-                    System.out.println("user = " + user);
-                    System.out.println("user = " + user);
                     if (new BCryptPasswordEncoder().matches(password, user.getPassword())) {
                         return LoginResultDto.builder()
                                 .email(email)
-                                .success("success")
+                                .success("true")
                                 .message("로그인 성공")
                                 .major(user.getMajor())
                                 .build();
@@ -128,7 +126,7 @@ public class UserService {
     public VerifyDto verify(String email) {
         return userRepository.findByEmail(email)
                 .map(user -> {
-                    String code = UUID.randomUUID().toString().substring(0, 8);
+                    String code = UUID.randomUUID().toString().substring(0, 6);
 
                     SimpleMailMessage simpleMailMessage = new SimpleMailMessage();
                     simpleMailMessage.setTo(email);
@@ -155,7 +153,7 @@ public class UserService {
     public UpdateDto updatePassword(String email, String password) {
         return userRepository.findByEmail(email)
                 .map(user -> {
-                    user.updatePassword(password);
+                    user.updatePassword(new BCryptPasswordEncoder().encode(password));
 
                     return UpdateDto.builder()
                             .success("true")

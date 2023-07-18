@@ -24,8 +24,8 @@ public class PlaceRepositoryImpl implements PlaceQueryRepository{
                 queryFactory
                         .selectFrom(place)
                         .where(
-                                Expressions.stringTemplate("replace(upper({0}), ' ', '')", place.title).toUpperCase().contains(searchKeyword),
-                                Expressions.stringTemplate("replace(upper({0}), ' ', '')", place.sort).toUpperCase().contains(searchKeyword)
+                                Expressions.stringTemplate("replace(upper({0}), ' ', '')", place.title).toUpperCase().contains(searchKeyword).or(
+                                Expressions.stringTemplate("replace(upper({0}), ' ', '')", place.sort).toUpperCase().contains(searchKeyword))
                         )
                         .fetch()
         );

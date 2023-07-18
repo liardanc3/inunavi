@@ -93,11 +93,11 @@ public class NaviService {
 
             // Set position
             StringTokenizer lngToken = new StringTokenizer(lineToken.nextToken("\t"));
-            String lng4326 = lngToken.nextToken(".") + lngToken.nextToken(",").substring(0, 4);
+            String lng4326 = lngToken.nextToken(".") + lngToken.nextToken(",");
             lng4326List.add(lng4326);
 
             StringTokenizer latToken = new StringTokenizer(lineToken.nextToken("\t"));
-            String lat4326 = latToken.nextToken(".") + latToken.nextToken(",").substring(0, 4);
+            String lat4326 = latToken.nextToken(".") + latToken.nextToken(",");
             lat4326List.add(lat4326);
         }
 
@@ -108,7 +108,7 @@ public class NaviService {
                                 Node.builder()
                                         .lng4326(lng4326List.get(idx))
                                         .lat4326(lat4326List.get(idx))
-                                        .nearNode(nearNodeList.get(idx))
+                                        .nearNode(nearNodeList.get(idx).replaceAll(" ", ""))
                                         .placeCode(placeCodes.get(idx))
                                         .build()
                 ));
@@ -293,6 +293,7 @@ public class NaviService {
                         .isArrived(dist < 15 ? "true" : "false")
                         .dist(dist)
                         .route(route)
+                        .srcId(srcId)
                         .dstId(dstIdx)
                         .build()
         );
@@ -413,7 +414,7 @@ public class NaviService {
                     List<String> lectureInfoList = lectureList.stream()
                             .flatMap(lecture -> {
                                 String[] classTimeList = lecture.getClassTime().split(",");
-                                String[] placeCodeList = lecture.getPlaceCode().split(",");
+                                String[] placeCodeList = lecture.getMultipliedPlaceCode().split(",");
 
                                 Arrays.stream(classTimeList)
                                         .mapToInt(time -> Integer.parseInt(time.split("-")[0]) / 48)
@@ -428,7 +429,7 @@ public class NaviService {
                             .filter(i -> isClassDay[i])
                             .forEach(i -> lectureInfoList.add((i * 48) + "-?,?,?"));
 
-                    lectureInfoList.sort(Comparator.naturalOrder());
+                    lectureInfoList.sort(Comparator.comparingInt(info -> Integer.parseInt(info.split("-")[0])));
 
                     IntStream.range(0, lectureInfoList.size() - 1)
                             .forEach(i -> {
@@ -438,40 +439,57 @@ public class NaviService {
                                 String startTime = startInfo[0];
                                 String endTime = endInfo[0];
 
-                                String endPlaceCode = endInfo[1];
+                                if(startTime.contains("?") || !endTime.contains("?")){
+                                    String endPlaceCode = endInfo[1];
 
-                                String startLectureName = startInfo[2];
-                                String endLectureName = endInfo[2];
+                                    String startLectureName = startInfo[2];
+                                    String endLectureName = endInfo[2];
 
-                                Path shortestPath = null;
+                                    PathDto shortestPath = null;
 
-                                if (startTime.contains("?")) {
-                                    shortestPath = getShortestPath(lectureInfoList.get(i + 1), List.of(22, 60, 67));
-                                    startLectureName = Map.of(
-                                                    22, "정문(버스정류장)",
-                                                    60, "자연과학대학(버스정류장)",
-                                                    67, "공과대학(버스정류장)"
-                                            )
-                                            .get(shortestPath.getSrcId());
-                                } else if (!endTime.contains("?")) {
-                                    shortestPath = getShortestPath(lectureInfoList.get(i + 1), nodeRepository.findIdByPlaceCode(endPlaceCode));
+                                    if (startTime.contains("?")) {
+                                        shortestPath = getShortestPath(lectureInfoList.get(i + 1), List.of(22, 60, 67));
+                                        startLectureName = Map.of(
+                                                        22, "정문(버스정류장)",
+                                                        60, "자연과학대학(버스정류장)",
+                                                        67, "공과대학(버스정류장)"
+                                                )
+                                                .get(shortestPath.getSrcId());
+                                    } else if (!endTime.contains("?")) {
+                                        shortestPath = getShortestPath(lectureInfoList.get(i + 1), nodeRepository.findIdByPlaceCode(endPlaceCode));
+                                    }
+
+                                    String formattedTime = timeFormatting(Integer.parseInt(endTime.split("-")[1]));
+                                    String totalTime = String.valueOf(((shortestPath.getDist() * 1.65) / 100));
+                                    String distance = shortestPath.getDist().toString();
+
+                                    String[] splitRoute = shortestPath.getRoute().split(",");
+                                    Stack<String> latStack = new Stack<>();
+                                    Stack<String> lngStack = new Stack<>();
+
+                                    for (int j = 0; j < splitRoute.length - 1; j += 2) {
+                                        latStack.push(splitRoute[j]);
+                                        lngStack.push(splitRoute[j+1]);
+                                    }
+
+                                    StringJoiner joiner = new StringJoiner(",");
+                                    while (!latStack.isEmpty()) {
+                                        joiner.add(latStack.pop() + "," + lngStack.pop());
+                                    }
+
+                                    String directionString = joiner.toString();
+
+                                    routeOverviewDtoList.add(
+                                            RouteOverviewDto.builder()
+                                                    .startLectureName(startLectureName)
+                                                    .endLectureName(endLectureName)
+                                                    .formattedTime(formattedTime)
+                                                    .totalTime(totalTime)
+                                                    .distance(distance)
+                                                    .directionString(directionString)
+                                                    .build()
+                                    );
                                 }
-
-                                String formattedTime = timeFormatting(Integer.parseInt(endTime.split("-")[1]));
-                                String totalTime = String.valueOf(((shortestPath.getDist() * 1.65) / 100));
-                                String distance = shortestPath.getDist().toString();
-                                String directionString = shortestPath.getRoute();
-
-                                routeOverviewDtoList.add(
-                                        RouteOverviewDto.builder()
-                                                .startLectureName(startLectureName)
-                                                .endLectureName(endLectureName)
-                                                .formattedTime(formattedTime)
-                                                .totalTime(totalTime)
-                                                .distance(distance)
-                                                .directionString(directionString)
-                                                .build()
-                                );
                             });
 
                     return routeOverviewDtoList;
@@ -513,7 +531,7 @@ public class NaviService {
 
                     String distancePercentage = String.valueOf((int) totalDist / 50);
                     String tightnessPercentage = String.valueOf(
-                            IntStream.range(0, isClassTime.length - 1)
+                            IntStream.range(1, isClassTime.length - 1)
                                     .map(i -> (isClassTime[i-1] && !isClassTime[i] && isClassTime[i+1]) ? 15 : 0)
                                     .sum()
                     );
@@ -596,9 +614,9 @@ public class NaviService {
         return lecture.getClassRoom().split(",")[idx].split(detailClassRoom)[0];
     }
 
-    private Path getShortestPath(String nextTimeAndIdPlaceCode, List<Integer> srcIdList) {
+    private PathDto getShortestPath(String nextTimeAndPlaceCodeAndLectureName, List<Integer> srcIdList) {
 
-        Path shortestPath = null;
+        PathDto shortestPath = null;
         Double shortestDist = 1e9;
 
         for (Integer srcId : srcIdList) {
@@ -608,15 +626,19 @@ public class NaviService {
             RouteInfo nodeToNextClassInfo = RouteInfo.builder()
                     .startPlaceCode("")
                     .startLocation(node.getLat4326() + "," + node.getLng4326())
-                    .endPlaceCode(nextTimeAndIdPlaceCode.split(",")[2])
+                    .endPlaceCode(nextTimeAndPlaceCodeAndLectureName.split(",")[1])
                     .endLocation("")
                     .build();
 
-            Path path = aStarWithManhattan(srcId, nodeRepository.findDstNodeIdByRouteInfo(nodeToNextClassInfo), nodeToNextClassInfo);
+            PathDto pathDto = pathRepository.findByRouteInfoQuery(nodeToNextClassInfo.getQuery())
+                            .orElseGet(() ->
+                                    new PathDto(aStarWithManhattan(srcId, nodeRepository.findDstNodeIdByRouteInfo(nodeToNextClassInfo), nodeToNextClassInfo)
+                            ));
 
-            if(path.getDist() < shortestDist){
-                shortestPath = path;
-                shortestDist = path.getDist();
+
+            if(pathDto.getDist() < shortestDist){
+                shortestPath = pathDto;
+                shortestDist = pathDto.getDist();
             }
         }
 

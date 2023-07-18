@@ -13,29 +13,28 @@ public class FormattedTimeDto {
     private String category;
     private String number;
 
-    @JsonProperty(namespace = "lecturename")
+    @JsonProperty("lecturename")
     private String lectureName;
 
     private String professor;
 
-    @JsonProperty(namespace = "classroom_raw")
+    @JsonProperty("classroom_raw")
     private String classRoomRaw;
 
-    @JsonProperty(namespace = "classtime_raw")
+    @JsonProperty("classtime_raw")
     private String classTimeRaw;
 
-    @JsonProperty(namespace = "classroom")
+    @JsonProperty("classroom")
     private String classRoom;
 
-    @JsonProperty(namespace = "classtime")
+    @JsonProperty("classtime")
     private String classTime;
 
-    @JsonProperty(namespace = "how")
     private String how;
 
     private String point;
 
-    @JsonProperty(namespace = "realTime")
+    @JsonProperty("realTime")
     private String formattedTime;
 
     public FormattedTimeDto(Lecture lecture) {

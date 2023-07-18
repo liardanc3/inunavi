@@ -1,5 +1,6 @@
 package com.maru.inunavi.navi.domain.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -16,17 +17,20 @@ public class PathDto {
     private String query;
     private String isArrived;
 
-    @JsonProperty(namespace = "Dist")
+    @JsonProperty("Dist")
     private Double dist;
 
-    @JsonProperty(namespace = "Route")
+    @JsonProperty("Route")
     private String route;
 
-    @JsonProperty(namespace = "time")
+    @JsonProperty("time")
     private int time;
 
-    @JsonProperty(namespace = "Steps")
+    @JsonProperty("Steps")
     private int steps;
+
+    @JsonIgnore
+    private Integer srcId;
 
     public PathDto(Path path){
         this.id = path.getId();
@@ -37,6 +41,8 @@ public class PathDto {
 
         this.steps = (int) (1.65 * this.dist);
         this.time = this.steps / 100;
+
+        this.srcId = path.getSrcId();
     }
 
 }

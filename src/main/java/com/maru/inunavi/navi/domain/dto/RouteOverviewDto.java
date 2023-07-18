@@ -11,7 +11,7 @@ public class RouteOverviewDto {
     private String startLectureName;
     private String endLectureName;
 
-    @JsonProperty(namespace = "endLectureTime")
+    @JsonProperty("endLectureTime")
     private String formattedTime;
 
     private String totalTime;

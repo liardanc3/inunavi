@@ -139,30 +139,25 @@ public class LectureRepositoryImpl implements LectureQueryRepository{
     }
 
     private BooleanExpression keywordCondition(String mainKeyword, String keywordOption) {
-        if(mainKeyword.equals("")){
-            return null;
-        }
-
         BooleanExpression booleanExpression = lecture.isNotNull();
 
         if(keywordOption.equals("전체")){
-            booleanExpression
-                    .or(lecture.lectureName.toUpperCase().contains(mainKeyword.toUpperCase()))
-                    .or(lecture.professor.contains(mainKeyword))
-                    .or(lecture.number.contains(mainKeyword));
+            booleanExpression = booleanExpression.and(
+                    lecture.lectureName.toUpperCase().contains(mainKeyword.toUpperCase())
+                            .or(lecture.professor.contains(mainKeyword))
+                            .or(lecture.number.contains(mainKeyword)
+                            ));
         }
 
         if(keywordOption.equals("과목명")){
-            booleanExpression
-                    .or(lecture.lectureName.toUpperCase().contains(mainKeyword.toUpperCase()));
-        }
-        else if(keywordOption.equals("교수명")){
-            booleanExpression
-                    .or(lecture.professor.contains(mainKeyword));
-        }
-        else if(keywordOption.equals("과목코드")){
-            booleanExpression
-                    .or(lecture.number.contains(mainKeyword));
+            booleanExpression = booleanExpression
+                    .and(lecture.lectureName.toUpperCase().contains(mainKeyword.toUpperCase()));
+        } else if(keywordOption.equals("교수명")){
+            booleanExpression = booleanExpression
+                    .and(lecture.professor.contains(mainKeyword));
+        } else if(keywordOption.equals("과목코드")){
+            booleanExpression = booleanExpression
+                    .and(lecture.number.contains(mainKeyword));
         }
 
         return booleanExpression;

@@ -21,7 +21,7 @@ public interface NodeRepository extends JpaRepository<Node, Integer>, NodeQueryR
     @Query("select n.lng4326 from Node n")
     List<Double> findAllOfLng();
 
-    @Query("select n.id from Node n where n.placeCode like '%:placeCode%'")
+    @Query("select n.id from Node n where n.placeCode like %:placeCode%")
     List<Integer> findIdByPlaceCode(String placeCode);
 
     // ---------------------------------------- //
