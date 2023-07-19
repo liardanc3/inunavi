@@ -41,7 +41,7 @@ public class User {
             joinColumns = @JoinColumn(name = "email"),
             inverseJoinColumns = @JoinColumn(name = "lecture_id")
     )
-    private Set<Lecture> lectures = new HashSet<>();
+    private List<Lecture> lectures = new ArrayList<>();
 
     // --------------------------------------------------- //
 

@@ -18,7 +18,6 @@ public interface UserRepository extends JpaRepository<User, Long>, UserQueryRepo
 
     Optional<User> findByEmail(@Param("email") String email);
 
-    @Cacheable("offlineLectures")
     @Query("select l from Lecture l join fetch l.users u" +
             " where u.email = :email and l.classRoom <> '-' and l.placeCode not like '%ZZ%' and l.placeCode not like '%NC%'")
     Optional<List<Lecture>> findOfflineLecturesByEmail(String email);

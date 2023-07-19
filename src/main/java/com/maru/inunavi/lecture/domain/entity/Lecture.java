@@ -71,7 +71,7 @@ public class Lecture {
     private String placeCode;
 
     @ManyToMany(mappedBy = "lectures")
-    private Set<User> users = new HashSet<>();
+    private List<User> users = new ArrayList<>();
     
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "recommend_id")

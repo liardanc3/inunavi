@@ -195,7 +195,10 @@ public class UserService {
                 .map(user -> {
                     if (new BCryptPasswordEncoder().matches(password, user.getPassword())) {
 
-                        user.getLectures().forEach(lecture -> deleteLecture(email, lecture.getNumber()));
+                        user.getLectures().forEach(lecture -> {
+                            lecture.getRecommend().updateSimilarityPoint(lecture.getId(), -1);
+                            lecture.getRecommend().updateSimilarityPoint(lecture.getId(), -1);
+                        });
                         user.removeLectures();
 
                         userRepository.delete(user);
