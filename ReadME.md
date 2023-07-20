@@ -87,7 +87,7 @@
 ></details>
 
 <details>
- <summary><code>d유저 강의 조회</code> <code>POST</code> <code><b>/user/select/class</b></code> </summary>
+ <summary><code>유저 강의 조회</code> <code>POST</code> <code><b>/user/select/class</b></code> </summary>
 
 <br>
 
@@ -144,7 +144,7 @@
 >
 > ### Run example
 >
-> // gif
+>![select-class](https://github.com/liardanc3/inunavi/assets/85429793/e73408a4-a6b8-426e-81e0-44648c36b0db)
 > </details>
 > </details>
 
