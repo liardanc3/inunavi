@@ -39,8 +39,8 @@
 ## 구현 API
 
 <details>
- <summary><code>회원가입</code> <code>POST</code> <code><b>/user/insert</b></code> </summary>
-
+ <summary><code>회원가입</code> <code>POST</code> <code><b>/user/insert</b></code></summary>
+ 
 <br>
 
 > ### Parameters
@@ -49,7 +49,6 @@
 > password : 비밀번호
 > major : 전공
 >```
-> 
 >
 > ### Responses
 > <details open><summary>success</summary> 
