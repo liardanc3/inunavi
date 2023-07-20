@@ -12,7 +12,7 @@
 ![inunavi](https://user-images.githubusercontent.com/85429793/235772684-2e480f82-1a84-4792-a270-5609f6b9bb39.png)
 
 <div align=center> 서비스 기간 : 2022.03.02 ~ 2022.12.29
-
+ 
 <br><br>
 [playstore](https://play.google.com/store/apps/details?id=com.maru.inunavi)
 <br>
