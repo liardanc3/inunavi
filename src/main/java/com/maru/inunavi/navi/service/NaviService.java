@@ -157,7 +157,7 @@ public class NaviService {
         return pathRepository.findByRouteInfoQuery(routeInfo.getQuery())
                 .orElseGet(() -> {
                     Integer srcId = nodeRepository.findSrcNodeIdByRouteInfo(routeInfo);
-                    List<Integer> dstIdList = nodeRepository.findDstNodeIdByRouteInfo(routeInfo);
+                    List<Integer> dstIdList = List.of(nodeRepository.findDstNodeIdByRouteInfo(routeInfo).get(0));
 
                     return new PathDto(aStarWithManhattan(srcId, dstIdList, routeInfo));
                 });
@@ -271,6 +271,9 @@ public class NaviService {
         // ---- Set other info ---- //
         String query = routeInfo.getQuery();
         Double dist = distArray[dstIdx];
+
+        // --- Set route ---- //
+        route = getReverseRoute(route);
 
         // ---- startLocation -> nearNode ---- //
         if(routeInfo.getStartPlaceCode().equals("LOCATION")){
@@ -440,7 +443,7 @@ public class NaviService {
                                 String endTime = endInfo[0];
 
                                 if(startTime.contains("?") || !endTime.contains("?")){
-                                    String endPlaceCode = endInfo[1];
+                                    String startPlaceCode = startInfo[1];
 
                                     String startLectureName = startInfo[2];
                                     String endLectureName = endInfo[2];
@@ -456,28 +459,13 @@ public class NaviService {
                                                 )
                                                 .get(shortestPath.getSrcId());
                                     } else if (!endTime.contains("?")) {
-                                        shortestPath = getShortestPath(lectureInfoList.get(i + 1), nodeRepository.findIdByPlaceCode(endPlaceCode));
+                                        shortestPath = getShortestPath(lectureInfoList.get(i + 1), nodeRepository.findIdByPlaceCode(startPlaceCode));
                                     }
 
                                     String formattedTime = timeFormatting(Integer.parseInt(endTime.split("-")[1]));
                                     String totalTime = String.valueOf(((shortestPath.getDist() * 1.65) / 100));
                                     String distance = shortestPath.getDist().toString();
-
-                                    String[] splitRoute = shortestPath.getRoute().split(",");
-                                    Stack<String> latStack = new Stack<>();
-                                    Stack<String> lngStack = new Stack<>();
-
-                                    for (int j = 0; j < splitRoute.length - 1; j += 2) {
-                                        latStack.push(splitRoute[j]);
-                                        lngStack.push(splitRoute[j+1]);
-                                    }
-
-                                    StringJoiner joiner = new StringJoiner(",");
-                                    while (!latStack.isEmpty()) {
-                                        joiner.add(latStack.pop() + "," + lngStack.pop());
-                                    }
-
-                                    String directionString = joiner.toString();
+                                    String directionString = shortestPath.getRoute();
 
                                     routeOverviewDtoList.add(
                                             RouteOverviewDto.builder()
@@ -495,6 +483,25 @@ public class NaviService {
                     return routeOverviewDtoList;
                 })
                 .orElseGet(() -> List.of(RouteOverviewDto.builder().build()));
+    }
+
+    private static String getReverseRoute(String route) {
+        String[] splitRoute = route.split(",");
+        Stack<String> latStack = new Stack<>();
+        Stack<String> lngStack = new Stack<>();
+
+        for (int j = 0; j < splitRoute.length - 1; j += 2) {
+            latStack.push(splitRoute[j]);
+            lngStack.push(splitRoute[j+1]);
+        }
+
+        StringJoiner joiner = new StringJoiner(",");
+        while (!latStack.isEmpty()) {
+            joiner.add(latStack.pop() + "," + lngStack.pop());
+        }
+
+        String directionString = joiner.toString();
+        return directionString;
     }
 
 

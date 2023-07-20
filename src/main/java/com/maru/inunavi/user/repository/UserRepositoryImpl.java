@@ -2,12 +2,12 @@ package com.maru.inunavi.user.repository;
 
 import com.maru.inunavi.lecture.domain.entity.Lecture;
 import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.core.types.dsl.MathExpressions;
+import com.querydsl.core.types.dsl.NumberTemplate;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 
-import java.util.Arrays;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static com.maru.inunavi.lecture.domain.entity.QLecture.lecture;
 import static com.maru.inunavi.user.domain.entity.QUser.user;
@@ -19,33 +19,43 @@ public class UserRepositoryImpl implements UserQueryRepository{
 
     @Override
     public Optional<Lecture> findNextLecture(String email, int nowTime) {
-        return Optional
-                .ofNullable(queryFactory
+        return Optional.ofNullable(
+                queryFactory
                         .selectFrom(lecture)
                         .leftJoin(lecture.users, user)
                         .fetchJoin()
                         .where(
                                 user.email.eq(email),
-                                Expressions.asNumber(getStartTime(nowTime))
-                                        .eq(-1)
-                                        .not()
+                                lecture.classTime.ne("-"),
+                                Expressions.numberTemplate(
+                                        Integer.class,
+                                        "FLOOR(SUBSTRING_INDEX(SUBSTRING_INDEX({0}, ',', 1), '-', 1) / 48)",
+                                        getStartTime()
+                                ).eq(nowTime / 48),
+                                getStartTime().gt(nowTime)
                         )
                         .orderBy(
-                                Expressions.numberTemplate(Integer.class, "{0} - {1}", getStartTime(nowTime), nowTime)
-                                        .asc()
+                                Expressions.numberTemplate(
+                                        Integer.class,
+                                        "{0} - {1}",
+                                        getStartTime(),
+                                        nowTime
+                                ).asc()
                         )
                         .limit(1)
-                        .fetchOne());
+                        .fetchOne()
+        );
     }
 
-    private Integer getStartTime(int nowTime){
-        return Optional.ofNullable(
-                Arrays.stream(lecture.classTime.toString().split(","))
-                        .map(range -> Integer.parseInt(range.split("-")[0]))
-                        .filter(startTime -> startTime / 48 == nowTime / 48 && nowTime <= startTime)
-                        .collect(Collectors.toList())
-                        .get(0)
+    private NumberTemplate<Integer> getStartTime() {
+        return Expressions.numberTemplate(
+                Integer.class,
+                "{0}",
+                Expressions.stringTemplate(
+                        "SUBSTRING_INDEX({0}, '-', {1})",
+                        Expressions.stringTemplate("SUBSTRING_INDEX({0}, ',', {1})", lecture.classTime, 1),
+                        1
                 )
-                .orElse(-1);
+        );
     }
 }

@@ -17,16 +17,12 @@ public class PathDto {
     private String query;
     private String isArrived;
 
-    @JsonProperty("Dist")
     private Double dist;
 
-    @JsonProperty("Route")
     private String route;
 
-    @JsonProperty("time")
     private int time;
 
-    @JsonProperty("Steps")
     private int steps;
 
     @JsonIgnore

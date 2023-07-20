@@ -9,6 +9,8 @@ import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.core.types.dsl.NumberExpression;
+import com.querydsl.core.types.dsl.NumberTemplate;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 
@@ -60,8 +62,13 @@ public class NodeRepositoryImpl implements NodeQueryRepository {
         String lat = locationToken.nextToken(", ");
         String lng = locationToken.nextToken(", ");
 
-        return Expressions.numberTemplate(Double.class, "abs({0} - {1})", String.valueOf(node.lat4326), lat)
-                .add(Expressions.numberTemplate(Double.class, "abs({0} - {1})", String.valueOf(node.lng4326), lng))
+        NumberTemplate<Double> nodeLat4326 = Expressions.numberTemplate(Double.class, "{0}", node.lat4326);
+        NumberTemplate<Double> lat4326 = Expressions.numberTemplate(Double.class, "{0}", lat);
+        NumberTemplate<Double> nodeLng4326 = Expressions.numberTemplate(Double.class, "{0}", node.lng4326);
+        NumberTemplate<Double> lng4326 = Expressions.numberTemplate(Double.class, "{0}", lng);
+
+        return Expressions.numberTemplate(Double.class, "abs({0} - {1})", nodeLat4326, lat4326)
+                .add(Expressions.numberTemplate(Double.class, "abs({0} - {1})", nodeLng4326, lng4326))
                 .asc();
     }
 
