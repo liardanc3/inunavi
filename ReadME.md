@@ -39,7 +39,7 @@
 ## 구현 API
 
 <details>
- <summary><code>d회원가입</code> <code>POST</code> <code><b>/user/insert</b></code> </summary>
+ <summary><code>회원가입</code> <code>POST</code> <code><b>/user/insert</b></code> </summary>
 
 <br>
 
@@ -78,6 +78,11 @@
 >    "email": "liardanc3@gmail.com"
 >}
 > ```
+> </details>
+>
+> ### Run example
+>
+> ![insert](https://github.com/liardanc3/inunavi/assets/85429793/2709b32c-193a-4e82-a769-2f66f7bcbd8f)
 ></details>
 ></details>
 
@@ -144,7 +149,7 @@
 > </details>
 
 <details>
- <summary><code>d아이디 중복 체크</code> <code>POST</code> <code><b>/user/check/id={id}</b></code> </summary>
+ <summary><code>아이디 중복 체크</code> <code>POST</code> <code><b>/user/check/id={id}</b></code> </summary>
 
 <br>
 
@@ -171,12 +176,12 @@
 >
 > ### Run example
 >
-> // gif
+> ![user-check-id](https://github.com/liardanc3/inunavi/assets/85429793/ebbc7813-15a0-4aa4-bfe4-072452820ac2)
 > </details>
 > </details>
 
 <details>
- <summary><code>d로그인</code> <code>POST</code> <code><b>/user/login</b></code> </summary>
+ <summary><code>로그인</code> <code>POST</code> <code><b>/user/login</b></code> </summary>
 
 <br>
 
@@ -220,12 +225,12 @@
 >
 > ### Run example
 >
-> // gif
+> ![login](https://github.com/liardanc3/inunavi/assets/85429793/4cad3f58-b8ec-4c6e-bb4f-34ea9474e3a1)
 > </details>
 > </details>
 
 <details>
- <summary><code>d이메일 인증</code> <code>POST</code> <code><b>/user/verify</b></code> </summary>
+ <summary><code>이메일 인증</code> <code>POST</code> <code><b>/user/verify</b></code> </summary>
 
 <br>
 
@@ -267,12 +272,12 @@
 >
 > ### Run example
 >
-> // gif
+> ![verify](https://github.com/liardanc3/inunavi/assets/85429793/cf80d0e8-16e7-43c9-9e8a-92dc5b2f23ae)
 > </details>
 > </details>
 
 <details>
- <summary><code>d비밀번호 변경</code> <code>POST</code> <code><b>/user/update</b></code> </summary>
+ <summary><code>비밀번호 변경</code> <code>POST</code> <code><b>/user/update</b></code> </summary>
 
 <br>
 
@@ -315,12 +320,12 @@
 >
 > ### Run example
 >
-> // gif
+> ![updatepassword](https://github.com/liardanc3/inunavi/assets/85429793/8937e6a8-752e-4ac9-aa7e-1da877126fad)
 > </details>
 > </details>
 
 <details>
- <summary><code>d전공 업데이트</code> <code>POST</code> <code><b>/user/update2</b></code> </summary>
+ <summary><code>전공 업데이트</code> <code>POST</code> <code><b>/user/update2</b></code> </summary>
 
 <br>
 
@@ -363,19 +368,19 @@
 >
 > ### Run example
 >
-> // gif
+> ![update2](https://github.com/liardanc3/inunavi/assets/85429793/636de0e0-d206-4a1d-b640-bc9b4d624bde)
 > </details>
 > </details>
 
 <details>
- <summary><code>d회원 탈퇴</code> <code>POST</code> <code><b>/user/quit</b></code> </summary>
+ <summary><code>회원 탈퇴</code> <code>POST</code> <code><b>/user/quit</b></code> </summary>
 
 <br>
 
 > ### Parameters
 > ```java
 > email : 이메일
-> password : 비밀번호호
+> password : 비밀번호
 >```
 > 
 >
@@ -411,12 +416,12 @@
 >
 > ### Run example
 >
-> // gif
+> ![quit](https://github.com/liardanc3/inunavi/assets/85429793/d413784f-d4a5-480d-8292-43a94e5d78ac)
 > </details>
 > </details>
 
 <details>
- <summary><code>d강의 추가</code> <code>POST</code> <code><b>/user/insert/class</b></code> </summary>
+ <summary><code>강의 추가</code> <code>POST</code> <code><b>/user/insert/class</b></code> </summary>
 
 <br>
 
@@ -459,12 +464,12 @@
 >
 > ### Run example
 >
-> // gif
+> ![insert-class](https://github.com/liardanc3/inunavi/assets/85429793/06515652-a462-46bd-b299-b6ac2122142b)
 > </details>
 > </details>
 
 <details>
- <summary><code>d강의 삭제</code> <code>POST</code> <code><b>/user/delete/class</b></code> </summary>
+ <summary><code>강의 삭제</code> <code>POST</code> <code><b>/user/delete/class</b></code> </summary>
 
 <br>
 
@@ -507,21 +512,15 @@
 >
 > ### Run example
 >
-> // gif
+> ![delete-class](https://github.com/liardanc3/inunavi/assets/85429793/39413b70-5ba4-494c-b424-47be04716d6a)
 > </details>
 > </details>
 
 <details>
- <summary><code>d시간표 정보</code> <code>GET</code> <code><b>/getTimeTableInfo</b></code> </summary>
+ <summary><code>시간표 정보</code> <code>GET</code> <code><b>/getTimeTableInfo</b></code> </summary>
 
 <br>
 
-> ### Parameters
-> ```java
-> x
->```
-> 
->
 > ### Responses
 > <details open><summary>success</summary> 
 > <br>
@@ -544,7 +543,7 @@
 > </details>
 
 <details>
- <summary><code>d강의 검색</code> <code>GET</code> <code><b>/selectLecture</b></code> </summary>
+ <summary><code>강의 검색</code> <code>GET</code> <code><b>/selectLecture</b></code> </summary>
 
 <br>
 
@@ -601,7 +600,7 @@
 >
 > ### Run example
 >
-> // gif
+> ![selectlecture](https://github.com/liardanc3/inunavi/assets/85429793/52e82a68-a1f4-40f7-9767-f89150d5c539)
 > </details>
 > </details>
 
@@ -647,7 +646,7 @@
 >
 > ### Run example
 >
-> // gif
+> ![getrootlive](https://github.com/liardanc3/inunavi/assets/85429793/31505e6c-5c92-48cb-87b9-dc91f8437b42)
 > </details>
 > </details>
 
@@ -693,13 +692,13 @@
 >
 > ### Run example
 >
-> // gif
+> ![getnextplace](https://github.com/liardanc3/inunavi/assets/85429793/29e59910-ddea-4385-a45f-559b4b949652)
 > </details>
 > </details>
 
 
 <details>
- <summary><code>d장소 검색</code> <code>GET</code> <code><b>/placeSearchList</b></code> </summary>
+ <summary><code>장소 검색</code> <code>GET</code> <code><b>/placeSearchList</b></code> </summary>
 
 <br>
 
@@ -746,7 +745,7 @@
 >
 > ### Run example
 >
-> // gif
+> ![placeSearchList](https://github.com/liardanc3/inunavi/assets/85429793/8d533b83-eaaf-47a2-8fd5-81c4dd3568bb)
 > </details>
 > </details>
 
@@ -793,7 +792,7 @@
 >
 > ### Run example
 >
-> // gif
+> ![getoverview](https://github.com/liardanc3/inunavi/assets/85429793/9f8a5b6a-3239-4d21-8376-56ff421180c6)
 > </details>
 > </details>
 
@@ -839,7 +838,7 @@
 >
 > ### Run example
 >
-> // gif
+> ![analysisresult](https://github.com/liardanc3/inunavi/assets/85429793/a2442ae7-49e3-4b2e-a200-6d8698c5c42f)
 > </details>
 > </details>
 
@@ -886,6 +885,6 @@
 >
 > ### Run example
 >
-> // gif
+> ![recommend](https://github.com/liardanc3/inunavi/assets/85429793/ff981f04-6e16-4cf6-86f9-f642efee9a28)
 > </details>
 > </details>
