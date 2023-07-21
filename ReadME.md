@@ -548,7 +548,8 @@
 
 > ### Parameters
 > ```java
-> email : 이메일
+> main_keyword : 검색 단어
+> keyword_option : 검색 옵션(과목명, 교수명)
 >```
 > 
 >
