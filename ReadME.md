@@ -843,20 +843,6 @@
 > Content-Type: application/json;charset=UTF-8
 >
 >{
->    "success": "true",
->    "email": "liardanc3@gmail.com"
->}
-> ```
-> </details>
->
-> <details><summary>failure</summary> 
-> <br>
->
-> ```java
-> HTTP/1.1 500 Internal Server Error
-> Content-Type: application/json;charset=UTF-8
->
->{
 >   "response": [
 >       {
 >           "id": "1893",
@@ -893,7 +879,7 @@
 >   ]
 >}
 > ```
-></details>
+> </details>
 >
 >
 > ### Run example
