@@ -550,6 +550,12 @@
 > ```java
 > main_keyword : 검색 단어
 > keyword_option : 검색 옵션(과목명, 교수명)
+> major_option : 전공 옵션
+> cse_option : 교양필수 옵션
+> sort_option : 정렬 기준(기본, 과목코드, 과목명)
+> grade_option : 학년
+> category_option : 카테고리 옵션(교양, 전공, 일반선택 등)
+> score_option : 학점
 >```
 > 
 >
@@ -584,18 +590,6 @@
 > ```
 > </details>
 >
-> <details><summary>failure</summary> 
-> <br>
->
-> ```java
-> HTTP/1.1 200 OK
-> Content-Type: application/json;charset=UTF-8
->
->{
->    "response": []
->}
-> ```
-></details>
 >
 >
 > ### Run example
@@ -611,7 +605,10 @@
 
 > ### Parameters
 > ```java
-> email : 이메일
+> startPlaceCode : 시작 장소 식별값
+> startLocation : 시작 장소 좌표
+> endPlaceCode : 도착 장소 식별값
+> endLocation : 도착 장소 좌표
 >```
 > 
 >
@@ -624,24 +621,20 @@
 > Content-Type: application/json;charset=UTF-8
 >
 >{
->    "success": "true",
->    "email": "liardanc3@gmail.com"
->}
+>   "response" : [
+>       {
+>           "id":269,
+>           "query":"LOCATION,37.37696025287909,126.63286875933409,LOCATION,37.3735037752572,126.63280069828033",
+>           "isArrived":"false",
+>           "dist":501.6447064033045,
+>           "route":"37.37696025287909,126.63286875933409,37.3768112,126.6328854,37.3767337,126.6328073,37.3764846,126.6324536,37.3760999,126.6324209,37.3760338,126.6325386,37.3759507,126.6326781,37.3758297,126.6326989,37.3757593,126.6326265,37.3755988,126.6324683,37.3755278,126.6323871,37.3753751,126.6327221,37.3752525,126.6328173,37.3750951,126.6326523,37.3749913,126.6325527,37.3747223,126.6327219,37.3746369,126.6327431,37.3744802,126.6326372,37.3743619,126.6325219,37.3742006,126.6327746,37.3739885,126.6325177,37.3738392,126.6327069,37.3735867,126.6324642,37.37348,126.6326007",
+>           "time":8,
+>           "steps":827
+>       }
+>   ]
+> }
 > ```
 > </details>
->
-> <details><summary>failure</summary> 
-> <br>
->
-> ```java
-> HTTP/1.1 500 Internal Server Error
-> Content-Type: application/json;charset=UTF-8
->
->{
->    "response": []
->}
-> ```
-></details>
 >
 >
 > ### Run example
@@ -671,23 +664,12 @@
 >
 >{
 >    "success": "true",
->    "email": "liardanc3@gmail.com"
+>    "nextPlaceCode" : "SF"
+>    "nextPlaceLocationString" : "37.3757955317388, 126.63483788738135"
+>    "nextPlaceTitle" : "자연과학대학 생명과학기술대학"
 >}
 > ```
 > </details>
->
-> <details><summary>failure</summary> 
-> <br>
->
-> ```java
-> HTTP/1.1 500 Internal Server Error
-> Content-Type: application/json;charset=UTF-8
->
->{
->    "response": []
->}
-> ```
-></details>
 >
 >
 > ### Run example
@@ -770,25 +752,35 @@
 > Content-Type: application/json;charset=UTF-8
 >
 >{
->    "success": "true",
->    "email": "liardanc3@gmail.com"
+>    "response": [
+>        {
+>            "startLectureName": "정문(버스정류장)",
+>            "endLectureName": "헌법과시민의식",
+>            "totalTime": "6.954737169047408",
+>            "distance": "421.49922236650957",
+>            "directionString": "37.3779618948447,126.634624941891,37.3776561,126.6343478,37.3775462,126.634278,37.3776165,126.6340366,37.3774093,126.6338804,37.3772261,126.6337823,37.3771011,126.6336014,37.3770244,126.6334982,37.3769344,126.6334508,37.3765983,126.6331388,37.3764788,126.6330362,37.3763888,126.632986,37.3762801,126.6328787,37.3761388,126.632927,37.3761087,126.6328564,37.3759851,126.6327438,37.3758297,126.6326989,37.3757593,126.6326265,37.3755988,126.6324683,37.3755278,126.6323871,37.3754372,126.6323093,37.3753669,126.632253,37.3751692,126.632078,37.3752193,126.6319707",
+>            "endLectureTime": "월요일 01:00 PM"
+>        },
+>        {
+>            "startLectureName": "공과대학(버스정류장)",
+>            "endLectureName": "행정학의이해",
+>            "totalTime": "4.324380023352096",
+>            "distance": "262.0836377789149",
+>            "directionString": "37.3724664576151,126.634094079558,37.3722549507586,126.633861767182,37.3722695442901,126.633637436853,37.3723266,126.6335242,37.3722275,126.6334276,37.3723439,126.6332448,37.3724601,126.6330638,37.3725496,126.6329055,37.3726391,126.6327446,37.3727536,126.6328199,37.3728804,126.6329648,37.3730062,126.6330841,37.3730797,126.6331537,37.3731426,126.6332087,37.3732641,126.6330075,37.3733078,126.6331966",
+>            "endLectureTime": "수요일 11:30 AM"
+>        },
+>        {
+>            "startLectureName": "행정학의이해",
+>            "endLectureName": "데이터베이스",
+>            "totalTime": "1.4395518845330186",
+>            "distance": "87.2455687595769",
+>            "directionString": "37.3749611,126.6323935,37.3746872,126.6330319,37.3745278,126.6332002",
+>            "endLectureTime": "수요일 05:30 PM"
+>        }
+>    ]
 >}
 > ```
 > </details>
->
-> <details><summary>failure</summary> 
-> <br>
->
-> ```java
-> HTTP/1.1 500 Internal Server Error
-> Content-Type: application/json;charset=UTF-8
->
->{
->    "response": []
->}
-> ```
-></details>
->
 >
 > ### Run example
 >
@@ -817,24 +809,12 @@
 >
 >{
 >    "success": "true",
->    "email": "liardanc3@gmail.com"
+>    "distancePercentage": "15",
+>    "tightnessPercentage": "10",
+>    "totalDistance" : "200.1323"
 >}
 > ```
 > </details>
->
-> <details><summary>failure</summary> 
-> <br>
->
-> ```java
-> HTTP/1.1 500 Internal Server Error
-> Content-Type: application/json;charset=UTF-8
->
->{
->    "response": []
->}
-> ```
-></details>
->
 >
 > ### Run example
 >
@@ -877,7 +857,40 @@
 > Content-Type: application/json;charset=UTF-8
 >
 >{
->    "response": []
+>   "response": [
+>       {
+>           "id": "1893",
+>           "department": "교양",
+>           "grade": "전학년",
+>           "category": "교양선택",
+>           "number": "XAA1375001",
+>           "professor": "김재영",
+>           "how": "-",
+>           "point": "3",
+>           "lecturename": "행정학의이해",
+>           "classroom_raw": "제12호관 컨벤션센터-101 용정강의실[SM101]",
+>           "classtime_raw": " [SM101:수(1)(2)(3)]",
+>           "classroom": "SM101,",
+>           "classtime": "114-119,",
+>           "realTime": "수 9:00 - 12:00"
+>       },
+>       {
+>           "id": "1778",
+>           "department": "교양",
+>           "grade": "전학년",
+>           "category": "교양선택",
+>           "number": "0007002001",
+>           "professor": "김영진",
+>           "how": "-",
+>           "point": "3",
+>           "lecturename": "헌법과시민의식",
+>           "classroom_raw": "제15호관 인문대학-201 강의실(대)-계단식[SP201]",
+>           "classtime_raw": " [SP201:월(2B-3)(4-5A)]",
+>           "classroom": "SP201,",
+>           "classtime": "21-26,",
+>           "realTime": "월 10:30 - 14:00"
+>       }
+>   ]
 >}
 > ```
 ></details>
