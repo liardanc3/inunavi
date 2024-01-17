@@ -866,7 +866,7 @@
 >           "grade": "전학년",
 >           "category": "교양선택",
 >           "number": "0007002001",
->           "professor": "김영진",
+>           "professor": "익명",
 >           "how": "-",
 >           "point": "3",
 >           "lecturename": "헌법과시민의식",
