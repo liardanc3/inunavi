@@ -27,9 +27,6 @@
 <br>
 
 ![KakaoTalk_20230503_043420577_06](https://user-images.githubusercontent.com/85429793/235777867-efeba544-5417-47da-9a67-27cdd1d2313c.jpg)
-
-- [대회 정보](https://www.inu.ac.kr/user/indexSub.do?codyMenuSeq=1477369&siteId=isis&dum=dum&boardId=490566&page=1&command=albumView&boardSeq=681579&chkBoxSeq=&categoryId=&categoryDepth=)<br>
-
 </details>
 
 <br>
